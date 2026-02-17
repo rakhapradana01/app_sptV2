@@ -36,7 +36,7 @@ class MenuHelper
                 'icon' => 'database',
                 'subItems' => [
                     ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
-                    ['name' => 'Sub Kegiatan', 'path' => '/blank', 'pro' => false],
+                    ['name' => 'Sub Kegiatan', 'path' => route('sub-kegiatan.index'), 'pro' => false],
                     ['name' => '404 Error', 'path' => '/error-404', 'pro' => false]
                 ],
             ],

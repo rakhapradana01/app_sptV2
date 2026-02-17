@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotaDinasController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SPTController;
+use App\Http\Controllers\SubKegiatanController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
@@ -26,6 +27,7 @@ Route::middleware('auth')->group(function () {
 
     //harus auth super admin
     Route::resource('pegawai', PegawaiController::class);
+    Route::resource('sub-kegiatan', SubKegiatanController::class);
 });
 
 
