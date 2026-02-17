@@ -1,0 +1,8 @@
+
+Roles: 
+1. User -> membuat spt dan mencetak
+2. Admin
+3. Kasubid
+4. Kabid
+5. Kaban
+6. Super admin
