@@ -6,38 +6,55 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('nota_dinas', function (Blueprint $table) {
             $table->id();
-            $table->string('nomor_surat')->unique();
-            $table->text('kegiatan');
 
-            $table->foreignId('pegawai_kasubid_id')
-                ->constrained('pegawais')
-                ->cascadeOnDelete();
-
-            $table->foreignId('pegawai_kabid_id')
-                ->constrained('pegawais')
-                ->cascadeOnDelete();
-
-            $table->foreignId('pegawai_kaban_id')
-                ->constrained('pegawais')
-                ->cascadeOnDelete();
-                
             $table->foreignId('sub_kegiatan_id')
                 ->constrained('sub_kegiatans')
                 ->cascadeOnDelete();
+
+            $table->unsignedInteger('nomor_urut')->nullable();
+            $table->year('tahun')->nullable();
+
+            $table->date('tanggal');
+
+            $table->foreignId('kepada_id')
+                ->constrained('pegawais')
+                ->cascadeOnDelete();
+
+            $table->foreignId('melalui_id')
+                ->nullable()
+                ->constrained('pegawais')
+                ->nullOnDelete();
+
+            // TAMBAHAN
+            $table->foreignId('dari_id')
+                ->constrained('pegawais')
+                ->cascadeOnDelete();
+
+            $table->string('perihal');
+            $table->string('asal_undangan')->nullable();
+
+            $table->string('lokasi');
+            $table->date('tanggal_mulai');
+            $table->date('tanggal_selesai');
+
+            $table->enum('status', [
+                'draft',
+                'diajukan_kabid',
+                'ditolak_kabid',
+                'disetujui_kabid',
+                'diajukan_kaban',
+                'ditolak_kaban',
+                'disetujui_kaban',
+            ])->default('draft');
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('nota_dinas');

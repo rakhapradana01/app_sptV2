@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sub_kegiatans', function (Blueprint $table) {
+        Schema::create('nota_dinas_pegawai', function (Blueprint $table) {
             $table->id();
 
-            $table->string('nomor_rekening');
-            $table->string('nama_kegiatan');
-
-            $table->foreignId('pegawai_kasubid_id')
-                ->constrained('pegawais')
+            $table->foreignId('nota_dinas_id')
+                ->constrained()
                 ->cascadeOnDelete();
 
-            $table->integer('harga_satuan');
-            $table->integer('koefisien');
-            $table->bigInteger('pagu');
+            $table->foreignId('pegawai_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->timestamps();
         });
@@ -34,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sub_kegiatans');
+        Schema::dropIfExists('nota_dinas_pegawai');
     }
 };

@@ -17,8 +17,8 @@ class Pegawai extends Model
     {
         return $this->hasMany(SubKegiatan::class, 'pegawai_kasubid_id');
     }
-    // public function notaDinas()
-    // {
-    //     return $this->hasMany(NotaDinas::class, 'pegawai_kasubid_id');
-    // }
+    public function notaDinas()
+    {
+        return $this->belongsToMany(NotaDinas::class, 'nota_dinas_pegawai');
+    }
 }

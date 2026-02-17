@@ -14,19 +14,24 @@
                             <th class="px-5 py-3 text-left sm:px-6">PPTK</th>
                             <th class="px-5 py-3 text-left sm:px-6">Nomor Rekening</th>
                             <th class="px-5 py-3 text-left sm:px-6">Nama Program</th>
+                            <th class="px-5 py-3 text-left sm:px-6">Koefisien</th>
+                            <th class="px-5 py-3 text-left sm:px-6">Harga Satuan</th>
                             <th class="px-5 py-3 text-left sm:px-6">Pagu</th>
                             <th class="px-5 py-3 text-left sm:px-6">Realisasi</th>
                             <th class="px-5 py-3 text-left sm:px-6">Sisa</th>
                             <th class="px-5 py-3 text-left sm:px-6">Aksi</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach ($subKegiatan as $item)
                             <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
                                 <td class="px-5 py-4 sm:px-6">{{ $subKegiatan->firstItem() + $loop->index }}</td>
-                                <td class="px-5 py-4 sm:px-6">{{ $item->pegawai_kasubid_id }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $item->pegawai->nama ?? '-' }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->nomor_rekening }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->nama_kegiatan }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $item->koefisien }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $item->harga_satuan }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->pagu }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->realisasi ?? '-' }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->pagu - ($item->realisasi ?? 0) }}</td>
@@ -44,7 +49,6 @@
                 </table>
             </div>
 
-            {{-- Modal Tambah --}}
             <x-ui.modal x-data="{ open: false }" @open-profile-create-modal.window="open = true" :isOpen="false"
                 class="max-w-[700px]">
                 <div
@@ -77,10 +81,17 @@
                         </div>
 
                         <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Harga Satuan</label>
+                            <input type="number" name="harga_satuan"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Koefisien</label>
                             <input type="number" name="koefisien"
                                 class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
                         </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">Pagu</label>
                             <input type="number" name="pagu"

@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     //harus auth super admin
     Route::resource('pegawai', PegawaiController::class);
     Route::resource('sub-kegiatan', SubKegiatanController::class);
+    Route::resource('nota-dinas', NotaDinasController::class);
 });
 
 
