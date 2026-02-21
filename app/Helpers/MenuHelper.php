@@ -44,6 +44,9 @@ class MenuHelper
 
         $roleMenuMap = [
             'super_admin' => ['Dashboard', 'Master', 'Perjalanan Dinas'],
+            'kepala_sub_bidang' =>['Perjalanan Dinas'],
+            'kepala_bidang' => ['Perjalanan Dinas'],
+            'user' =>['Perjalanan Dinas']
         ];
 
         $user = Auth::user();

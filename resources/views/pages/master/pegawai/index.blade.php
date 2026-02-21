@@ -3,7 +3,7 @@
 @section('content')
     <x-common.page-breadcrumb pageTitle="Pegawai" />
     <div class="space-y-6">
-        <x-common.component-card title="Daftar Pegawai">
+        <x-common.component-card title="Dfoaftar Pegawai">
             <x-ui.button size="sm" @click="$dispatch('open-profile-create-modal')">Tambah</x-ui.button>
             <div
                 class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">

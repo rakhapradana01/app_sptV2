@@ -11,7 +11,7 @@ use App\Http\Controllers\SubKegiatanController;
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return view('pages.dashboard.index', ['title' => 'Dashboard']);
-    })->name('dashboard')->middleware('role:admin,super_admin');
+    })->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -28,7 +28,15 @@ Route::middleware('auth')->group(function () {
     //harus auth super admin
     Route::resource('pegawai', PegawaiController::class);
     Route::resource('sub-kegiatan', SubKegiatanController::class);
-    Route::resource('nota-dinas', NotaDinasController::class);
+    Route::patch('/nota-dinas/{nota}/kirim-kasubid', [NotaDinasController::class, 'kirimKasubid'])
+        ->name('nota-dinas.kirim-kasubid');
+
+    Route::patch('/nota-dinas/{nota}/approve-kasubid', [NotaDinasController::class, 'approveKasubid'])
+        ->name('nota-dinas.approve-kasubid');
+
+    Route::patch('/nota-dinas/{nota}/approve-kabid', [NotaDinasController::class, 'approveKabid'])
+        ->name('nota-dinas.approve-kabid');
+        
 });
 
 

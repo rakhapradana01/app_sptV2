@@ -105,7 +105,7 @@
                         </div>
 
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Lokasi</label>
+                            <label class="block mb-2 text-sm font-medium">Tujuan</label>
                             <input type="text" name="lokasi" class="w-full border rounded-lg p-2">
                         </div>
 

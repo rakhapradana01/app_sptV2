@@ -43,6 +43,8 @@ return new class extends Migration
 
             $table->enum('status', [
                 'draft',
+                'diajukan_kasubid',
+                'ditolak_kasubid',
                 'diajukan_kabid',
                 'ditolak_kabid',
                 'disetujui_kabid',
