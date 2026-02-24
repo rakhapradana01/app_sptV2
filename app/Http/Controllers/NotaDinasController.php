@@ -32,11 +32,19 @@ class NotaDinasController extends Controller
     public function create()
     {
         $subKegiatans = SubKegiatan::all();
-        $pegawais = Pegawai::all();
+
+        $kepalaBadan = Pegawai::where('jabatan', 'Kepala Badan')->get();
+        $kepalaBidang = Pegawai::where('jabatan', 'Kepala Bidang')->get();
+        $kasubid = Pegawai::where('jabatan', 'like', 'Kepala Sub Bidang%')->get();
+        $staff = Pegawai::where('jabatan','', 'Staff')->get();
+        $subKegiatans = SubKegiatan::all();
 
         return view('pages.nota_dinas.create', compact(
-            'subKegiatans',
-            'pegawais'
+            'kepalaBadan',
+            'kepalaBidang',
+            'kasubid',
+            'staff',
+            'subKegiatans'
         ));
     }
 
@@ -95,9 +103,9 @@ class NotaDinasController extends Controller
 
     public function approveKasubid(NotaDinas $nota)
     {
-        $nota->update([
-            'status' => 'diajukan_kabid'
-        ]);
+        // $nota->update([
+        //     'status' => 'diajukan_kabid'
+        // ]);
 
         return back()->with('success', 'Berhasil! Disetujui Kasubid dan dikirim ke Kabid');
     }

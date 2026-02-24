@@ -15,7 +15,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium">Kepada (kepala badan) </label>
                             <select name="kepada_id" class="w-full border rounded-lg p-2">
-                                @foreach ($pegawais as $pegawai)
+                                @foreach ($kepalaBadan as $pegawai)
                                     <option value="{{ $pegawai->id }}">
                                         {{ $pegawai->nama }}
                                     </option>
@@ -26,8 +26,7 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium">Melalui (kepala bidang)</label>
                             <select name="melalui_id" class="w-full border rounded-lg p-2">
-                                <option value="">-- Pilih --</option>
-                                @foreach ($pegawais as $pegawai)
+                                @foreach ($kepalaBidang as $pegawai)
                                     <option value="{{ $pegawai->id }}">
                                         {{ $pegawai->nama }}
                                     </option>
@@ -39,7 +38,7 @@
                             <label class="block mb-2 text-sm font-medium">Dari (kepala sub bidang)</label>
                             <select name="dari_id" x-model="selectedKasubid" class="w-full border rounded-lg p-2">
                                 <option value="">-- Pilih --</option>
-                                @foreach ($pegawais as $pegawai)
+                                @foreach ($kasubid as $pegawai)
                                     <option value="{{ $pegawai->id }}">
                                         {{ $pegawai->nama }}
                                     </option>
@@ -50,42 +49,42 @@
                         <div>
                             <label class="block mb-2 text-sm font-medium">Sub Kegiatan</label>
                             <select name="sub_kegiatan_id" :disabled="!selectedKasubid"
-                            class="w-full border rounded-lg p-2">
-                            <option value="">-- Pilih --</option>
-                            
-                            <template x-for="sub in subKegiatans.filter(s => s.pegawai_kasubid_id == selectedKasubid)"
-                                :key="sub.id">
-                                <option :value="sub.id" x-text="sub.nomor_rekening + ' - ' + sub.nama_kegiatan">
-                                </option>
-                            </template>
-                        </select>
-                    </div>
-                    
-                    <div class="lg:col-span-2">
-                        <label class="block mb-2 text-sm font-medium">
-                            Nomor Nota Dinas
-                        </label>
+                                class="w-full border rounded-lg p-2">
+                                <option value="">-- Pilih --</option>
 
-                        <div class="flex items-center border rounded-lg overflow-hidden bg-gray-50">
-
-                            <span class="px-3 py-2 bg-gray-100 text-gray-700 font-medium">
-                                900.1 /
-                            </span>
-
-               
-                            <input type="text" disabled placeholder="Nomor akan dibuat otomatis"
-                                class="flex-1 px-3 py-2 bg-white text-center text-gray-400 cursor-not-allowed">
-
-                            <span class="px-3 py-2 bg-gray-100 text-gray-700 font-medium">
-                                / BPKAD / {{ date('Y') }}
-                            </span>
-
+                                <template x-for="sub in subKegiatans.filter(s => s.pegawai_kasubid_id == selectedKasubid)"
+                                    :key="sub.id">
+                                    <option :value="sub.id" x-text="sub.nomor_rekening + ' - ' + sub.nama_kegiatan">
+                                    </option>
+                                </template>
+                            </select>
                         </div>
 
-                        <p class="text-xs text-gray-500 mt-1">
-                            Nomor urut akan diisi otomatis oleh sistem.
-                        </p>
-                    </div>
+                        <div class="lg:col-span-2">
+                            <label class="block mb-2 text-sm font-medium">
+                                Nomor Nota Dinas
+                            </label>
+
+                            <div class="flex items-center border rounded-lg overflow-hidden bg-gray-50">
+
+                                <span class="px-3 py-2 bg-gray-100 text-gray-700 font-medium">
+                                    900.1 /
+                                </span>
+
+
+                                <input type="text" disabled placeholder="Nomor akan dibuat otomatis"
+                                    class="flex-1 px-3 py-2 bg-white text-center text-gray-400 cursor-not-allowed">
+
+                                <span class="px-3 py-2 bg-gray-100 text-gray-700 font-medium">
+                                    / BPKAD / {{ date('Y') }}
+                                </span>
+
+                            </div>
+
+                            <p class="text-xs text-gray-500 mt-1">
+                                Nomor urut akan diisi otomatis oleh sistem.
+                            </p>
+                        </div>
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Nota</label>
                             <input type="date" name="tanggal" onclick="this.showPicker()"
@@ -129,7 +128,7 @@
                             <div class="flex gap-3">
                                 <select x-ref="pegawaiSelect" class="w-full border rounded-lg p-2">
                                     <option value="">-- Pilih Pegawai --</option>
-                                    @foreach ($pegawais as $pegawai)
+                                    @foreach ($staff as $pegawai)
                                         <option value="{{ $pegawai->id }}">
                                             {{ $pegawai->nama }}
                                         </option>

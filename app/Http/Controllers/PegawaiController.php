@@ -13,6 +13,7 @@ class PegawaiController extends Controller
         $pegawais = Pegawai::latest()->paginate(10);
         return view('pages.master.pegawai.index', compact('pegawais'));
     }
+    
     public function store(Request $request)
     {
         $request->validate([
