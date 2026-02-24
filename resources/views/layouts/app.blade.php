@@ -107,11 +107,12 @@ window.addEventListener('resize', checkMobile);">
     <x-common.preloader />
     {{-- preloader end --}}
 
-    <div class="min-h-screen w-screen lg:flex">
+    <div class="min-h-screen w-full lg:flex">
         @include('layouts.backdrop')
         @include('layouts.sidebar')
 
-        <div class="flex-1 max-w-[calc(100vw-290px)] transition-all duration-300 ease-in-out"
+        <div class="flex-1 w-full transition-all duration-300 ease-in-out
+    xl:ml-[290px]"
             :class="{
                 'xl:ml-[290px]': $store.sidebar.isExpanded || $store.sidebar.isHovered,
                 'xl:ml-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
@@ -120,7 +121,7 @@ window.addEventListener('resize', checkMobile);">
             <!-- app header start -->
             @include('layouts.app-header')
             <!-- app header end -->
-            <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+            <div class="p-4 md:p-6 w-full">
                 @yield('content')
             </div>
         </div>
@@ -130,6 +131,17 @@ window.addEventListener('resize', checkMobile);">
         <x-notify::notify />
     </div>
     @notifyJs
+    @if (session('success'))
+        <x-ui.toast type="success" :message="session('success')" />
+    @endif
+
+    @if (session('error'))
+        <x-ui.toast type="error" :message="session('error')" />
+    @endif
+
+    @if (session('warning'))
+        <x-ui.toast type="warning" :message="session('warning')" />
+    @endif
 </body>
 
 @stack('scripts')

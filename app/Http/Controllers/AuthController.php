@@ -25,10 +25,19 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($data)) {
-            return redirect('/');
+
+            $request->session()->regenerate();
+            $user = Auth::user();
+
+            if ($user->role->name === 'super_admin') {
+                return redirect()->route('dashboard');
+            }
+
+            return redirect()->route('nota-dinas.index');
         }
 
-        return redirect()->route('login')->with(['error' => 'Username atau password salah']);
+        return redirect()->route('login')
+            ->with(['error' => 'Username atau password salah']);
     }
 
     public function logout(Request $request)

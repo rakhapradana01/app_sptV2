@@ -77,7 +77,7 @@ class NotaDinasController extends Controller
 
     public function kirimKasubid(NotaDinas $nota)
     {
-        //  dd('masuk sini', $nota->status);
+
         if (Auth::user()->role->name != 'user' && Auth::user()->role->name != 'super_admin') {
             abort(403);
         }
@@ -90,7 +90,7 @@ class NotaDinasController extends Controller
             'status' => 'diajukan_kasubid'
         ]);
 
-        return back()->with('success', 'Berhasil dikirim ke Kasubid');
+        return back()->with('success', 'Berhasil!!! dikirim ke Kasubid');
     }
 
     public function approveKasubid(NotaDinas $nota)
@@ -99,7 +99,7 @@ class NotaDinasController extends Controller
             'status' => 'diajukan_kabid'
         ]);
 
-        return back()->with('success', 'Disetujui Kasubid dan dikirim ke Kabid');
+        return back()->with('success', 'Berhasil! Disetujui Kasubid dan dikirim ke Kabid');
     }
 
     public function approveKabid(NotaDinas $nota)

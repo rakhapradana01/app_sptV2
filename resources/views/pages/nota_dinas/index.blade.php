@@ -4,6 +4,7 @@
     <x-common.page-breadcrumb pageTitle="Nota Dinas" />
     <div class="space-y-6">
         <x-common.component-card title="Daftar Nota Dinas">
+           
             <div class="px-2">
                 <a href="{{ route('nota-dinas.create') }}">
                     <x-ui.button size="sm">Tambah</x-ui.button>
@@ -42,9 +43,9 @@
                                         {{ $nota->status }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
-                                        @if (auth()->user()->role->name == 'user' && $nota->isFinal())
+                                        {{-- @if (auth()->user()->role->name == 'user' && $nota->isFinal())
                                             Tombol Cetak
-                                        @endif
+                                        @endif --}}
 
                                         {{-- @if ($nota->status == 'disetujui_kabid')
                                             <a href="{{ route('nota.cetak', $nota->id) }}">Cetak Nota</a>

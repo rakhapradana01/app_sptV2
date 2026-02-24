@@ -8,37 +8,55 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SubKegiatanController;
 
-Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('pages.dashboard.index', ['title' => 'Dashboard']);
-    })->name('dashboard');
+Route::middleware(['auth'])->group(function () {
 
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // =========================
+    // SUPER ADMIN ONLY
+    // =========================
+    Route::middleware('role:super_admin')->group(function () {
 
+        Route::get('/', function () {
+            return view('pages.dashboard.index', ['title' => 'Dashboard']);
+        })->name('dashboard');
 
-    // SPT Route
-    Route::get('/spt', [SPTController::class, 'index'])->name('spt.index');
+        Route::resource('pegawai', PegawaiController::class);
+        Route::resource('sub-kegiatan', SubKegiatanController::class);
+    });
 
-    //auth user, kasubid, kabid, kaban
-    Route::resource('nota-dinas', NotaDinasController::class)
-        ->parameters([
-            'nota-dinas' => 'nota'
-        ]);
+    // =========================
+    // SEMUA ROLE YANG BOLEH NOTA DINAS
+    // =========================
+    Route::middleware('role:super_admin,kepala_sub_bidang,kepala_bidang,user')
+        ->group(function () {
 
-    //harus auth super admin
-    Route::resource('pegawai', PegawaiController::class);
-    Route::resource('sub-kegiatan', SubKegiatanController::class);
-    Route::patch('/nota-dinas/{nota}/kirim-kasubid', [NotaDinasController::class, 'kirimKasubid'])
-        ->name('nota-dinas.kirim-kasubid');
+            Route::resource('nota-dinas', NotaDinasController::class)
+                ->parameters([
+                    'nota-dinas' => 'nota'
+                ]);
 
-    Route::patch('/nota-dinas/{nota}/approve-kasubid', [NotaDinasController::class, 'approveKasubid'])
-        ->name('nota-dinas.approve-kasubid');
+            Route::patch('/nota-dinas/{nota}/kirim-kasubid',
+                [NotaDinasController::class, 'kirimKasubid'])
+                ->name('nota-dinas.kirim-kasubid');
 
-    Route::patch('/nota-dinas/{nota}/approve-kabid', [NotaDinasController::class, 'approveKabid'])
-        ->name('nota-dinas.approve-kabid');
-        
+            Route::patch('/nota-dinas/{nota}/approve-kasubid',
+                [NotaDinasController::class, 'approveKasubid'])
+                ->name('nota-dinas.approve-kasubid');
+
+            Route::patch('/nota-dinas/{nota}/approve-kabid',
+                [NotaDinasController::class, 'approveKabid'])
+                ->name('nota-dinas.approve-kabid');
+        });
+
+    // =========================
+    // LOGOUT & SPT (SEMUA LOGIN)
+    // =========================
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
+
+    Route::get('/spt', [SPTController::class, 'index'])
+        ->name('spt.index');
 });
 
-
 Route::get('/login', [AuthController::class, 'index'])->name('login');
-Route::post('/login', [AuthController::class, 'authenticated'])->name('login.authenticated');
+Route::post('/login', [AuthController::class, 'authenticated'])
+    ->name('login.authenticated');
