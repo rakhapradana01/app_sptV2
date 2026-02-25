@@ -14,6 +14,7 @@ class NotaDinas extends Model
         'kepada_id',
         'dari_id',
         'melalui_id',
+        'asal_udangan',
         'perihal',
         'lokasi',
         'tanggal_mulai',

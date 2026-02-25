@@ -36,7 +36,7 @@ class NotaDinasController extends Controller
         $kepalaBadan = Pegawai::where('jabatan', 'Kepala Badan')->get();
         $kepalaBidang = Pegawai::where('jabatan', 'Kepala Bidang')->get();
         $kasubid = Pegawai::where('jabatan', 'like', 'Kepala Sub Bidang%')->get();
-        $staff = Pegawai::where('jabatan','', 'Staff')->get();
+        $staff = Pegawai::all();
         $subKegiatans = SubKegiatan::all();
 
         return view('pages.nota_dinas.create', compact(
@@ -59,7 +59,7 @@ class NotaDinasController extends Controller
             'perihal' => 'required|string',
             'lokasi' => 'required|string',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date',
+            'tanggal_selesai' => 'nullable|date',
         ]);
 
         $nota = NotaDinas::create([
@@ -71,8 +71,8 @@ class NotaDinasController extends Controller
             'perihal' => $validated['perihal'],
             'lokasi' => $validated['lokasi'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
-            'tanggal_selesai' => $validated['tanggal_selesai'],
-            'status' => 'draft',
+            'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
+            'status' => NotaDinas::DRAFT,
         ]);
 
         if ($request->pegawai_ids) {
@@ -83,39 +83,59 @@ class NotaDinasController extends Controller
             ->with('success', 'Nota dinas berhasil disimpan.');
     }
 
-    public function kirimKasubid(NotaDinas $nota)
+    public function approveKasubid(NotaDinas $nota)
     {
-
-        if (Auth::user()->role->name != 'user' && Auth::user()->role->name != 'super_admin') {
+        if (
+            Auth::user()->role->name != 'kepala_sub_bidang'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
             abort(403);
         }
 
-        if ($nota->status != 'draft') {
+        if ($nota->status != NotaDinas::DRAFT) {
             return back()->with('error', 'Status tidak valid');
         }
 
         $nota->update([
-            'status' => 'diajukan_kasubid'
+            'status' => NotaDinas::DIAJUKAN_KABID
         ]);
 
-        return back()->with('success', 'Berhasil!!! dikirim ke Kasubid');
-    }
-
-    public function approveKasubid(NotaDinas $nota)
-    {
-        // $nota->update([
-        //     'status' => 'diajukan_kabid'
-        // ]);
-
-        return back()->with('success', 'Berhasil! Disetujui Kasubid dan dikirim ke Kabid');
+        return back()->with('success', 'Berhasil diajukan ke Kabid');
     }
 
     public function approveKabid(NotaDinas $nota)
     {
+        if (
+            Auth::user()->role->name != 'kepala_bidang'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        if ($nota->status != NotaDinas::DIAJUKAN_KABID) {
+            return back()->with('error', 'Status tidak valid');
+        }
+
         $nota->update([
-            'status' => 'disetujui_kabid'
+            'status' => NotaDinas::DISETUJUI_KABID
         ]);
 
         return back()->with('success', 'Disetujui Kabid');
+    }
+
+    public function preview(NotaDinas $nota)
+    {
+        $nota->load('pegawais');
+
+        $grouped = $nota->pegawais
+            ->groupBy('jabatan')
+            ->map(function ($items) {
+                return $items->count();
+            });
+
+        return view('pages.nota_dinas.preview', [
+            'nota' => $nota,
+            'groupedPegawai' => $grouped
+        ]);
     }
 }

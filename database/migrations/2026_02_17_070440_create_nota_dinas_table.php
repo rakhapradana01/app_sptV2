@@ -38,7 +38,7 @@ return new class extends Migration
             $table->string('asal_undangan')->nullable();
 
             $table->string('lokasi');
-            $table->date('tanggal_mulai');
+            $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_selesai');
 
             $table->enum('status', [

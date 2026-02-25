@@ -4,11 +4,13 @@
     <x-common.page-breadcrumb pageTitle="Nota Dinas" />
     <div class="space-y-6">
         <x-common.component-card title="Daftar Nota Dinas">
-           
+
             <div class="px-2">
-                <a href="{{ route('nota-dinas.create') }}">
-                    <x-ui.button size="sm">Tambah</x-ui.button>
-                </a>
+                @if (in_array(auth()->user()->role->name, ['super_admin', 'kepala_sub_bidang']))
+                    <a href="{{ route('nota-dinas.create') }}">
+                        <x-ui.button size="sm">Tambah</x-ui.button>
+                    </a>
+                @endif
             </div>
             <div
                 class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
@@ -52,33 +54,23 @@
                                             <a href="{{ route('spt.cetak', $nota->id) }}">Cetak SPT</a>
                                         @endif --}}
 
-                                        @if (auth()->user()->role->name == 'user' && $nota->status == 'draft')
-                                            <form action="{{ route('nota-dinas.kirim-kasubid', $nota->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <x-ui.button size="sm">Kirim ke Kasubid</x-ui.button>
-                                            </form>
-                                        @endif
-
-                                        @if (auth()->user()->role->name == 'kepala_sub_bidang' && $nota->status == 'diajukan_kasubid')
+                                        @if (auth()->user()->role->name == 'kepala_sub_bidang' && $nota->status == 'draft')
                                             <form action="{{ route('nota-dinas.approve-kasubid', $nota->id) }}"
                                                 method="POST">
                                                 @csrf
                                                 @method('PATCH')
-                                                <x-ui.button size="sm" variant="success">Approve & Kirim
+                                                <x-ui.button size="sm" variant="success">Kirim
                                                     Kabid</x-ui.button>
                                             </form>
                                         @endif
 
 
                                         @if (auth()->user()->role->name == 'kepala_bidang' && $nota->status == 'diajukan_kabid')
-                                            <form action="{{ route('nota-dinas.approve-kabid', $nota->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <x-ui.button size="sm" variant="primary">Approve Final</x-ui.button>
-                                            </form>
+                                            <a href="{{ route('nota-dinas.preview', $nota->id) }}">
+                                                <x-ui.button size="sm" variant="primary">
+                                                    Lihat & Approve
+                                                </x-ui.button>
+                                            </a>
                                         @endif
 
                                         @if (auth()->user()->role->name == 'super_admin')

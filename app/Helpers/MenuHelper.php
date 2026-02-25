@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\Routing\Route;
 
@@ -27,26 +28,28 @@ class MenuHelper
                 'name' => 'Perjalanan Dinas',
                 'icon' => 'person',
                 'subItems' => [
-                   [ 'name' => 'Nota Dinas', 'path' => route('nota-dinas.index'), 'pro' =>false],
-                   [ 'name' => 'Arsip', 'path' => '/blank', 'pro' =>false],
+                    ['name' => 'Nota Dinas', 'path' => route('nota-dinas.index'), 'pro' => false],
+                    ['name' => 'Arsip', 'path' => '/blank', 'pro' => false],
                 ]
             ],
             [
                 'name' => 'Master',
                 'icon' => 'database',
-                'subItems' => [
-                    ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
+                'subItems' => array_values(array_filter([
+                    Auth::user()->role->name === 'super_admin' ?
+                        ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false]
+                        : null,
+
                     ['name' => 'Sub Kegiatan', 'path' => route('sub-kegiatan.index'), 'pro' => false],
-                    ['name' => '404 Error', 'path' => '/error-404', 'pro' => false]
-                ],
+                ])),
             ],
         ];
 
         $roleMenuMap = [
             'super_admin' => ['Dashboard', 'Master', 'Perjalanan Dinas'],
-            'kepala_sub_bidang' =>['Perjalanan Dinas'],
+            'kepala_sub_bidang' => ['Perjalanan Dinas'],
             'kepala_bidang' => ['Perjalanan Dinas'],
-            'user' =>['Perjalanan Dinas']
+            'user' => ['Master']
         ];
 
         $user = Auth::user();
