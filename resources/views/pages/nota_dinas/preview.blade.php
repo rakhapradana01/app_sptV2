@@ -36,7 +36,6 @@
             </tr>
         </table>
 
-        {{-- PARAGRAF 1 --}}
         <div class="text-justify leading-relaxed mb-6 indent-8">
             Sehubungan dengan undangan <b> {{ $nota->asal_undangan }}</b>, dengan hormat diusulkan
             <b>
@@ -51,7 +50,6 @@
             untuk melaksanakan perjalanan dinas ke <b>{{ $nota->lokasi }}</b>.
         </div>
 
-        {{-- PARAGRAF 2 --}}
         <div class="text-justify leading-relaxed mb-6 indent-8">
             Pembebanan biaya perjalanan dinas menggunakan Sub Kegiatan pada
             DPA Badan Pengelolaan Keuangan dan Aset Daerah Provinsi Kalimantan Selatan
@@ -62,7 +60,6 @@
             </b>.
         </div>
 
-        {{-- PARAGRAF 3 --}}
         <div class="text-justify leading-relaxed mb-8 indent-8">
             Demikian disampaikan, apabila berkenan mohon persetujuan Bapak untuk
             penandatanganan SPT sebagaimana terlampir. Atas persetujuan dan
