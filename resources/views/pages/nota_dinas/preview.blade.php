@@ -47,7 +47,7 @@
                     @endif
                 @endforeach
             </b>
-            untuk melaksanakan perjalanan dinas ke <b>{{ $nota->lokasi }}</b>.
+           untuk melaksanakan perjalanan dinas biasa yakni perjalanan dinas dalam rangka {{ $nota->perihal}}
         </div>
 
         <div class="text-justify leading-relaxed mb-6 indent-8">
@@ -67,8 +67,8 @@
         </div>
 
         <div class="mt-12 text-right">
-            <p>{{ \Carbon\Carbon::parse($nota->tanggal)->translatedFormat('d F Y') }}</p>
-            <p class="mt-16 font-bold">{{ $nota->dari->nama }}</p>
+            <p class="mt-16 font-bold">{{ optional($nota->dari)->jabatan }}</p>
+            <p class="mt-16 font-bold">{{ optional($nota->dari)->nama }}</p>
         </div>
 
         @if (auth()->user()->role->name == 'kepala_bidang')
