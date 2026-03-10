@@ -40,6 +40,20 @@ Route::middleware(['auth'])->group(function () {
             '/nota-dinas/{nota}/preview',
             [NotaDinasController::class, 'preview']
         )->name('nota-dinas.preview');
+
+        Route::post(
+            '/nota-dinas/{nota}/pegawai',
+            [NotaDinasController::class, 'storePegawai']
+        )->name('nota-dinas.pegawai.store');
+
+        Route::delete(
+            '/nota-dinas/{nota}/pegawai/{pegawai}',
+            [NotaDinasController::class, 'destroyPegawai']
+        )->name('nota-dinas.pegawai.destroy');
+
+        Route::get('/nota-dinas/{id}/cetak', [NotaDinasController::class, 'cetakNotaDinas'])
+            ->name('nota.cetakNotaDinas');
+        // Route::
     });
 
     // ======================

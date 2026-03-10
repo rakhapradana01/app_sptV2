@@ -8,9 +8,20 @@ use App\Models\Role;
 use App\Models\SubKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class NotaDinasController extends Controller
 {
+    public function cetakNotaDinas($id)
+    {
+        $nota = NotaDinas::findOrFail($id);
+// dd($nota->all());
+        $pdf = Pdf::loadView('pages.nota_dinas.pdf', compact('nota'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->stream('nota_dinas.pdf');
+    }
+
     public function index()
     {
         $notaDinas = NotaDinas::with([
@@ -27,6 +38,30 @@ class NotaDinasController extends Controller
             'subKegiatans',
             'pegawais'
         ));
+    }
+    
+    public function createPegawai($notaId)
+    {
+        $nota = NotaDinas::findOrFail($notaId);
+        $pegawai = Pegawai::all();
+
+        return view('nota-dinas.pegawai.create', compact('nota', 'pegawai'));
+    }
+    public function storePegawai(Request $request, $notaId)
+    {
+        $nota = NotaDinas::findOrFail($notaId);
+
+        $nota->pegawais()->attach($request->pegawai_ids);
+
+        return back()->with('success', 'Pegawai ditambahkan');
+    }
+    public function destroyPegawai($notaId, $pegawaiId)
+    {
+        $nota = NotaDinas::findOrFail($notaId);
+
+        $nota->pegawais()->detach($pegawaiId);
+
+        return back()->with('success', 'Pegawai dihapus');
     }
 
     public function create()
@@ -133,9 +168,12 @@ class NotaDinasController extends Controller
                 return $items->count();
             });
 
+        $pegawais = Pegawai::all();
+
         return view('pages.nota_dinas.preview', [
             'nota' => $nota,
-            'groupedPegawai' => $grouped
+            'groupedPegawai' => $grouped,
+            'pegawais' => $pegawais
         ]);
     }
 }

@@ -47,7 +47,100 @@
                     @endif
                 @endforeach
             </b>
-           untuk melaksanakan perjalanan dinas biasa yakni perjalanan dinas dalam rangka {{ $nota->perihal}}
+            untuk melaksanakan perjalanan dinas biasa yakni perjalanan dinas dalam rangka {{ $nota->perihal }}
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-gray-100 dark:border-gray-800">
+                        <th class="px-5 py-3 text-left sm:px-6">No</th>
+                        <th class="px-5 py-3 text-left sm:px-6">Nama</th>
+                        <th class="px-5 py-3 text-left sm:px-6">Pangkat / Gol</th>
+                        <th class="px-5 py-3 text-left sm:px-6">Jabatan</th>
+                        <th class="px-5 py-3 text-left sm:px-6">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($nota->pegawais as $item)
+                        <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
+                            <td class="px-5 py-4 sm:px-6">
+                                {{ $loop->iteration }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6">
+                                {{ $item->nama }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6">
+                                {{ $item->pangkat }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6">
+                                {{ $item->jabatan }}
+                            </td>
+                            <td>
+                                @if (auth()->user()->role->name == 'kepala_bidang')
+                                    <form action="{{ route('nota-dinas.pegawai.destroy', [$nota->id, $item->id]) }}"
+                                        method="POST" class="inline">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <button class="text-red-600 text-sm" onclick="return confirm('Hapus pegawai ini?')">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @if (auth()->user()->role->name == 'kepala_bidang')
+                <div x-data="{ open: false }" class="mt-4">
+
+                    <button @click="open=true" class="px-4 py-2 bg-green-600 text-white rounded">
+                        Tambah Pegawai
+                    </button>
+
+                    <!-- MODAL -->
+                    <div x-show="open" x-cloak class="fixed inset-0 flex items-center justify-center bg-black/40">
+
+                        <div class="bg-white w-96 p-6 rounded-lg shadow">
+
+                            <h2 class="font-bold text-lg mb-4">
+                                Tambah Pegawai
+                            </h2>
+
+                            <form action="{{ route('nota-dinas.pegawai.store', $nota->id) }}" method="POST">
+                                @csrf
+
+                                <select name="pegawai_ids[]" class="w-full border rounded-lg p-2 mb-4">
+
+                                    <option value="">-- Pilih Pegawai --</option>
+
+                                    @foreach ($pegawais as $pegawai)
+                                        <option value="{{ $pegawai->id }}">
+                                            {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
+                                        </option>
+                                    @endforeach
+
+                                </select>
+
+                                <div class="flex justify-end gap-2">
+
+                                    <button type="button" @click="open=false" class="px-3 py-2 border rounded">
+                                        Batal
+                                    </button>
+
+                                    <button class="px-3 py-2 bg-blue-600 text-white rounded">
+                                        Simpan
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            @endif
         </div>
 
         <div class="text-justify leading-relaxed mb-6 indent-8">

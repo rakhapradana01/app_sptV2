@@ -54,6 +54,15 @@
                                             <a href="{{ route('spt.cetak', $nota->id) }}">Cetak SPT</a>
                                         @endif --}}
 
+                                        @if (auth()->user()->role->name == 'kepala_sub_bidang' && $nota->status == \App\Models\NotaDinas::DISETUJUI_KABID)
+                                            <div class="mt-10">
+                                                <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}" target="_blank"
+                                                    class="px-4 py-2 bg-blue-600 text-white rounded">
+                                                    Cetak
+                                                </a>
+                                            </div>
+                                        @endif
+
                                         @if (auth()->user()->role->name == 'kepala_sub_bidang' && $nota->status == 'draft')
                                             <form action="{{ route('nota-dinas.approve-kasubid', $nota->id) }}"
                                                 method="POST">
