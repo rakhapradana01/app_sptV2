@@ -9,18 +9,18 @@ use App\Models\SubKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Redirect;
 
 class NotaDinasController extends Controller
 {
-    public function cetakNotaDinas($id)
+    public function cetakNotaDinas(NotaDinas $nota)
     {
-        $nota = NotaDinas::findOrFail($id);
-// dd($nota->all());
         $pdf = Pdf::loadView('pages.nota_dinas.pdf', compact('nota'))
             ->setPaper('A4', 'portrait');
 
         return $pdf->stream('nota_dinas.pdf');
     }
+
 
     public function index()
     {
@@ -39,7 +39,7 @@ class NotaDinasController extends Controller
             'pegawais'
         ));
     }
-    
+
     public function createPegawai($notaId)
     {
         $nota = NotaDinas::findOrFail($notaId);
@@ -51,7 +51,7 @@ class NotaDinasController extends Controller
     {
         $nota = NotaDinas::findOrFail($notaId);
 
-        $nota->pegawais()->attach($request->pegawai_ids);
+        $nota->pegawais()->syncWithoutDetaching($request->pegawai_ids);
 
         return back()->with('success', 'Pegawai ditambahkan');
     }
@@ -85,6 +85,7 @@ class NotaDinasController extends Controller
 
     public function store(Request $request)
     {
+       
         $validated = $request->validate([
             'sub_kegiatan_id' => 'required|exists:sub_kegiatans,id',
             'tanggal' => 'required|date',
@@ -95,6 +96,9 @@ class NotaDinasController extends Controller
             'lokasi' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'nullable|date',
+            'pegawai_ids' => 'nullable|array',
+            'pegawai_ids.*' => 'exists:pegawais,id',
+            'kegiatan'=> 'required|string'
         ]);
 
         $nota = NotaDinas::create([
@@ -108,10 +112,11 @@ class NotaDinasController extends Controller
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
             'status' => NotaDinas::DRAFT,
+            'kegiatan' =>$validated['kegiatan']
         ]);
 
-        if ($request->pegawai_ids) {
-            $nota->pegawais()->attach($request->pegawai_ids);
+        if (!empty($validated['pegawai_ids'])) {
+            $nota->pegawais()->syncWithoutDetaching($validated['pegawai_ids']);
         }
 
         return redirect()->route('nota-dinas.index')
@@ -155,7 +160,8 @@ class NotaDinasController extends Controller
             'status' => NotaDinas::DISETUJUI_KABID
         ]);
 
-        return back()->with('success', 'Disetujui Kabid');
+        return redirect()->route('nota-dinas.index')
+            ->with('success','Telah Disetujui');
     }
 
     public function preview(NotaDinas $nota)

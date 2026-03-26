@@ -20,6 +20,7 @@ class NotaDinas extends Model
         'tanggal_mulai',
         'tanggal_selesai',
         'status',
+        'kegiatan'
     ];
 
     const DRAFT = 'draft';

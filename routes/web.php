@@ -51,8 +51,9 @@ Route::middleware(['auth'])->group(function () {
             [NotaDinasController::class, 'destroyPegawai']
         )->name('nota-dinas.pegawai.destroy');
 
-        Route::get('/nota-dinas/{id}/cetak', [NotaDinasController::class, 'cetakNotaDinas'])
+        Route::get('/nota-dinas/{nota}/cetak', [NotaDinasController::class, 'cetakNotaDinas'])
             ->name('nota.cetakNotaDinas');
+
         // Route::
     });
 

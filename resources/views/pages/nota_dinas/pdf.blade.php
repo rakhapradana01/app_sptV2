@@ -96,6 +96,11 @@
         .space-half {
             height: 10px;
         }
+
+        .garis-tipis {
+            border-top: 1px solid #555;
+            margin: 6px 0;
+        }
     </style>
 
 
@@ -180,6 +185,7 @@
 
     </table>
 
+    <div class="garis-tipis"></div>
     <!-- ISI -->
 
     <div class="isi">
@@ -226,13 +232,13 @@
 
             </b>
 
-            untuk melaksanakan perjalanan dinas dalam rangka kegiatan tersebut.
+            untuk melaksanakan perjalanan dinas dalam rangka {{$nota->kegiatan}}.
 
         </p>
         <p>
 
             Pembebanan biaya perjalanan dinas dimaksud dibebankan pada
-            <b>{{ $nota->subKegiatan->nomor_rekening}}</b> - <b>{{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b>
+            <b>{{ $nota->subKegiatan->nomor_rekening }}</b> - <b>{{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b>
             pada Badan Pengelolaan Keuangan dan Aset Daerah Provinsi Kalimantan Selatan.
 
         </p>

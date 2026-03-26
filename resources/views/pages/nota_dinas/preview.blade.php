@@ -9,30 +9,61 @@
             <p>Banjarbaru</p>
         </div>
 
+        <style>
+            body {
+                font-family: "Times New Roman";
+                font-size: 12pt;
+            }
+
+            .info-table {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .info-table td {
+                vertical-align: top;
+                padding: 2px 0;
+            }
+
+            .label {
+                width: 110px;
+            }
+
+            .colon {
+                width: 10px;
+            }
+            
+        </style>
+
         <div class="text-center font-bold mb-6">
             NOTA DINAS
         </div>
 
-        <table class="w-full mb-6">
+        <table class="info-table">
             <tr>
-                <td width="150">Kepada</td>
-                <td>: {{ $nota->kepada->nama }}</td>
+                <td class="label">Kepada</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->kepada->nama }}</td>
             </tr>
             <tr>
-                <td>Melalui</td>
-                <td>: {{ $nota->melalui->nama ?? '-' }}</td>
+                <td class="label">Melalui</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->melalui->nama ?? '-' }}</td>
             </tr>
             <tr>
-                <td>Dari</td>
-                <td>: {{ $nota->dari->nama }}</td>
+                <td class="label">Dari</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->dari->nama }}</td>
             </tr>
             <tr>
-                <td>Tanggal</td>
-                <td>: {{ \Carbon\Carbon::parse($nota->tanggal)->translatedFormat('d F Y') }}</td>
+                <td class="label">Tanggal</td>
+                <td class="colon">:</td>
+                <td>{{ \Carbon\Carbon::parse($nota->tanggal)->translatedFormat('d F Y') }}</td>
             </tr>
             <tr>
-                <td>Hal</td>
-                <td>: {{ $nota->perihal }}</td>
+                <td class="label">Hal</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->perihal }}</td>
             </tr>
         </table>
 

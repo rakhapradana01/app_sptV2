@@ -35,6 +35,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->string('perihal');
+            $table->string('kegiatan');
             $table->string('asal_undangan')->nullable();
 
             $table->string('lokasi');

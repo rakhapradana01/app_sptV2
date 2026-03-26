@@ -4,6 +4,15 @@
     <x-common.page-breadcrumb pageTitle="Tambah Nota Dinas" />
 
     <div class="space-y-6">
+        @if ($errors->any())
+            <div class="bg-red-100 text-red-700 p-3 rounded-lg">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <x-common.component-card title="Form Nota Dinas">
 
             <form method="POST" action="{{ route('nota-dinas.store') }}">
@@ -93,8 +102,13 @@
 
                         <div class="lg:col-span-2">
                             <label class="block mb-2 text-sm font-medium">Perihal</label>
-                            <input type="text" name="perihal" value="Mohon persetujuan perjalanan dinas dalam rangka "
+                            <input type="text" name="perihal" value="Mohon persetujuan Pejalanan Dinas Dalam Rangka "
                                 class="w-full border rounded-lg p-2">
+                        </div>
+
+                        <div class="lg:col-span-2">
+                            <label class="block mb-2 text-sm font-medium">Kegiatan</label>
+                            <input type="text" name="kegiatan" value="Menghadiri " class="w-full border rounded-lg p-2">
                         </div>
 
                         <div class="lg:col-span-2">
@@ -105,7 +119,8 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tujuan</label>
-                            <input type="text" name="lokasi" class="w-full border rounded-lg p-2">
+                            <input type="text" name="lokasi" class="w-full border rounded-lg p-2"
+                                placeholder="D.K.I Jakarta">
                         </div>
 
                         <div class="lg:col-span-2" x-data="{
