@@ -56,11 +56,40 @@
 
                                         @if (optional(auth()->user()->role)->name === 'kepala_sub_bidang' &&
                                                 $nota->status === \App\Models\NotaDinas::DISETUJUI_KABID)
-                                            <div class="mt-4">
+                                            <div class="flex flex-col gap-2 mt-2">
+
                                                 <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}" target="_blank"
-                                                    class="inline-block px-4 py-2 bg-blue-600 text-white rounded whitespace-nowrap">
-                                                    Nota Dinas
+                                                    class="px-4 py-2 bg-blue-600 text-white rounded text-center">
+                                                    NOTDIN
                                                 </a>
+
+                                                @if ($nota->spt)
+                                                    {{-- Jika SPT sudah ada, tampilkan tombol CETAK --}}
+                                                    <a href="{{ route('nota.cetakSpt', $nota->id) }}" target="_blank"
+                                                        class="px-4 py-2 bg-green-600 text-white rounded text-center text-xs font-bold hover:bg-green-700 transition">
+                                                        CETAK SPT
+                                                    </a>
+                                                @else
+                                                    {{-- Jika SPT belum ada, tampilkan tombol BUAT --}}
+                                                    <button
+                                                        @click="openModalSpt({{ $nota->id }}, '{{ $nota->nomor_urut }}')"
+                                                        class="px-4 py-2 bg-gray-500 text-white rounded text-center text-xs font-bold hover:bg-gray-600 transition">
+                                                        BUAT SPT
+                                                    </button>
+                                                @endif
+
+                                                @if ($nota->sppd)
+                                                    <a href="#" target="_blank"
+                                                        class="px-4 py-2 bg-purple-600 text-white rounded text-center">
+                                                        SPPD
+                                                    </a>
+                                                @else
+                                                    <a href="#"
+                                                        class="px-4 py-2 bg-yellow-500 text-white rounded text-center">
+                                                        SPPD
+                                                    </a>
+                                                @endif
+
                                             </div>
                                         @endif
 
@@ -128,4 +157,66 @@
             <x-ui.pagination :paginator="$notaDinas" />
         </x-common.component-card>
     </div>
+
+    <div x-data="{ open: false, notaId: null, nomorUrut: '' }"
+        @open-modal-spt.window="open = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor">
+
+        {{-- Overlay --}}
+        <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-black opacity-50"></div>
+
+                {{-- Modal Content --}}
+                <div
+                    class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-xl transform transition-all max-w-lg w-full z-50 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Generate SPT</h3>
+                    <p class="text-sm text-gray-500 mb-4">Nota Dinas: <span x-text="nomorUrut"
+                            class="font-mono text-blue-600"></span></p>
+
+                    <form :action="`/spt/store/${notaId}`" method="POST" class="space-y-4">
+                        @csrf
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor SPT</label>
+                            <input type="text" name="nomor_spt" required placeholder="090/001/SPT/2026" value="800.1.11.1/       /BPKAD/2026"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tahun</label>
+                                <input type="number" name="tahun_anggaran" value="{{ date('Y') }}"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sumber
+                                    Anggaran</label>
+                                <select name="jenis_anggaran"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                    <option value="DPA">DPA (Murni)</option>
+                                    <option value="DPPA">DPPA (Perubahan)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="open = false"
+                                class="px-4 py-2 text-gray-500 hover:text-gray-700">Batal</button>
+                            <x-ui.button type="submit" variant="primary">Simpan & Generate</x-ui.button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModalSpt(id, nomor) {
+            window.dispatchEvent(new CustomEvent('open-modal-spt', {
+                detail: {
+                    id: id,
+                    nomor: nomor
+                }
+            }));
+        }
+    </script>
 @endsection

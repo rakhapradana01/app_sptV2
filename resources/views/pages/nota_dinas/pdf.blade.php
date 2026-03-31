@@ -3,22 +3,29 @@
 
 <head>
     <meta charset="utf-8">
-
+    <title>Nota Dinas</title>
     <style>
+        @page {
+            margin: 0.5cm 2.5cm 2.5cm 2.5cm;
+        }
+
         .page-break {
             page-break-before: always;
         }
 
         body {
-            font-family: "Times New Roman";
-            font-size: 12pt;
-            margin: 40px;
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            margin: 0;
         }
 
         /* HEADER */
 
         .header {
             width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
         }
 
         .logo {
@@ -111,29 +118,8 @@
     <!-- HEADER -->
 
     <table class="header">
-
-        <tr>
-
-            <td width="50">
-                <img src="{{ public_path('/images/logo.png') }}" class="logo">
-            </td>
-
-            <td class="kop-text">
-
-                PEMERINTAH PROVINSI KALIMANTAN SELATAN<br>
-                <b>BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</b><br>
-                Jl. Raya Dharma Praja Kawasan Perkantoran Pemprov Kalsel<br>
-                BANJARBARU
-
-            </td>
-
-            <td width="50"></td>
-
-        </tr>
-
+        @include('components.kop-surat')
     </table>
-
-    <div class="garis"></div>
 
     <!-- JUDUL -->
 
@@ -232,7 +218,7 @@
 
             </b>
 
-            untuk melaksanakan perjalanan dinas dalam rangka {{$nota->kegiatan}}.
+            untuk melaksanakan perjalanan dinas dalam rangka {{ $nota->kegiatan }}.
 
         </p>
         <p>

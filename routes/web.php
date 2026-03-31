@@ -75,6 +75,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:super_admin,kepala_sub_bidang')->group(function () {
 
         Route::resource('spt', SPTController::class);
+        Route::post('/spt/store/{nota_id}', [SPTController::class, 'store'])->name('spt.store');
+        Route::get('/spt/cetak/{id}', [App\Http\Controllers\SPTController::class, 'cetakSpt'])->name('nota.cetakSpt');
+        Route::get('/nota-dinas/{id}/cetak-spt', [SPTController::class, 'cetakSpt'])->name('nota.cetakSpt');
     });
 
     Route::post('/logout', [AuthController::class, 'logout'])

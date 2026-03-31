@@ -58,5 +58,9 @@ class NotaDinas extends Model
             'nota_dinas_pegawai'
         );
     }
-    
+
+    public function spt()
+    {
+        return $this->hasOne(Spt::class, 'nota_dinas_id');
+    }
 }
