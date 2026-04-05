@@ -25,17 +25,20 @@ class SPTController extends Controller
     public function store(Request $request, $nota_id)
     {
         $request->validate([
-            'nomor_spt' => 'required|unique:spts,nomor_spt',
+            'nomor_spt' => 'required',
             'jenis_anggaran' => 'required|in:DPA,DPPA',
         ]);
 
-        Spt::create([
-            'nota_dinas_id' => $nota_id,
-            'nomor_spt' => $request->nomor_spt,
-            'jenis_anggaran' => $request->jenis_anggaran,
-        ]);
+        Spt::updateOrCreate(
+            ['nota_dinas_id' => $nota_id],
+            [
+                'nomor_spt' => $request->nomor_spt,
+                'jenis_anggaran' => $request->jenis_anggaran,
+                'tahun_anggaran' => $request->tahun_anggaran ?? date('Y'),
+            ]
+        );
 
-        return view('pages.nota_dinas.index')
-            ->with('success', 'Data SPT berhasil dibuat.');
+        return redirect()->route('nota-dinas.index')
+            ->with('success', 'Data SPT berhasil disimpan.');
     }
 }

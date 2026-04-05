@@ -9,12 +9,13 @@ class NotaDinas extends Model
     protected $table = 'nota_dinas';
 
     protected $fillable = [
+        'nomor_urut',
         'sub_kegiatan_id',
         'tanggal',
         'kepada_id',
         'dari_id',
         'melalui_id',
-        'asal_udangan',
+        'asal_undangan',
         'perihal',
         'lokasi',
         'tanggal_mulai',

@@ -67,7 +67,7 @@
                                                     {{-- Jika SPT sudah ada, tampilkan tombol CETAK --}}
                                                     <a href="{{ route('nota.cetakSpt', $nota->id) }}" target="_blank"
                                                         class="px-4 py-2 bg-green-600 text-white rounded text-center text-xs font-bold hover:bg-green-700 transition">
-                                                        CETAK SPT
+                                                        SPT
                                                     </a>
                                                 @else
                                                     {{-- Jika SPT belum ada, tampilkan tombol BUAT --}}
@@ -169,7 +169,7 @@
                 {{-- Modal Content --}}
                 <div
                     class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-xl transform transition-all max-w-lg w-full z-50 p-6">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Generate SPT</h3>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Form SPT</h3>
                     <p class="text-sm text-gray-500 mb-4">Nota Dinas: <span x-text="nomorUrut"
                             class="font-mono text-blue-600"></span></p>
 

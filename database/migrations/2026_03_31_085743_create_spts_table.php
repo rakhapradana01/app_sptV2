@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('spts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('nota_dinas_id')->constrained('nota_dinas')->onDelete('cascade');
-            $table->string('nomor_spt')->unique();
+            $table->string('nomor_spt');
             $table->enum('jenis_anggaran', ['DPA', 'DPPA'])->default('DPA');
             $table->timestamps();
         });

@@ -9,7 +9,7 @@ use App\Models\SubKegiatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Redirect;
+use Carbon\Carbon;
 
 class NotaDinasController extends Controller
 {
@@ -85,7 +85,8 @@ class NotaDinasController extends Controller
 
     public function store(Request $request)
     {
-       
+        $nomor = '900.1 /          / BPKAD / ' . Carbon::now()->year;
+
         $validated = $request->validate([
             'sub_kegiatan_id' => 'required|exists:sub_kegiatans,id',
             'tanggal' => 'required|date',
@@ -98,10 +99,13 @@ class NotaDinasController extends Controller
             'tanggal_selesai' => 'nullable|date',
             'pegawai_ids' => 'nullable|array',
             'pegawai_ids.*' => 'exists:pegawais,id',
-            'kegiatan'=> 'required|string'
+            'kegiatan' => 'required|string',
+            'asal_undangan' => 'required|string'
         ]);
 
         $nota = NotaDinas::create([
+            'nomor_urut' => $nomor,
+            'asal_undangan'=> $validated['asal_undangan'],
             'sub_kegiatan_id' => $validated['sub_kegiatan_id'],
             'tanggal' => $validated['tanggal'],
             'kepada_id' => $validated['kepada_id'],
@@ -112,7 +116,7 @@ class NotaDinasController extends Controller
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
             'status' => NotaDinas::DRAFT,
-            'kegiatan' =>$validated['kegiatan']
+            'kegiatan' => $validated['kegiatan']
         ]);
 
         if (!empty($validated['pegawai_ids'])) {
@@ -161,7 +165,7 @@ class NotaDinasController extends Controller
         ]);
 
         return redirect()->route('nota-dinas.index')
-            ->with('success','Telah Disetujui');
+            ->with('success', 'Telah Disetujui');
     }
 
     public function preview(NotaDinas $nota)
