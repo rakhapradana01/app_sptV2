@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SPPD - {{ $nota->sppd->nomor_sppd ?? '-' }}</title>
+    <style>
+        @page {
+            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #000;
+        }
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .main-table td {
+            border: 1px solid black;
+            padding: 5px 10px;
+            vertical-align: top;
+        }
+
+        .no-border-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .no-border-table td {
+            border: none !important;
+            padding: 1px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-underline {
+            text-decoration: underline;
+        }
+
+        /* Teknik Pecah Halaman */
+        .page-break {
+            page-break-after: always;
+        }
+
+        .last-page {
+            page-break-after: avoid;
+        }
+    </style>
+</head>
+
+<body>
+    @foreach ($nota->pegawais as $p)
+        <div class="{{ $loop->last ? 'last-page' : 'page-break' }}">
+            {{-- Bagian Kop Surat --}}
+            <table>
+                @include('components.kop-surat')
+            </table>
+
+            {{-- Bagian Lembar & Nomor --}}
+            <table style="width: 100%;">
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td>
+                        <table class="no-border-table" style="font-size: 9pt;">
+                            <tr>
+                                <td style="width: 80px;">Lembar ke</td>
+                                <td>: </td>
+                            </tr>
+                            <tr>
+                                <td>Kode No</td>
+                                <td>: </td>
+                            </tr>
+                            <tr>
+                                <td>Nomor</td>
+                                <td>: {{ $nota->sppd->nomor_sppd ?? '-' }}</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="text-center" style="margin: 10px 0;">
+                <strong style="font-size: 11pt;" class="text-underline">SURAT PERJALANAN DINAS (SPD)</strong>
+            </div>
+
+            {{-- Tabel Utama SPPD --}}
+            <table class="main-table">
+                <tr>
+                    <td style="width: 30px;" class="text-center">1.</td>
+                    <td style="width: 40%;">Pejabat Pembuat Komitmen</td>
+                    <td>{{ $nota->sppd->pejabat_ppk ?? 'Kepala Bidang Perencanaan Anggaran Daerah Selaku Kuasa Pengguna Anggaran' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">2.</td>
+                    <td>Nama/NIP Pegawai yang melaksanakan perjalanan dinas</td>
+                    <td><strong>{{ $p->nama }}</strong><br>NIP. {{ $p->nip }}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">3.</td>
+                    <td>
+                        a. Pangkat dan Golongan<br>
+                        b. Jabatan / Instansi<br>
+                        c. Tingkat Biaya Perjalanan Dinas
+                    </td>
+                    <td>
+                        a. {{ $p->pangkat_golongan ?? '-' }}<br>
+                        b. {{ $p->jabatan ?? '-' }}<br>
+                        c. {{ $p->tingkat_biaya ?? '-' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">4.</td>
+                    <td>Maksud Perjalanan Dinas</td>
+                    <td>{{ $nota->kegiatan ?? ($nota->spt->maksud ?? '-') }}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">5.</td>
+                    <td>Alat Angkut yang dipergunakan</td>
+                    <td>{{ $nota->sppd->alat_angkutan ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td class="text-center">6.</td>
+                    <td>
+                        a. Tempat Berangkat<br>
+                        b. Tempat Tujuan
+                    </td>
+                    <td>
+                        a. {{ $nota->sppd->tempat_berangkat ?? 'Banjarbaru' }}<br>
+                        b. {{ $nota->sppd->tempat_tujuan ?? '-' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">7.</td>
+                    <td>
+                        a. Lamanya Perjalanan Dinas<br>
+                        b. Tanggal Berangkat<br>
+                        c. Tanggal Harus Kembali/Tiba di Tempat Baru
+                    </td>
+                    <td>
+                        a. {{ $lamaHari }} Hari<br>
+                        b. {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}<br>
+                        c. {{ \Carbon\Carbon::parse($nota->sppd->tanggal_kembali)->translatedFormat('d F Y') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">8.</td>
+                    <td>Pengikut: Nama</td>
+                    <td>Keterangan</td>
+                </tr>
+                <tr>
+                    <td class="text-center">9.</td>
+                    <td>
+                        Pembebanan Anggaran<br>
+                        a. Instansi<br>
+                        b. Akun
+                    </td>
+                    <td>
+                        <br>
+                        a. {{ $nota->sppd->instansi ?? 'DPA - SKPD BPKAD PROV KALSEL TA 2026' }}<br>
+                        b. {{ $nota->sppd->akun ?? '-' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-center">10.</td>
+                    <td>Keterangan Lain-lain</td>
+                    <td></td>
+                </tr>
+            </table>
+
+            {{-- Bagian Tanda Tangan --}}
+            <table style="width: 100%; margin-top: 25px;">
+                <tr>
+                    <td style="width: 55%;"></td>
+                    <td class="text-center">
+                        Dikeluarkan di: {{ $nota->sppd->tempat_berangkat ?? 'Banjarbaru' }} <br>
+                        Pada Tanggal: {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                        <br><br>
+                        <strong>Kuasa Pengguna Anggaran</strong>
+                        <br><br><br><br><br>
+                        <strong class="text-underline">ADYA FERINA, S.E., M.Ak.</strong><br>
+                        NIP. 19860206 201101 2 005
+                    </td>
+                </tr>
+            </table>
+        </div>
+    @endforeach
+</body>
+
+</html>

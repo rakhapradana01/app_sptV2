@@ -79,15 +79,16 @@
                                                 @endif
 
                                                 @if ($nota->sppd)
-                                                    <a href="#" target="_blank"
-                                                        class="px-4 py-2 bg-purple-600 text-white rounded text-center">
+                                                    <a href="{{ route('nota.cetakSPPD', $nota->id) }}" target="_blank"
+                                                        class="px-4 py-2 bg-purple-600 text-white rounded text-center text-xs font-bold hover:bg-purple-700 transition">
                                                         SPPD
                                                     </a>
                                                 @else
-                                                    <a href="#"
-                                                        class="px-4 py-2 bg-yellow-500 text-white rounded text-center">
-                                                        SPPD
-                                                    </a>
+                                                    <button
+                                                        @click="openModalSppd({{ $nota->id }}, {{ json_encode($nota->nomor_urut) }}, {{ json_encode($nota->spt ? $nota->spt->nomor_spt : '') }})"
+                                                        class="px-4 py-2 bg-yellow-500 text-white rounded text-center text-xs font-bold hover:bg-yellow-600 transition">
+                                                        BUAT SPPD
+                                                    </button>
                                                 @endif
 
                                             </div>
@@ -177,7 +178,8 @@
                         @csrf
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor SPT</label>
-                            <input type="text" name="nomor_spt" required placeholder="090/001/SPT/2026" value="800.1.11.1/       /BPKAD/2026"
+                            <input type="text" name="nomor_spt" required placeholder="090/001/SPT/2026"
+                                value="800.1.11.1/       /BPKAD/2026"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                         </div>
 
@@ -208,6 +210,74 @@
             </div>
         </div>
     </div>
+    <div x-data="{ openSppd: false, notaId: null, nomorUrut: '', nomorSpt: '' }"
+        @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor; nomorSpt = $event.detail.spt">
+
+        <div x-show="openSppd" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+            <div class="flex items-center justify-center min-h-screen px-4">
+                <div class="fixed inset-0 bg-black opacity-50" @click="openSppd = false"></div>
+
+                <div
+                    class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-xl transform transition-all max-w-lg w-full z-50 p-6">
+
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Form SPPD</h3>
+
+                    <div class="space-y-1 mb-4">
+                        <p class="text-sm text-gray-500">Nota Dinas: <span x-text="nomorUrut"
+                                class="font-mono text-blue-600"></span></p>
+                        <p class="text-sm text-gray-500">Nomor SPT: <span x-text="nomorSpt"
+                                class="font-mono text-blue-600"></span></p>
+                    </div>
+
+                    <form :action="`/sppd/store/${notaId}`" method="POST" class="space-y-4">
+                        @csrf
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor SPPD</label>
+                            <input type="text" name="nomor_sppd" required
+                                :value="'000.1.2.3/' + '    ' + '/BPKAD/2026'"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alat Angkutan</label>
+                            <select name="alat_angkutan"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                <option value="mobil">Mobil</option>
+                                <option value="pesawat dan mobil">Pesawat dan Mobil</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Berangkat</label>
+                                <input type="text" name="tempat_berangkat" value="Banjarbaru" required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan</label>
+                                <input type="text" name="tempat_tujuan" placeholder="Contoh: Jakarta" required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal
+                                Pembuatan</label>
+                            <input type="date" name="tanggal_sppd" value="{{ date('Y-m-d') }}" required
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-6">
+                            <button type="button" @click="openSppd = false"
+                                class="px-4 py-2 text-gray-500 hover:text-gray-700">Batal</button>
+                            <x-ui.button type="submit" variant="primary">Simpan & Cetak</x-ui.button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         function openModalSpt(id, nomor) {
@@ -215,6 +285,16 @@
                 detail: {
                     id: id,
                     nomor: nomor
+                }
+            }));
+        }
+
+        function openModalSppd(id, nomor, spt) {
+            window.dispatchEvent(new CustomEvent('open-modal-sppd', {
+                detail: {
+                    id: id,
+                    nomor: nomor,
+                    spt: spt
                 }
             }));
         }

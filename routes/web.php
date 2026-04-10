@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotaDinasController;
 use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\SPPDController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SubKegiatanController;
 
@@ -54,6 +56,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/nota-dinas/{nota}/cetak', [NotaDinasController::class, 'cetakNotaDinas'])
             ->name('nota.cetakNotaDinas');
 
+        Route::post('/sppd/store/{notaId}', [SPPDController::class, 'store'])->name('nota.storeSppd');
+        Route::get('/sppd/cetak/{id}', [SPPDController::class, 'cetakSPPD'])->name('nota.cetakSPPD');
         // Route::
     });
 
