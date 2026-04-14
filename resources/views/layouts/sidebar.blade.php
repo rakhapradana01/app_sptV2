@@ -61,7 +61,7 @@
         <a href="/" class="flex items-center gap-2">
             <img 
                 class="w-10 h-10" src="/images/logo.png" alt="Logo" />
-            <span class=" leading-5 text-lg font-semibold dark:text-white" x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen">Aplikasi Bidang <br>Anggaran </span>
+            <span class=" leading-5 text-lg font-semibold dark:text-white" x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen">Aplikasi <br> Bidang Anggaran </span>
         </a>
     </div>
 
