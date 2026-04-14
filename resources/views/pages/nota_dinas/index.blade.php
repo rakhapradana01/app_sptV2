@@ -29,10 +29,11 @@
                         <tbody>
                             @foreach ($notaDinas as $nota)
                                 <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 ">
                                         {{ $notaDinas->firstItem() + $loop->index }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td
+                                        class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
                                         {{ $nota->nomor_urut }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
@@ -42,112 +43,165 @@
                                         {{ $nota->lokasi }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
-                                        {{ $nota->status }}
+                                        @php
+                                            $statusConfig = match ($nota->status) {
+                                                'draft' => [
+                                                    'label' => 'Konsep',
+                                                    'class' => 'bg-slate-50 text-slate-600 border-slate-200',
+                                                ],
+                                                'diajukan_kabid' => [
+                                                    'label' => 'Diajukan',
+                                                    'class' => 'bg-blue-50 text-blue-600 border-blue-200',
+                                                ],
+                                                \App\Models\NotaDinas::DISETUJUI_KABID => [
+                                                    'label' => 'Final',
+                                                    'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                                ],
+                                                'ditolak' => [
+                                                    'label' => 'Revisi',
+                                                    'class' => 'bg-rose-50 text-rose-600 border-rose-200',
+                                                ],
+                                                default => [
+                                                    'label' => 'Info',
+                                                    'class' => 'bg-gray-50 text-gray-600 border-gray-200',
+                                                ],
+                                            };
+                                        @endphp
+
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider {{ $statusConfig['class'] }}">
+                                            {{ $statusConfig['label'] }}
+                                        </span>
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
-                                        {{-- @if (auth()->user()->role->name == 'user' && $nota->isFinal())
-                                            Tombol Cetak
-                                        @endif --}}
+                                    <td class="px-5 py-4 sm:px-6 text-center">
+                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                            <button @click="open = !open" @click.away="open = false"
+                                                class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                <span class="text-xs font-semibold">Opsi</span>
+                                                <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </button>
 
-                                        {{-- @if ($nota->status == 'disetujui_kabid')
-                                            <a href="{{ route('nota.cetak', $nota->id) }}">Cetak Nota</a>
-                                            <a href="{{ route('spt.cetak', $nota->id) }}">Cetak SPT</a>
-                                        @endif --}}
+                                            <div x-show="open" x-cloak
+                                                x-transition:enter="transition ease-out duration-100"
+                                                class="absolute right-0 mt-2 w-52 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
 
-                                        @if (optional(auth()->user()->role)->name === 'kepala_sub_bidang' &&
-                                                $nota->status === \App\Models\NotaDinas::DISETUJUI_KABID)
-                                            <div class="flex flex-col gap-2 mt-2">
+                                                <div class="py-1 flex flex-col">
+                                                    @php
+                                                        $role = auth()->user()->role->name;
+                                                        $status = $nota->status;
+                                                        $hasAction = false;
+                                                    @endphp
 
-                                                <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}" target="_blank"
-                                                    class="px-4 py-2 bg-blue-600 text-white rounded text-center">
-                                                    NOTDIN
-                                                </a>
+                                                    @if ($role === 'kepala_bidang')
+                                                        @if ($status === 'diajukan_kabid')
+                                                            @php $hasAction = true; @endphp
+                                                            <a href="{{ route('nota-dinas.preview', $nota->id) }}"
+                                                                class="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                                                <svg class="w-4 h-4 mr-2" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                                    </path>
+                                                                </svg>
+                                                                Preview & Setujui
+                                                            </a>
+                                                        @endif
 
-                                                @if ($nota->spt)
-                                                    {{-- Jika SPT sudah ada, tampilkan tombol CETAK --}}
-                                                    <a href="{{ route('nota.cetakSpt', $nota->id) }}" target="_blank"
-                                                        class="px-4 py-2 bg-green-600 text-white rounded text-center text-xs font-bold hover:bg-green-700 transition">
-                                                        SPT
-                                                    </a>
-                                                @else
-                                                    {{-- Jika SPT belum ada, tampilkan tombol BUAT --}}
-                                                    <button
-                                                        @click="openModalSpt({{ $nota->id }}, '{{ $nota->nomor_urut }}')"
-                                                        class="px-4 py-2 bg-gray-500 text-white rounded text-center text-xs font-bold hover:bg-gray-600 transition">
-                                                        BUAT SPT
-                                                    </button>
-                                                @endif
+                                                        @if ($status === \App\Models\NotaDinas::DISETUJUI_KABID)
+                                                            @php $hasAction = true; @endphp
+                                                            <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}"
+                                                                target="_blank"
+                                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                                <svg class="w-4 h-4 mr-2" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                                                                    </path>
+                                                                </svg>
+                                                                Cetak Nota
+                                                            </a>
+                                                        @endif
+                                                    @endif
 
-                                                @if ($nota->sppd)
-                                                    <a href="{{ route('nota.cetakSPPD', $nota->id) }}" target="_blank"
-                                                        class="px-4 py-2 bg-purple-600 text-white rounded text-center text-xs font-bold hover:bg-purple-700 transition">
-                                                        SPPD
-                                                    </a>
-                                                @else
-                                                    <button
-                                                        @click="openModalSppd({{ $nota->id }}, {{ json_encode($nota->nomor_urut) }}, {{ json_encode($nota->spt ? $nota->spt->nomor_spt : '') }})"
-                                                        class="px-4 py-2 bg-yellow-500 text-white rounded text-center text-xs font-bold hover:bg-yellow-600 transition">
-                                                        BUAT SPPD
-                                                    </button>
-                                                @endif
+                                                    @if (in_array($role, ['kepala_sub_bidang', 'super_admin']))
+                                                        {{-- Logika Cetak & Dokumen (Hanya jika disetujui) --}}
+                                                        @if ($status === \App\Models\NotaDinas::DISETUJUI_KABID)
+                                                            @php $hasAction = true; @endphp
+                                                            <div
+                                                                class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase border-b border-gray-100 dark:border-gray-700">
+                                                                Dokumen</div>
 
+                                                            <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}"
+                                                                target="_blank"
+                                                                class="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                                                Cetak NOTDIN
+                                                            </a>
+
+                                                            @if ($nota->spt)
+                                                                <a href="{{ route('nota.cetakSpt', $nota->id) }}"
+                                                                    target="_blank"
+                                                                    class="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50">Cetak
+                                                                    SPT</a>
+                                                            @else
+                                                                <button
+                                                                    @click="openModalSpt({{ $nota->id }}, '{{ $nota->nomor_urut }}')"
+                                                                    class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">Buat
+                                                                    SPT</button>
+                                                            @endif
+
+                                                            @if ($nota->sppd)
+                                                                <a href="{{ route('nota.cetakSPPD', $nota->id) }}"
+                                                                    target="_blank"
+                                                                    class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50">Cetak
+                                                                    SPPD</a>
+                                                            @else
+                                                                <button
+                                                                    @click="openModalSppd({{ $nota->id }}, {{ json_encode($nota->nomor_urut) }}, {{ json_encode($nota->spt ? $nota->spt->nomor_spt : '') }})"
+                                                                    class="flex items-center px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50">Buat
+                                                                    SPPD</button>
+                                                            @endif
+                                                        @endif
+
+                                                        @if ($status === 'draft')
+                                                            @php $hasAction = true; @endphp
+                                                            <form
+                                                                action="{{ route('nota-dinas.approve-kasubid', $nota->id) }}"
+                                                                method="POST"
+                                                                class="border-t border-gray-100 dark:border-gray-700">
+                                                                @csrf @method('PATCH')
+                                                                <button type="submit"
+                                                                    class="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50">Kirim
+                                                                    Kabid</button>
+                                                            </form>
+
+                                                            <a href="{{ route('nota-dinas.edit', $nota->id) }}"
+                                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Edit
+                                                                Data</a>
+
+                                                            <form action="{{ route('nota-dinas.destroy', $nota->id) }}"
+                                                                method="POST" onsubmit="return confirm('Hapus data ini?')">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">Hapus</button>
+                                                            </form>
+                                                        @endif
+                                                    @endif
+
+                                                    @if (!$hasAction)
+                                                        <div
+                                                            class="px-4 py-3 text-xs text-gray-500 italic text-center bg-gray-50 dark:bg-gray-900/50">
+                                                            Tidak ada aksi
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </div>
-                                        @endif
-
-                                        @if (auth()->user()->role->name == 'kepala_sub_bidang' && $nota->status == 'draft')
-                                            <form action="{{ route('nota-dinas.approve-kasubid', $nota->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                @method('PATCH')
-                                                <x-ui.button size="sm" variant="success">Kirim
-                                                    Kabid</x-ui.button>
-                                            </form>
-                                        @endif
-
-
-                                        @if (auth()->user()->role->name == 'kepala_bidang' && $nota->status == 'diajukan_kabid')
-                                            <a href="{{ route('nota-dinas.preview', $nota->id) }}">
-                                                <x-ui.button size="sm" variant="primary">
-                                                    Lihat & Approve
-                                                </x-ui.button>
-                                            </a>
-                                        @endif
-
-                                        @if (auth()->user()->role->name == 'super_admin')
-                                            <div class="flex gap-2">
-
-                                                @if ($nota->status == 'draft')
-                                                    <form action="{{ route('nota-dinas.kirim-kasubid', $nota->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <x-ui.button size="sm">Kirim</x-ui.button>
-                                                    </form>
-                                                @endif
-
-                                                @if ($nota->status == 'diajukan_kasubid')
-                                                    <form action="{{ route('nota-dinas.approve-kasubid', $nota->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <x-ui.button size="sm" variant="success">Approve
-                                                            Kasubid</x-ui.button>
-                                                    </form>
-                                                @endif
-
-                                                @if ($nota->status == 'disetujui_kasubid')
-                                                    <form action="{{ route('nota-dinas.approve-kabid', $nota->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <x-ui.button size="sm" variant="primary">Approve
-                                                            Kabid</x-ui.button>
-                                                    </form>
-                                                @endif
-
-                                            </div>
-                                        @endif
-
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -162,12 +216,10 @@
     <div x-data="{ open: false, notaId: null, nomorUrut: '' }"
         @open-modal-spt.window="open = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor">
 
-        {{-- Overlay --}}
         <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
             <div class="flex items-center justify-center min-h-screen px-4">
                 <div class="fixed inset-0 bg-black opacity-50"></div>
 
-                {{-- Modal Content --}}
                 <div
                     class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-xl transform transition-all max-w-lg w-full z-50 p-6">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Form SPT</h3>
@@ -203,7 +255,7 @@
                         <div class="flex justify-end gap-3 mt-6">
                             <button type="button" @click="open = false"
                                 class="px-4 py-2 text-gray-500 hover:text-gray-700">Batal</button>
-                            <x-ui.button type="submit" variant="primary">Simpan & Generate</x-ui.button>
+                            <x-ui.button type="submit" variant="primary">Simpan</x-ui.button>
                         </div>
                     </form>
                 </div>

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Surat Perintah Tugas</title>
+    <title>SPT</title>
     <style>
         @page {
             margin: 0.5cm 1.5cm 1.5cm 1.5cm;
@@ -53,7 +53,6 @@
             font-size: 9pt;
         }
 
-        /* Isi Surat */
         .content-table {
             width: 100%;
             margin-top: 10px;
@@ -71,7 +70,6 @@
             border-collapse: collapse;
         }
 
-        /* Tanda Tangan */
         .ttd-container {
             margin-top: 40px;
             width: 100%;
@@ -93,17 +91,18 @@
 
     <div class="text-center">
         <div class="font-bold underline" style="font-size: 12pt;">SURAT PERINTAH TUGAS</div>
-        {{-- <div>
+        <div style="line-height: 1.5;">
             @php
                 $parts = explode('/', $nota->spt->nomor_spt);
             @endphp
 
             NOMOR : {{ $parts[0] ?? '' }}/
-            <span style="display: inline-block; min-width: 1.5cm; text-align: center;">
+            <span
+                style="display: inline-block; min-width: 1.5cm; text-align: center; border-bottom: 1px solid transparent; vertical-align: bottom;">
                 {{ $parts[1] ?? '' }}
             </span>
             /{{ $parts[2] ?? '' }}/{{ $parts[3] ?? '' }}
-        </div> --}}
+        </div>
     </div>
 
     <table class="content-table">

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>SPPD</title>
+    <title>SPD</title>
     <style>
         @page {
             margin: 0.5cm 1.5cm 1.5cm 1.5cm;
@@ -65,7 +65,6 @@
                 @include('components.kop-surat')
             </table>
 
-            {{-- Bagian Lembar & Nomor --}}
             <table style="width: 100%;">
                 <tr>
                     <td style="width: 55%;"></td>
@@ -81,7 +80,7 @@
                             </tr>
                             <tr>
                                 <td>Nomor</td>
-                                <td>: {{ $nota->sppd->nomor_sppd ?? '-' }}</td>
+                                <td>:{{ $nota->sppd->nomor_sppd ?? '000.1.2.3/    /BPKAD/2026' }}</td>
                             </tr>
                         </table>
                     </td>
@@ -92,7 +91,6 @@
                 <strong style="font-size: 11pt;" class="text-underline">SURAT PERJALANAN DINAS (SPD)</strong>
             </div>
 
-            {{-- Tabel Utama SPPD --}}
             <table class="main-table">
                 <tr>
                     <td style="width: 30px;" class="text-center">1.</td>
@@ -177,7 +175,6 @@
                 </tr>
             </table>
 
-            {{-- Bagian Tanda Tangan --}}
             <table style="width: 100%; margin-top: 25px;">
                 <tr>
                     <td style="width: 55%;"></td>
@@ -197,7 +194,6 @@
         <div class="last-page">
             <table class="main-table">
 
-                {{-- BARIS 1 --}}
                 <tr>
                     <td style="width:50%; height:130px;"></td>
 
@@ -216,9 +212,9 @@
                                     Pada Tanggal :
                                     {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
 
-                                    <br><br><br>
+                                    <br><br>
                                     Pejabat Pelaksana Teknis Kegiatan
-                                    <br><br><br><br>
+                                    <br><br><br><br><br>
 
                                     <b>{{ $nota->dari->nama ?? '' }}</b><br>
 
@@ -231,9 +227,8 @@
                     </td>
                 </tr>
 
-                {{-- BARIS 2 --}}
                 <tr>
-                    <td style="vertical-align:top; height:130px;">
+                    <td style="vertical-align:top; height:150px;">
                         <table class="no-border-table">
                             <tr>
                                 <td style="width:20px;"><b>II.</b></td>
@@ -246,7 +241,7 @@
                         </table>
                     </td>
 
-                    <td style="vertical-align:top;">
+                    <td style="vertical-align:top; height:160px;">
                         <table class="no-border-table">
                             <tr>
                                 <td style="width:5px;"></td>
@@ -261,21 +256,21 @@
                     </td>
                 </tr>
 
-                {{-- BARIS 3 --}}
                 <tr>
-                    <td style="vertical-align:top; height:120px;">
+                    <td style="vertical-align:top; height:160px;">
                         <table class="no-border-table">
                             <tr>
                                 <td style="width:20px;"><b>III.</b></td>
                                 <td>
                                     Tiba di :<br>
                                     Pada Tanggal :
+                                    <br><br><br>
                                 </td>
                             </tr>
                         </table>
                     </td>
 
-                    <td style="vertical-align:top;">
+                    <td style="vertical-align:top; height:160px;">
                         <table class="no-border-table">
                             <tr>
                                 <td style="width:5px;"></td>
@@ -289,9 +284,8 @@
                     </td>
                 </tr>
 
-                {{-- BARIS 4 --}}
                 <tr>
-                    <td style="vertical-align:top; height:120px;">
+                    <td style="vertical-align:top; height:160px;">
                         <table class="no-border-table">
                             <tr>
                                 <td style="width:20px;"><b>IV.</b></td>
@@ -303,7 +297,7 @@
                         </table>
                     </td>
 
-                    <td style="vertical-align:top;">
+                    <td style="vertical-align:top; height:160px;">
                         <table class="no-border-table">
                             <tr>
                                 <td style="width:5px;"></td>
@@ -317,7 +311,6 @@
                     </td>
                 </tr>
 
-                {{-- BARIS 5 --}}
                 <tr>
                     <td colspan="2" style="height:20px;">
                         <table class="no-border-table">
@@ -329,7 +322,7 @@
                     </td>
                 </tr>
 
-                {{-- BARIS 6 --}}
+
                 <tr>
                     <td colspan="2" style="vertical-align:top;">
                         <table class="no-border-table">
@@ -351,7 +344,7 @@
 
             </table>
         </div>
-        <div class="page-break"></div>
+        {{-- <div class="page-break"></div> --}}
     @endforeach
 </body>
 
