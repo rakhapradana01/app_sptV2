@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>SPPD - {{ $nota->sppd->nomor_sppd ?? '-' }}</title>
+    <title>SPPD</title>
     <style>
         @page {
             margin: 0.5cm 1.5cm 1.5cm 1.5cm;
@@ -193,6 +193,165 @@
                 </tr>
             </table>
         </div>
+
+        <div class="last-page">
+            <table class="main-table">
+
+                {{-- BARIS 1 --}}
+                <tr>
+                    <td style="width:50%; height:130px;"></td>
+
+                    <td style="width:50%; vertical-align:top;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:5px; vertical-align:top;"><b>I.</b></td>
+                                <td>
+                                    Berangkat dari : <br>
+                                    (Tempat Kedudukan)
+                                    <br>
+                                    {{ $nota->sppd->tempat_berangkat ?? 'Banjarbaru' }}<br>
+
+                                    Ke : {{ $nota->sppd->tempat_tujuan }}<br>
+
+                                    Pada Tanggal :
+                                    {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+
+                                    <br><br><br>
+                                    Pejabat Pelaksana Teknis Kegiatan
+                                    <br><br><br><br>
+
+                                    <b>{{ $nota->dari->nama ?? '' }}</b><br>
+
+                                    @if (isset($nota->dari->nip))
+                                        NIP. {{ $nota->dari->nip }}
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                {{-- BARIS 2 --}}
+                <tr>
+                    <td style="vertical-align:top; height:130px;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:20px;"><b>II.</b></td>
+                                <td>
+                                    Tiba di : {{ $nota->sppd->tempat_tujuan }}<br>
+                                    Pada Tanggal :
+                                    {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <td style="vertical-align:top;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:5px;"></td>
+                                <td>
+                                    Berangkat dari : {{ $nota->sppd->tempat_tujuan }}<br>
+                                    Ke : {{ $nota->sppd->tempat_berangkat }}<br>
+                                    Pada Tanggal :
+                                    {{ \Carbon\Carbon::parse($nota->sppd->tanggal_kembali)->translatedFormat('d F Y') }}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                {{-- BARIS 3 --}}
+                <tr>
+                    <td style="vertical-align:top; height:120px;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:20px;"><b>III.</b></td>
+                                <td>
+                                    Tiba di :<br>
+                                    Pada Tanggal :
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <td style="vertical-align:top;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:5px;"></td>
+                                <td>
+                                    Berangkat dari :<br>
+                                    Ke :<br>
+                                    Pada Tanggal :
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                {{-- BARIS 4 --}}
+                <tr>
+                    <td style="vertical-align:top; height:120px;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:20px;"><b>IV.</b></td>
+                                <td>
+                                    Tiba di :<br>
+                                    Pada Tanggal :
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <td style="vertical-align:top;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:5px;"></td>
+                                <td style="text-align:justify;">
+                                    Telah diperiksa, dengan keterangan bahwa perjalanan tersebut di atas
+                                    benar dilakukan atas perintahnya dan semata-mata untuk kepentingan
+                                    jabatan dalam waktu yang sesingkat-singkatnya.
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                {{-- BARIS 5 --}}
+                <tr>
+                    <td colspan="2" style="height:20px;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:20px;"><b>V.</b></td>
+                                <td>Catatan Lain-Lain</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                {{-- BARIS 6 --}}
+                <tr>
+                    <td colspan="2" style="vertical-align:top;">
+                        <table class="no-border-table">
+                            <tr>
+                                <td style="width:20px;"><b>VI.</b></td>
+                                <td>
+                                    PERHATIAN:<br>
+                                    PPK yang menerbitkan SPD, Pegawai yang melakukann perjalanan dinas, para pejabat
+                                    yang mengesahkan
+                                    tanggal berangkat/tiba, serta bendahara pengeluaran bertanggung jawab berdasarkan
+                                    peraturan-peraturan
+                                    Keuangan Negara apabila negara menderita rugi akibat kesalahan, kelalaian, dan
+                                    kealpaannya
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+        <div class="page-break"></div>
     @endforeach
 </body>
 

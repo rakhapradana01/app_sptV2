@@ -6,7 +6,7 @@
     <title>Nota Dinas</title>
     <style>
         @page {
-            margin: 0.5cm 2.5cm 2.5cm 2.5cm;
+            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
         }
 
         .page-break {

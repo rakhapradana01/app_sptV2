@@ -5,7 +5,7 @@
     <title>Surat Perintah Tugas</title>
     <style>
         @page {
-            margin: 0.5cm 2.5cm 2.5cm 2.5cm;
+            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
         }
 
         body {
@@ -93,7 +93,7 @@
 
     <div class="text-center">
         <div class="font-bold underline" style="font-size: 12pt;">SURAT PERINTAH TUGAS</div>
-        <div>
+        {{-- <div>
             @php
                 $parts = explode('/', $nota->spt->nomor_spt);
             @endphp
@@ -103,7 +103,7 @@
                 {{ $parts[1] ?? '' }}
             </span>
             /{{ $parts[2] ?? '' }}/{{ $parts[3] ?? '' }}
-        </div>
+        </div> --}}
     </div>
 
     <table class="content-table">
