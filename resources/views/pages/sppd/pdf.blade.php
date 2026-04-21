@@ -212,9 +212,9 @@
                                     Pada Tanggal :
                                     {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
 
-                                    <br><br>
+                                    <br>
                                     Pejabat Pelaksana Teknis Kegiatan
-                                    <br><br><br><br><br>
+                                    <br><br><br><br>
 
                                     <b>{{ $nota->dari->nama ?? '' }}</b><br>
 
@@ -344,6 +344,20 @@
 
             </table>
         </div>
+        <table style="width: 100%; margin-top: 0px;">
+            <tr>
+                <td style="width: 55%;"></td>
+                <td class="text-center">
+                    Dikeluarkan di: {{ $nota->sppd->tempat_berangkat ?? 'Banjarbaru' }} <br>
+                    Pada Tanggal: {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                    <br><br>
+                    <strong>Kuasa Pengguna Anggaran</strong>
+                    <br><br><br><br><br>
+                    <strong class="text-underline">ADYA FERINA, S.E., M.Ak.</strong><br>
+                    NIP. 19860206 201101 2 005
+                </td>
+            </tr>
+        </table>
         {{-- <div class="page-break"></div> --}}
     @endforeach
 </body>

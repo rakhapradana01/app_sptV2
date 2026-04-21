@@ -13,7 +13,9 @@
             </div>
             <div class="kop-alamat">
                 Jl. Raya Dharma Praja Kawasan Perkantoran Pemprov Kalsel<br>
-                BANJARBARU
+                (Kawasan Perkantoran Pemerintahan Provinsi Kalimantan Selatan)<br> 
+                Laman https://bpkad.kalselprov.go.id/, Pos-el bpkad@kalselprov.go.id
+
             </div>
         </td>
 
