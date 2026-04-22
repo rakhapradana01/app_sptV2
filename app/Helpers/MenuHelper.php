@@ -29,7 +29,7 @@ class MenuHelper
                 'icon' => 'person',
                 'subItems' => [
                     ['name' => 'Nota Dinas', 'path' => route('nota-dinas.index'), 'pro' => false],
-                    ['name' => 'Arsip', 'path' => '/blank', 'pro' => false],
+                    ['name' => 'Arsip', 'path' => route('arsip'), 'pro' => false],
                 ]
             ],
             [

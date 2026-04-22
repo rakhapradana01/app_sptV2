@@ -21,6 +21,14 @@ class NotaDinasController extends Controller
         return $pdf->stream('nota_dinas.pdf');
     }
 
+    public function arsip()
+    {
+        $notaDinas = NotaDinas::where('status', \App\Models\NotaDinas::DISETUJUI_KABID)
+            ->latest()
+            ->paginate(10);
+
+        return view('pages.arsip.index', compact('notaDinas'));
+    }
 
     public function index()
     {

@@ -60,7 +60,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/sppd/store/{notaId}', [SPPDController::class, 'store'])->name('nota.storeSppd');
         Route::get('/sppd/cetak/{id}', [SPPDController::class, 'cetakSPPD'])->name('nota.cetakSPPD');
-        // Route::
+        
+        //Arsip
+        Route::get('/arsip', [NotaDinasController::class, 'arsip'])->name('arsip');
     });
 
     // ======================
