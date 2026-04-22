@@ -57,6 +57,10 @@
                                                     'label' => 'Final',
                                                     'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                                                 ],
+                                                \App\Models\NotaDinas::REVISI_KABID =>[
+                                                    'label' => 'Revisi',
+                                                    'class' => 'bg-orange-50 text-orange-600 border-rose-200'
+                                                ],
                                                 'ditolak' => [
                                                     'label' => 'Revisi',
                                                     'class' => 'bg-rose-50 text-rose-600 border-rose-200',
@@ -167,22 +171,14 @@
                                                                     SPPD</button>
                                                             @endif
                                                         @endif
-
-                                                        @if ($status === 'draft')
+                                                        @if (in_array($status, ['draft', 'diajukan_kabid', 'revisi_kabid']))
                                                             @php $hasAction = true; @endphp
-                                                            <form
-                                                                action="{{ route('nota-dinas.approve-kasubid', $nota->id) }}"
-                                                                method="POST"
-                                                                class="border-t border-gray-100 dark:border-gray-700">
-                                                                @csrf @method('PATCH')
-                                                                <button type="submit"
-                                                                    class="flex items-center w-full px-4 py-2 text-sm text-green-600 hover:bg-green-50">Kirim
-                                                                    Kabid</button>
-                                                            </form>
-
+                                                            @if ($status === 'draft')
+                                                            @endif
                                                             <a href="{{ route('nota-dinas.edit', $nota->id) }}"
-                                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Edit
-                                                                Data</a>
+                                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                                Edit Data
+                                                            </a>
 
                                                             <form action="{{ route('nota-dinas.destroy', $nota->id) }}"
                                                                 method="POST" onsubmit="return confirm('Hapus data ini?')">

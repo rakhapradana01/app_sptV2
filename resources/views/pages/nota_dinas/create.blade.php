@@ -99,7 +99,27 @@
                             <input type="date" name="tanggal" onclick="this.showPicker()"
                                 class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
+                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:col-span-2">
+                            {{-- Input Sifat --}}
+                            <div>
+                                <label class="block mb-2 text-sm font-medium">Sifat</label>
+                                <select name="sifat"
+                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <option value="Biasa">Biasa</option>
+                                    <option value="Penting">Penting</option>
+                                    <option value="Segera">Segera</option>
+                                    <option value="Sangat Segera">Sangat Segera</option>
+                                </select>
+                            </div>
 
+                            {{-- Input Lampiran --}}
+                            <div>
+                                <label class="block mb-2 text-sm font-medium">Lampiran</label>
+                                <input type="text" name="lampiran" value="1 (satu) Berkas"
+                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="Contoh: 1 (satu) Berkas">
+                            </div>
+                        </div>
                         <div class="lg:col-span-2">
                             <label class="block mb-2 text-sm font-medium">Perihal</label>
                             <input type="text" name="perihal" value="Mohon persetujuan Pejalanan Dinas Dalam Rangka "
@@ -108,7 +128,7 @@
 
                         <div class="lg:col-span-2">
                             <label class="block mb-2 text-sm font-medium">Kegiatan</label>
-                            <input type="text" name="kegiatan" value="Menghadiri " class="w-full border rounded-lg p-2">
+                            <input type="text" name="kegiatan" value="Dalam rangka melaksanakan  " class="w-full border rounded-lg p-2">
                         </div>
 
                         <div class="lg:col-span-2">

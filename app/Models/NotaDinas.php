@@ -21,13 +21,17 @@ class NotaDinas extends Model
         'tanggal_mulai',
         'tanggal_selesai',
         'status',
-        'kegiatan'
+        'kegiatan',
+        'revisi',
+        'lampiran',
+        'sifat'
     ];
 
     const DRAFT = 'draft';
     const DIAJUKAN_KASUBID = 'diajukan_kasubid';
     const DISETUJUI_KASUBID = 'disetujui_kasubid';
     const DIAJUKAN_KABID = 'diajukan_kabid';
+    const REVISI_KABID = 'revisi_kabid';
     const DISETUJUI_KABID = 'disetujui_kabid';
     const DIAJUKAN_KABAN = 'diajukan_kaban';
     const DISETUJUI_KABAN = 'disetujui_kaban';

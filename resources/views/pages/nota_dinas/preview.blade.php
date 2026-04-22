@@ -32,7 +32,6 @@
             .colon {
                 width: 10px;
             }
-            
         </style>
 
         <div class="text-center font-bold mb-6">
@@ -41,14 +40,9 @@
 
         <table class="info-table">
             <tr>
-                <td class="label">Kepada</td>
+                <td class="label">Yth</td>
                 <td class="colon">:</td>
                 <td>{{ $nota->kepada->nama }}</td>
-            </tr>
-            <tr>
-                <td class="label">Melalui</td>
-                <td class="colon">:</td>
-                <td>{{ $nota->melalui->nama ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">Dari</td>
@@ -56,9 +50,29 @@
                 <td>{{ $nota->dari->nama }}</td>
             </tr>
             <tr>
+                <td class="label">Melalui</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->melalui->nama ?? '-' }}</td>
+            </tr>
+            <tr>
                 <td class="label">Tanggal</td>
                 <td class="colon">:</td>
                 <td>{{ \Carbon\Carbon::parse($nota->tanggal)->translatedFormat('d F Y') }}</td>
+            </tr>
+            <tr>
+                <td class="label">Nomor</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->nomor_urut }}</td>
+            </tr>
+            <tr>
+                <td class="label">Sifat</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->sifat ?? 'Biasa' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Lampiran</td>
+                <td class="colon">:</td>
+                <td>{{ $nota->lampiran ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">Hal</td>
@@ -68,7 +82,7 @@
         </table>
 
         <div class="text-justify leading-relaxed mb-6 indent-8">
-            Sehubungan dengan undangan <b> {{ $nota->asal_undangan }}</b>, dengan hormat diusulkan
+            Dengan hormat diusulkan
             <b>
                 @foreach ($groupedPegawai as $jabatan => $jumlah)
                     {{ $jumlah }}
@@ -196,12 +210,43 @@
         </div>
 
         @if (auth()->user()->role->name == 'kepala_bidang')
-            <div class="mt-10">
-                <form action="{{ route('nota-dinas.approve-kabid', $nota->id) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
-                    <x-ui.button variant="success">Approve Final</x-ui.button>
-                </form>
+            <div class="mt-10" x-data="{ showRevisiModal: false }">
+                <div class="flex gap-2">
+                    <form action="{{ route('nota-dinas.approve-kabid', $nota->id) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <x-ui.button variant="success" type="submit">Setujui</x-ui.button>
+                    </form>
+
+                    <x-ui.button variant="yellow" @click="showRevisiModal = true">Revisi</x-ui.button>
+
+                    <form action="{{ route('nota-dinas.reject-kabid', $nota->id) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <x-ui.button variant="red" type="submit">Tolak</x-ui.button>
+                    </form>
+                </div>
+
+                <div x-show="showRevisiModal" x-cloak
+                    class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                    <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+                        <h2 class="font-bold text-lg mb-4">Catatan Revisi</h2>
+
+                        <form action="{{ route('nota-dinas.revisi-kabid', $nota->id) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+
+                            <textarea name="revisi" rows="4"
+                                class="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-yellow-500"
+                                placeholder="Tuliskan bagian yang perlu diperbaiki..." required></textarea>
+
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="showRevisiModal = false"
+                                    class="px-4 py-2 border rounded">Batal</button>
+                                <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Kirim
+                                    Revisi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         @endif
 

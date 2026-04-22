@@ -38,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
             '/nota-dinas/{nota}/approve-kasubid',
             [NotaDinasController::class, 'approveKasubid']
         )->name('nota-dinas.approve-kasubid');
+        Route::patch('/nota-dinas/{id}/revisi-kabid', [NotaDinasController::class, 'revisiKabid'])->name('nota-dinas.revisi-kabid');
+        Route::patch('/nota-dinas/{id}/reject-kabid', [NotaDinasController::class, 'rejectKabid'])->name('nota-dinas.reject-kabid');
         Route::get(
             '/nota-dinas/{nota}/preview',
             [NotaDinasController::class, 'preview']

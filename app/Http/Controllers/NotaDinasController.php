@@ -100,12 +100,14 @@ class NotaDinasController extends Controller
             'pegawai_ids' => 'nullable|array',
             'pegawai_ids.*' => 'exists:pegawais,id',
             'kegiatan' => 'required|string',
-            'asal_undangan' => 'required|string'
+            'asal_undangan' => 'required|string',
+            'sifat' => 'nullable|string',
+            'lampiran' => 'nullable|string'
         ]);
 
         $nota = NotaDinas::create([
             'nomor_urut' => $nomor,
-            'asal_undangan'=> $validated['asal_undangan'],
+            'asal_undangan' => $validated['asal_undangan'],
             'sub_kegiatan_id' => $validated['sub_kegiatan_id'],
             'tanggal' => $validated['tanggal'],
             'kepada_id' => $validated['kepada_id'],
@@ -115,8 +117,10 @@ class NotaDinasController extends Controller
             'lokasi' => $validated['lokasi'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
-            'status' => NotaDinas::DRAFT,
-            'kegiatan' => $validated['kegiatan']
+            'kegiatan' => $validated['kegiatan'],
+            'status' => NotaDinas::DIAJUKAN_KABID,
+            'sifat' => $validated['sifat'],
+            'lampiran' => $validated['lampiran']
         ]);
 
         if (!empty($validated['pegawai_ids'])) {
@@ -147,6 +151,29 @@ class NotaDinasController extends Controller
         return back()->with('success', 'Berhasil diajukan ke Kabid');
     }
 
+    public function revisiKabid(Request $request, $id)
+    {
+        $request->validate([
+            'revisi' => 'required|string|min:5',
+        ]);
+
+        $nota = NotaDinas::findOrFail($id);
+
+        $nota->update([
+            'status' => NotaDinas::REVISI_KABID, // Status berubah jadi revisi
+            'revisi' => $request->revisi,        // Simpan pesan revisinya
+        ]);
+
+        return redirect()->route('nota-dinas.index')->with('warning', 'Nota dikembalikan ke Kasubid untuk diperbaiki.');
+    }
+
+    public function rejectKabid($id)
+    {
+        $nota = NotaDinas::findOrFail($id);
+        $nota->update(['status' => 'ditolak']);
+
+        return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak.');
+    }
     public function approveKabid(NotaDinas $nota)
     {
         if (
