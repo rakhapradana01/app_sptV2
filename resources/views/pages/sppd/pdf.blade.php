@@ -101,7 +101,7 @@
                 <tr>
                     <td class="text-center">2.</td>
                     <td>Nama/NIP Pegawai yang melaksanakan perjalanan dinas</td>
-                    <td><strong>{{ $p->nama }}</strong><br>NIP. {{ $p->nip }}</td>
+                    <td>{{ $p->nama }}<br>NIP. {{ $p->nip }}</td>
                 </tr>
                 <tr>
                     <td class="text-center">3.</td>
@@ -111,7 +111,7 @@
                         c. Tingkat Biaya Perjalanan Dinas
                     </td>
                     <td>
-                        a. {{ $p->pangkat_golongan ?? '-' }}<br>
+                        a. {{ $p->pangkat ?? '-' }}<br>
                         b. {{ $p->jabatan ?? '-' }}<br>
                         c. {{ $p->tingkat_biaya ?? '-' }}
                     </td>
