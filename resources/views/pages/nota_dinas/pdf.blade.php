@@ -151,6 +151,13 @@
             <td>{{ $nota->dari->jabatan ?? '-' }}</td>
         </tr>
 
+
+        <tr>
+            <td>Tanggal</td>
+            <td>:</td>
+            <td>{{ \Carbon\Carbon::parse($nota->tanggal)->translatedFormat('d F Y') }}</td>
+        </tr>
+
         <tr>
             <td>Nomor</td>
             <td>:</td>
@@ -158,9 +165,15 @@
         </tr>
 
         <tr>
-            <td>Tanggal</td>
+            <td>Sifat</td>
             <td>:</td>
-            <td>{{ \Carbon\Carbon::parse($nota->tanggal)->translatedFormat('d F Y') }}</td>
+            <td>{{ $nota->sifat }}</td>
+        </tr>
+
+        <tr>
+            <td>Lampiran</td>
+            <td>:</td>
+            <td>{{ $nota->lampiran }}</td>
         </tr>
 
         <tr>
@@ -177,62 +190,40 @@
     <div class="isi">
 
         <p>
-
-            Sehubungan dengan kegiatan
-            <b>{{ $nota->subKegiatan->nama ?? '-' }}</b>
-            yang akan dilaksanakan di
-            <b>{{ $nota->lokasi }}</b>
-            pada tanggal
-
+            Sehubungan dengan kegiatan yang akan dilaksanakan di
+            <b>{{ $nota->lokasi }}</b> pada tanggal
             <b>
-
                 {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
-
                 @if ($nota->tanggal_selesai)
                     s.d {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
                 @endif
-
-            </b>.
-
+            </b>,
+            bersama ini disampaikan hal-hal sebagai berikut.
         </p>
 
         <p>
-
-            Berkenaan dengan hal tersebut, dengan hormat diusulkan
-
             @php
                 $grouped = $nota->pegawais->groupBy('jabatan')->map->count();
             @endphp
 
-            <b>
-
-                {{ $nota->pegawais->count() }} orang pegawai (
-
-                @foreach ($grouped as $jabatan => $jumlah)
-                    {{ $jumlah }} {{ $jabatan }}@if (!$loop->last)
-                        ,
-                    @endif
-                @endforeach
-
-                )
-
-            </b>
-
-            untuk melaksanakan perjalanan dinas dalam rangka {{ $nota->kegiatan }}.
-
+            Diusulkan <b>{{ $nota->pegawais->count() }} orang pegawai</b> (
+            @foreach ($grouped as $jabatan => $jumlah)
+                {{ $jumlah }} {{ $jabatan }}@if (!$loop->last)
+                    ,
+                @endif
+            @endforeach
+            )
+            untuk melaksanakan perjalanan dinas {{ Str::lcfirst($nota->kegiatan) }}.
         </p>
+
         <p>
-
-            Pembebanan biaya perjalanan dinas dimaksud dibebankan pada
-            <b>{{ $nota->subKegiatan->nomor_rekening }}</b> - <b>{{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b>
-            pada Badan Pengelolaan Keuangan dan Aset Daerah Provinsi Kalimantan Selatan.
-
+            Pembebanan biaya perjalanan dinas dibebankan pada
+            <b>{{ $nota->subKegiatan->nomor_rekening }}</b> -
+            <b>{{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b>.
         </p>
+
         <p>
-
-            Demikian disampaikan, apabila disetujui mohon kiranya dapat diberikan persetujuan
-            untuk pelaksanaan perjalanan dinas dimaksud.
-
+            Demikian Nota Dinas ini disampaikan untuk menjadi perhatian dan sebagaimana mestinya.
         </p>
 
     </div>
@@ -251,7 +242,9 @@
 
                 <br><br><br><br>
 
-                <b>{{ $nota->dari->nama ?? '' }}</b><br>
+                <b style="white-space: nowrap;">
+                    {{ $nota->dari->nama ?? '' }}
+                </b><br>
 
                 @if (isset($nota->dari->pangkat))
                     {{ $nota->dari->pangkat }}<br>

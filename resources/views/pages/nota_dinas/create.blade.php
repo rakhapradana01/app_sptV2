@@ -165,7 +165,7 @@
                                     <option value="">-- Pilih Pegawai --</option>
                                     @foreach ($staff as $pegawai)
                                         <option value="{{ $pegawai->id }}">
-                                            {{ $pegawai->nama }}
+                                            {{ $pegawai->nama }} - {{ $pegawai->jabatan}}
                                         </option>
                                     @endforeach
                                 </select>

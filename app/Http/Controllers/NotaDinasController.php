@@ -76,8 +76,8 @@ class NotaDinasController extends Controller
     {
         $subKegiatans = SubKegiatan::all();
 
-        $kepalaBadan = Pegawai::where('jabatan', 'Kepala Badan')->get();
-        $kepalaBidang = Pegawai::where('jabatan', 'Kepala Bidang')->get();
+        $kepalaBadan = Pegawai::where('jabatan', 'like','Kepala Badan%')->get();
+        $kepalaBidang = Pegawai::where('jabatan', 'like', 'Kepala Bidang%')->get();
         $kasubid = Pegawai::where('jabatan', 'like', 'Kepala Sub Bidang%')->get();
         $staff = Pegawai::all();
         $subKegiatans = SubKegiatan::all();

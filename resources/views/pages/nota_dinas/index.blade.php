@@ -57,9 +57,9 @@
                                                     'label' => 'Final',
                                                     'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                                                 ],
-                                                \App\Models\NotaDinas::REVISI_KABID =>[
+                                                \App\Models\NotaDinas::REVISI_KABID => [
                                                     'label' => 'Revisi',
-                                                    'class' => 'bg-orange-50 text-orange-600 border-rose-200'
+                                                    'class' => 'bg-orange-50 text-orange-600 border-rose-200',
                                                 ],
                                                 'ditolak' => [
                                                     'label' => 'Revisi',
@@ -134,43 +134,6 @@
                                                     @endif
 
                                                     @if (in_array($role, ['kepala_sub_bidang', 'super_admin']))
-                                                        {{-- Logika Cetak & Dokumen (Hanya jika disetujui) --}}
-                                                        @if ($status === \App\Models\NotaDinas::DISETUJUI_KABID)
-                                                            @php $hasAction = true; @endphp
-                                                            <div
-                                                                class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase border-b border-gray-100 dark:border-gray-700">
-                                                                Dokumen</div>
-
-                                                            <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}"
-                                                                target="_blank"
-                                                                class="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                                                Cetak NOTDIN
-                                                            </a>
-
-                                                            @if ($nota->spt)
-                                                                <a href="{{ route('nota.cetakSpt', $nota->id) }}"
-                                                                    target="_blank"
-                                                                    class="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50">Cetak
-                                                                    SPT</a>
-                                                            @else
-                                                                <button
-                                                                    @click="openModalSpt({{ $nota->id }}, '{{ $nota->nomor_urut }}')"
-                                                                    class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">Buat
-                                                                    SPT</button>
-                                                            @endif
-
-                                                            @if ($nota->sppd)
-                                                                <a href="{{ route('nota.cetakSPPD', $nota->id) }}"
-                                                                    target="_blank"
-                                                                    class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50">Cetak
-                                                                    SPPD</a>
-                                                            @else
-                                                                <button
-                                                                    @click="openModalSppd({{ $nota->id }}, {{ json_encode($nota->nomor_urut) }}, {{ json_encode($nota->spt ? $nota->spt->nomor_spt : '') }})"
-                                                                    class="flex items-center px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50">Buat
-                                                                    SPPD</button>
-                                                            @endif
-                                                        @endif
                                                         @if (in_array($status, ['draft', 'diajukan_kabid', 'revisi_kabid']))
                                                             @php $hasAction = true; @endphp
                                                             @if ($status === 'draft')
