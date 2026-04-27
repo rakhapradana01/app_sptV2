@@ -38,18 +38,22 @@
                                         {{ $pegawai->jabatan }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
-                                    <td class="px-5 py-4 sm:px-6">
-                                        <x-ui.button variant="yellow" class="text-blue-500">
-                                            Edit
-                                        </x-ui.button>
-                                        <form action="{{ route('pegawai.destroy', $pegawai->id) }}" method="POST"
-                                            class="inline-block" onsubmit="return confirm('Yakin hapus?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <x-ui.button variant="red" type="submit" class="text-red-500 ml-2">
-                                                Hapus
+                                        <div class="flex items-center gap-2">
+                                            <x-ui.button variant="yellow">
+                                                Edit
                                             </x-ui.button>
-                                        </form>
+
+                                            <form action="{{ route('pegawai.destroy', $pegawai->id) }}" method="POST"
+                                                onsubmit="return confirm('Yakin hapus?')">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <x-ui.button variant="red" type="submit">
+                                                    Hapus
+                                                </x-ui.button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
