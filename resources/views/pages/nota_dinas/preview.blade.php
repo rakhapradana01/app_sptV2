@@ -42,17 +42,17 @@
             <tr>
                 <td class="label">Yth</td>
                 <td class="colon">:</td>
-                <td>{{ $nota->kepada->nama }}</td>
+                <td>{{ $nota->kepada->jabatan }}</td>
             </tr>
             <tr>
                 <td class="label">Dari</td>
                 <td class="colon">:</td>
-                <td>{{ $nota->dari->nama }}</td>
+                <td>{{ $nota->dari->jabatan }}</td>
             </tr>
             <tr>
                 <td class="label">Melalui</td>
                 <td class="colon">:</td>
-                <td>{{ $nota->melalui->nama ?? '-' }}</td>
+                <td>{{ $nota->melalui->jabatan ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">Tanggal</td>
@@ -62,7 +62,13 @@
             <tr>
                 <td class="label">Nomor</td>
                 <td class="colon">:</td>
-                <td>{{ $nota->nomor_urut }}</td>
+                <td class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
+                    900.1 /
+                    <span style="display:inline-block; min-width:60px; text-align:center;">
+                        {{ $nota->nomor_urut ?: '     ' }}
+                    </span>
+                    / BPKAD / {{ date('Y') }}
+                </td>
             </tr>
             <tr>
                 <td class="label">Sifat</td>
@@ -92,7 +98,7 @@
                     @endif
                 @endforeach
             </b>
-            untuk melaksanakan perjalanan dinas biasa yakni perjalanan dinas dalam rangka {{ $nota->perihal }}
+            {{ $nota->kegiatan }}
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-gray-100 dark:border-gray-800">
@@ -234,8 +240,7 @@
                             @csrf
                             @method('PATCH')
 
-                            <textarea name="revisi" rows="4"
-                                class="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-yellow-500"
+                            <textarea name="revisi" rows="4" class="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-yellow-500"
                                 placeholder="Tuliskan bagian yang perlu diperbaiki..." required></textarea>
 
                             <div class="flex justify-end gap-2">

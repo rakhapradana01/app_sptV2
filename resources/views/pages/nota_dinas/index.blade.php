@@ -34,7 +34,12 @@
                                     </td>
                                     <td
                                         class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
-                                        {{ $nota->nomor_urut }}
+                                        900.1 /
+                                        <span
+                                            style="display:inline-block; min-width:60px; border-bottom:1px solid #999; text-align:center;">
+                                            {{ $nota->nomor_urut ?? '' }}
+                                        </span>
+                                        / BPKAD / {{ date('Y') }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
                                         {{ $nota->perihal }}

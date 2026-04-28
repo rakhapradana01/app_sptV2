@@ -21,7 +21,15 @@
                                 @foreach ($notaDinas as $nota)
                                     <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
                                         <td class="px-5 py-4">{{ $notaDinas->firstItem() + $loop->index }}</td>
-                                        <td class="px-5 py-4 font-mono text-sm">{{ $nota->nomor_urut }}</td>
+                                        <td
+                                            class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
+                                            900.1 /
+                                            <span
+                                                style="display:inline-block; min-width:60px; border-bottom:1px solid #999; text-align:center;">
+                                                {{ $nota->nomor_urut ?? '' }}
+                                            </span>
+                                            / BPKAD / {{ date('Y') }}
+                                        </td>
                                         <td class="px-5 py-4">{{ $nota->perihal }}</td>
                                         <td class="px-5 py-4 text-center">
 

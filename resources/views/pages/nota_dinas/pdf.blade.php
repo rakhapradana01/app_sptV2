@@ -161,7 +161,13 @@
         <tr>
             <td>Nomor</td>
             <td>:</td>
-            <td>{{ $nota->nomor ?? '-' }}</td>
+            <td>
+                900.1 /
+                <span style="display:inline-block; min-width:80px;">
+                    {{ $nota->nomor_urut }}
+                </span>
+                / BPKAD / {{ date('Y') }}
+            </td>
         </tr>
 
         <tr>

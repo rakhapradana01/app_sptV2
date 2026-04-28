@@ -128,7 +128,8 @@
 
                         <div class="lg:col-span-2">
                             <label class="block mb-2 text-sm font-medium">Kegiatan</label>
-                            <input type="text" name="kegiatan" value="Dalam rangka melaksanakan  " class="w-full border rounded-lg p-2">
+                            <input type="text" name="kegiatan" value="Dalam rangka melaksanakan  "
+                                class="w-full border rounded-lg p-2">
                         </div>
 
                         <div class="lg:col-span-2">
@@ -165,7 +166,7 @@
                                     <option value="">-- Pilih Pegawai --</option>
                                     @foreach ($staff as $pegawai)
                                         <option value="{{ $pegawai->id }}">
-                                            {{ $pegawai->nama }} - {{ $pegawai->jabatan}}
+                                            {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -200,12 +201,14 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Mulai</label>
-                            <input type="date" name="tanggal_mulai" class="w-full border rounded-lg p-2">
+                            <input type="date" name="tanggal_mulai" onclick="this.showPicker()"
+                                class="w-full border rounded-lg p-2">
                         </div>
 
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Selesai</label>
-                            <input type="date" name="tanggal_selesai" class="w-full border rounded-lg p-2">
+                            <input type="date" name="tanggal_selesai" onclick="this.showPicker()"
+                                class="w-full border rounded-lg p-2">
                         </div>
                     </div>
 

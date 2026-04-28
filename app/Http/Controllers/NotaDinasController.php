@@ -93,7 +93,6 @@ class NotaDinasController extends Controller
 
     public function store(Request $request)
     {
-        $nomor = '900.1 /          / BPKAD / ' . Carbon::now()->year;
 
         $validated = $request->validate([
             'sub_kegiatan_id' => 'required|exists:sub_kegiatans,id',
@@ -114,7 +113,7 @@ class NotaDinasController extends Controller
         ]);
 
         $nota = NotaDinas::create([
-            'nomor_urut' => $nomor,
+            'nomor_urut' => $request->nomor_urut ?? null,
             'asal_undangan' => $validated['asal_undangan'],
             'sub_kegiatan_id' => $validated['sub_kegiatan_id'],
             'tanggal' => $validated['tanggal'],

@@ -38,7 +38,7 @@ class SPTController extends Controller
             ]
         );
 
-        return redirect()->route('nota-dinas.index')
+        return redirect()->route('arsip.index')
             ->with('success', 'Data SPT berhasil disimpan.');
     }
 }

@@ -80,7 +80,15 @@
                             </tr>
                             <tr>
                                 <td>Nomor</td>
-                                <td>:{{ $nota->sppd->nomor_sppd ?? '000.1.2.3/    /BPKAD/2026' }}</td>
+                                <td>:</td>
+                                <td
+                                    class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
+                                    000.1.2.3 /
+                                    <span style="display:inline-block; min-width:60px; text-align:center;">
+                                        {{ $nota->nomor_sppd ?: '     ' }}
+                                    </span>
+                                    / BPKAD / {{ date('Y') }}
+                                </td>
                             </tr>
                         </table>
                     </td>
