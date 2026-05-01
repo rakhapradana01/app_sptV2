@@ -24,6 +24,9 @@ class SPTController extends Controller
 
     public function store(Request $request, $nota_id)
     {
+        $notaDinas = NotaDinas::where('status', \App\Models\NotaDinas::DISETUJUI_KABID)
+            ->latest()
+            ->paginate(10);
         $request->validate([
             'nomor_spt' => 'required',
             'jenis_anggaran' => 'required|in:DPA,DPPA',
@@ -38,7 +41,7 @@ class SPTController extends Controller
             ]
         );
 
-        return redirect()->route('arsip.index')
-            ->with('success', 'Data SPT berhasil disimpan.');
+        return view('pages.arsip.index', compact('notaDinas'))
+            ->with('success','SPT Berhasil Dibuat!');
     }
 }
