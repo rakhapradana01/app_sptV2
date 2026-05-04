@@ -36,7 +36,9 @@
                                 <td class="px-5 py-4 sm:px-6">{{ $item->realisasi ?? '-' }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->pagu - ($item->realisasi ?? 0) }}</td>
                                 <td class="px-5 py-4 sm:px-6 flex gap-2">
-                                    <x-ui.button variant="yellow" size="sm">Edit</x-ui.button>
+                                    <x-ui.button size="sm" type="button" onclick="editData({{ $item->id }})">
+                                        Edit
+                                    </x-ui.button>
                                     <form action="#" method="POST" onsubmit="return confirm('Yakin hapus?')">
                                         @csrf
                                         @method('DELETE')
@@ -106,9 +108,108 @@
                 </div>
             </x-ui.modal>
 
+            <x-ui.modal x-data="{ open: false }" @open-edit-modal.window="open = true" :isOpen="false"
+                class="max-w-[700px]">
+                <div class="relative w-full max-w-[700px] rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
+
+                    <h4 class="mb-4 text-2xl font-semibold text-gray-800 dark:text-white/90">
+                        Edit Sub Kegiatan
+                    </h4>
+
+                    <form id="formEdit" class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        @csrf
+                        @method('PUT')
+
+                        <input type="hidden" id="edit_id">
+
+                        <div>
+                            <label class="block text-sm font-medium">Nomor Rekening</label>
+                            <input type="text" id="nomor_rekening"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium">Nama Program</label>
+                            <input type="text" id="nama_kegiatan"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium">Harga Satuan</label>
+                            <input type="number" id="harga_satuan"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium">Koefisien</label>
+                            <input type="number" id="koefisien"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium">Pagu</label>
+                            <input type="number" id="pagu"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                        </div>
+
+                        <div class="lg:col-span-2 flex justify-end gap-2 mt-2">
+                            <button type="button" @click="open = false" class="px-4 py-2 border rounded-lg">
+                                Batal
+                            </button>
+
+                            <x-ui.button type="submit" variant="primary">
+                                Update
+                            </x-ui.button>
+                        </div>
+                    </form>
+                </div>
+            </x-ui.modal>
+
             <div class="mt-4">
                 <x-ui.pagination :paginator="$subKegiatan" />
             </div>
         </x-common.component-card>
     </div>
+    <script>
+        function editData(id) {
+            fetch(`/sub-kegiatan/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('edit_id').value = data.id;
+                    document.getElementById('nomor_rekening').value = data.nomor_rekening;
+                    document.getElementById('nama_kegiatan').value = data.nama_kegiatan;
+                    document.getElementById('harga_satuan').value = data.harga_satuan;
+                    document.getElementById('koefisien').value = data.koefisien;
+                    document.getElementById('pagu').value = data.pagu;
+
+                    window.dispatchEvent(new CustomEvent('open-edit-modal'));
+                });
+        }
+
+        document.getElementById('formEdit').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let id = document.getElementById('edit_id').value;
+
+            fetch(`/sub-kegiatan/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        nomor_rekening: document.getElementById('nomor_rekening').value,
+                        nama_kegiatan: document.getElementById('nama_kegiatan').value,
+                        harga_satuan: document.getElementById('harga_satuan').value,
+                        koefisien: document.getElementById('koefisien').value,
+                        pagu: document.getElementById('pagu').value,
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.success);
+                    location.reload();
+                });
+        });
+    </script>
 @endsection

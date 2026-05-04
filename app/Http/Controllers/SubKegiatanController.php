@@ -13,9 +13,25 @@ class SubKegiatanController extends Controller
         $subKegiatan = SubKegiatan::paginate(10);
         // dd($subKegiatan->all());
         $pegawais = Pegawai::paginate(10);
-        return view('pages.master.sub_kegiatan.index', compact('subKegiatan','pegawais'));
+        return view('pages.master.sub_kegiatan.index', compact('subKegiatan', 'pegawais'));
+    }
+    public function update(Request $request, $id)
+    {
+        $sub = SubKegiatan::findOrFail($id);
+
+        $sub->update($request->all());
+
+        return response()->json([
+            'success' => 'Sub Kegiatan Berhasil Dirubah!'
+        ]);
     }
 
+    public function show($id)
+    {
+        return response()->json(
+            SubKegiatan::findOrFail($id)
+        );
+    }
     public function store(Request $request)
     {
         $request->validate([
