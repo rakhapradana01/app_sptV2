@@ -226,7 +226,7 @@
             </div>
         </div>
     </div>
-    <div x-data="{ openSppd: false, notaId: null, nomorUrut: '', nomorSpt: '' }"
+    <div x-data="{ openSppd: false, notaId: null, nomor_urut: '', nomorSpt: '' }"
         @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor; nomorSpt = $event.detail.spt">
 
         <div x-show="openSppd" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
@@ -239,7 +239,7 @@
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Form SPPD</h3>
 
                     <div class="space-y-1 mb-4">
-                        <p class="text-sm text-gray-500">Nota Dinas: <span x-text="nomorUrut"
+                        <p class="text-sm text-gray-500">Nota Dinas: <span x-text="nomor_urut"
                                 class="font-mono text-blue-600"></span></p>
                         <p class="text-sm text-gray-500">Nomor SPT: <span x-text="nomorSpt"
                                 class="font-mono text-blue-600"></span></p>
@@ -276,6 +276,7 @@
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             </div>
                         </div>
+                        
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal

@@ -65,9 +65,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/arsip', [NotaDinasController::class, 'arsip'])->name('arsip');
     });
 
-    // ======================
-    // APPROVE KABID
-    // ======================
     Route::middleware('role:super_admin,kepala_bidang')->group(function () {
 
         Route::patch(

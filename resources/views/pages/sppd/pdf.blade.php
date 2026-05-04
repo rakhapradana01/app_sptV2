@@ -201,6 +201,9 @@
 
         <div class="last-page">
             <table class="main-table">
+                @php
+                    $tgl = \Carbon\Carbon::parse($nota->sppd->tanggal_sppd);
+                @endphp
 
                 <tr>
                     <td style="width:50%; height:130px;"></td>
@@ -242,8 +245,7 @@
                                 <td style="width:20px;"><b>II.</b></td>
                                 <td>
                                     Tiba di : {{ $nota->sppd->tempat_tujuan }}<br>
-                                    Pada Tanggal :
-                                    {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                                    Pada Tanggal : {{ $tgl->translatedFormat('d F Y') }}
                                 </td>
                             </tr>
                         </table>
@@ -256,8 +258,7 @@
                                 <td>
                                     Berangkat dari : {{ $nota->sppd->tempat_tujuan }}<br>
                                     Ke : {{ $nota->sppd->tempat_berangkat }}<br>
-                                    Pada Tanggal :
-                                    {{ \Carbon\Carbon::parse($nota->sppd->tanggal_kembali)->translatedFormat('d F Y') }}
+                                    Pada Tanggal : {{ $tgl->translatedFormat('d F Y') }}
                                 </td>
                             </tr>
                         </table>
@@ -270,8 +271,9 @@
                             <tr>
                                 <td style="width:20px;"><b>III.</b></td>
                                 <td>
-                                    Tiba di :<br>
+                                    Tiba di : {{ $nota->sppd->tempat_tujuan_2 ?? '' }}<br>
                                     Pada Tanggal :
+                                    {{ $nota->sppd->tempat_tujuan_2 ? $tgl->copy()->addDay()->translatedFormat('d F Y') : '' }}
                                     <br><br><br>
                                 </td>
                             </tr>
@@ -283,9 +285,10 @@
                             <tr>
                                 <td style="width:5px;"></td>
                                 <td>
-                                    Berangkat dari :<br>
-                                    Ke :<br>
+                                    Berangkat dari : {{ $nota->sppd->tempat_tujuan_2 ?? '' }}<br>
+                                    Ke : {{ $nota->sppd->tempat_berangkat ?? ''}}<br>
                                     Pada Tanggal :
+                                    {{ $nota->sppd->tempat_tujuan_2 ? $tgl->copy()->addDays(2)->translatedFormat('d F Y') : '' }}
                                 </td>
                             </tr>
                         </table>

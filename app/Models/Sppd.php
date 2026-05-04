@@ -13,5 +13,6 @@ class Sppd extends Model
         'tempat_berangkat',
         'tempat_tujuan',
         'tanggal_sppd',
+        'tempat_tujuan_2'
     ];
 }

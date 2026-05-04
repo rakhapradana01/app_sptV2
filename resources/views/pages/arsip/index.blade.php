@@ -128,8 +128,8 @@
             </div>
         </x-common.component-card>
     </div>
-    <div x-data="{ open: false, notaId: null, nomorUrut: '' }"
-        @open-modal-spt.window="open = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor">
+    <div x-data="{ open: false, notaId: null, nomor_ur: '' }"
+        @open-modal-spt.window="open = true; notaId = $event.detail.id; nomor_ur = $event.detail.nomor">
 
         <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
             <div class="flex items-center justify-center min-h-screen px-4">
@@ -138,7 +138,7 @@
                 <div
                     class="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-xl transform transition-all max-w-lg w-full z-50 p-6">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Form SPT</h3>
-                    <p class="text-sm text-gray-500 mb-4">Nota Dinas: <span x-text="nomorUrut"
+                    <p class="text-sm text-gray-500 mb-4">Nota Dinas: <span x-text="nomor_ur"
                             class="font-mono text-blue-600"></span></p>
 
                     <form :action="`/spt/store/${notaId}`" method="POST" class="space-y-4">
@@ -177,8 +177,8 @@
             </div>
         </div>
     </div>
-    <div x-data="{ openSppd: false, notaId: null, nomorUrut: '', nomorSpt: '' }"
-        @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor; nomorSpt = $event.detail.spt">
+    <div x-data="{ openSppd: false, notaId: null, nomor_ur: '', nomorSpt: '' }"
+        @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomor_ur = $event.detail.nomor; nomorSpt = $event.detail.spt">
 
         <div x-show="openSppd" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
             <div class="flex items-center justify-center min-h-screen px-4">
@@ -190,7 +190,7 @@
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Form SPPD</h3>
 
                     <div class="space-y-1 mb-4">
-                        <p class="text-sm text-gray-500">Nota Dinas: <span x-text="nomorUrut"
+                        <p class="text-sm text-gray-500">Nota Dinas: <span x-text="nomor_ur"
                                 class="font-mono text-blue-600"></span></p>
                         <p class="text-sm text-gray-500">Nomor SPT: <span x-text="nomorSpt"
                                 class="font-mono text-blue-600"></span></p>
@@ -224,6 +224,11 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan</label>
                                 <input type="text" name="tempat_tujuan" placeholder="Contoh: Jakarta" required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Ke-2</label>
+                                <input type="text" name="tempat_tujuan_2" placeholder="Contoh: Jakarta" required
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             </div>
                         </div>

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('tempat_berangkat');
             $table->string('tempat_tujuan');
             $table->date('tanggal_sppd');
+            $table->string('tempat_tujuan_2')->nullable();
             $table->timestamps();
         });
     }
