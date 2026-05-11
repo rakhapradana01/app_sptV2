@@ -26,9 +26,6 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);
-
-            Route::get('/monev/pptk/{id}', [MonevController::class, 'pptkRekap'])->name('monev.pptk.rekap');
-            Route::get('/monev/sub-kegiatan/{id}', [MonevController::class, 'subKegiatanDetail'])->name('monev.sub-kegiatan.show');
         });
     });
 
@@ -36,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
     // NOTA DINAS (SUPER ADMIN + KASUBID + Kabid)
     // ======================
     Route::middleware('role:super_admin,kepala_sub_bidang,kepala_bidang')->group(function () {
+
+        Route::get('/monev/pptk/{id}', [MonevController::class, 'pptkRekap'])->name('monev.pptk.rekap');
+        Route::get('/monev/sub-kegiatan/{id}', [MonevController::class, 'subKegiatanDetail'])->name('monev.sub-kegiatan.show');
 
         Route::resource('nota-dinas', NotaDinasController::class)
             ->parameters(['nota-dinas' => 'nota']);

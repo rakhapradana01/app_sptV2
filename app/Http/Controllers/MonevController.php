@@ -13,8 +13,29 @@ class MonevController extends Controller
      */
     public function pptkRekap($id)
     {
-        // Ambil data pegawai beserta sub kegiatannya
+        // 1. Ambil data asli PPTK dan Sub Kegiatannya
         $pptk = Pegawai::with('subKegiatans')->findOrFail($id);
+
+        // 2. Tambahkan data Uraian Dummy ke setiap Sub Kegiatan
+        $pptk->subKegiatans->map(function ($sub) use ($id) {
+            $sub->uraians = collect([
+                (object)[
+                    'nama_uraian' => 'Uraian Dummy 1 untuk ' . $sub->nama_kegiatan,
+                    'koefisien' => 100,
+                    'koef_digunakan' => 45,
+                    'anggaran' => 5000000,
+                    'anggaran_digunakan' => 2250000,
+                ],
+                (object)[
+                    'nama_uraian' => 'Uraian Dummy 2 untuk ' . $sub->nama_kegiatan,
+                    'koefisien' => 50,
+                    'koef_digunakan' => 10,
+                    'anggaran' => 2000000,
+                    'anggaran_digunakan' => 400000,
+                ]
+            ]);
+            return $sub;
+        });
 
         return view('pages.monev.pptk-rekap', compact('pptk'));
     }
