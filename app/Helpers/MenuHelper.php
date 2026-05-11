@@ -10,7 +10,6 @@ class MenuHelper
 {
     public static function getMainNavItems()
     {
-        // 1. Ambil data PPTK (hanya 3 orang, jadi query ini sangat ringan)
         $pptks = Pegawai::has('subKegiatans')->with('subKegiatans')->get();
 
         $monevMenus = [];
@@ -41,8 +40,6 @@ class MenuHelper
                 'subItems' => $subMenus,
             ];
         }
-
-        // 2. Definisi semua menu (Hanya sekali saja)
         $allMenu = [
             [
                 'icon'   => 'dashboard',
@@ -66,6 +63,12 @@ class MenuHelper
                 ]
             ],
             [
+                'name' => 'SPJ',
+                'icon' => 'forms',
+                'path' => route('spj.index'),
+                'prefix' => 'spj',
+            ],
+            [
                 'name' => 'Master',
                 'icon' => 'database',
                 'path' => '#',
@@ -75,12 +78,10 @@ class MenuHelper
                 ],
             ],
         ];
-
-        // 3. Filter berdasarkan Role
         $roleMenuMap = [
-            'super_admin'       => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi'],
-            'kepala_sub_bidang' => ['Perjalanan Dinas', 'Monitoring dan Evaluasi'],
-            'kepala_bidang'     => ['Perjalanan Dinas', 'Monitoring dan Evaluasi'],
+            'super_admin'       => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'kepala_sub_bidang' => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'kepala_bidang'     => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'user'              => ['Master']
         ];
 

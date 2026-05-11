@@ -29,6 +29,8 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    Route::get('/monev/{id}', [MonevController::class, 'getBySubActivityId']);
+
     // ======================
     // NOTA DINAS (SUPER ADMIN + KASUBID + Kabid)
     // ======================
@@ -69,6 +71,10 @@ Route::middleware(['auth'])->group(function () {
 
         //Arsip
         Route::get('/arsip', [NotaDinasController::class, 'arsip'])->name('arsip');
+
+        // SPJ Routes
+        Route::get('/spj', [App\Http\Controllers\SPJController::class, 'index'])->name('spj.index');
+        Route::get('/spj/{id}', [App\Http\Controllers\SPJController::class, 'show'])->name('spj.show');
     });
 
     Route::middleware('role:super_admin,kepala_bidang')->group(function () {

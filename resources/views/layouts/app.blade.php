@@ -142,6 +142,7 @@ window.addEventListener('resize', checkMobile);">
     @if (session('warning'))
         <x-ui.toast type="warning" :message="session('warning')" />
     @endif
+    <script src="{{asset('js/jquery.min.js')}}"></script>
 </body>
 
 @stack('scripts')

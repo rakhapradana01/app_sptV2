@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pegawai;
 use App\Models\SubKegiatan;
+use App\Models\Uraian;
 use Illuminate\Http\Request;
 
 class MonevController extends Controller
@@ -15,29 +16,14 @@ class MonevController extends Controller
     {
 
         $pptk = Pegawai::with('subKegiatans')->findOrFail($id);
-
-        $pptk->subKegiatans->map(function ($sub) use ($id) {
-            $sub->uraians = collect([
-                (object)[
-                    'nama_uraian' => 'Uraian Dummy 1 untuk ' . $sub->nama_kegiatan,
-                    'koefisien' => 100,
-                    'koef_digunakan' => 45,
-                    'anggaran' => 5000000,
-                    'anggaran_digunakan' => 2250000,
-                ],
-                (object)[
-                    'nama_uraian' => 'Uraian Dummy 2 untuk ' . $sub->nama_kegiatan,
-                    'koefisien' => 50,
-                    'koef_digunakan' => 10,
-                    'anggaran' => 2000000,
-                    'anggaran_digunakan' => 400000,
-                ]
-            ]);
-            return $sub;
-        });
-
         return view('pages.monev.pptk-rekap', compact('pptk'));
     }
+
+
+   public function getBySubActivityId($id){
+        $result  = Uraian::where('sub_kegiatan_id', $id)->get();
+        return response()->json($result);
+   }
 
     // Menampilkan Detail satu Sub Kegiatan
     public function subKegiatanShow($id)
