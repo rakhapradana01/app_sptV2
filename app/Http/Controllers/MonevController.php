@@ -13,10 +13,9 @@ class MonevController extends Controller
      */
     public function pptkRekap($id)
     {
-        // 1. Ambil data asli PPTK dan Sub Kegiatannya
+
         $pptk = Pegawai::with('subKegiatans')->findOrFail($id);
 
-        // 2. Tambahkan data Uraian Dummy ke setiap Sub Kegiatan
         $pptk->subKegiatans->map(function ($sub) use ($id) {
             $sub->uraians = collect([
                 (object)[
