@@ -4,29 +4,62 @@ namespace App\Helpers;
 
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\Routing\Route;
+use App\Models\Pegawai;
 
 class MenuHelper
 {
     public static function getMainNavItems()
     {
+        // 1. Ambil data PPTK (hanya 3 orang, jadi query ini sangat ringan)
+        $pptks = Pegawai::has('subKegiatans')->with('subKegiatans')->get();
+
+        $monevMenus = [];
+
+        foreach ($pptks as $pptk) {
+            $subMenus = [];
+
+            $subMenus[] = [
+                'name' => 'Rekap ' . $pptk->nama,
+                'path' => route('monev.pptk.rekap', $pptk->id),
+                'pro'  => false,
+            ];
+
+
+            foreach ($pptk->subKegiatans as $sub) {
+                $subMenus[] = [
+                    'name' => $sub->nama_sub_kegiatan,
+                    'path' => route('monev.sub-kegiatan.show', $sub->id),
+                    'pro'  => false,
+                ];
+            }
+
+
+            $monevMenus[] = [
+                'name'     => $pptk->jabatan,
+                'icon'     => 'person',
+                'path'     => route('monev.pptk.rekap', $pptk->id),
+                'subItems' => $subMenus,
+            ];
+        }
+
+        // 2. Definisi semua menu (Hanya sekali saja)
         $allMenu = [
             [
-                'icon' => 'dashboard',
-                'name' => 'Dashboard',
-                'path' => '/',
+                'icon'   => 'dashboard',
+                'name'   => 'Dashboard',
+                'path'   => '/',
                 'prefix' => 'dashboard',
-
             ],
             [
-                'name' => 'Forms',
-                'icon' => 'forms',
-                'subItems' => [
-                    ['name' => 'Form Elements', 'path' => '/form-elements', 'pro' => false],
-                ],
+                'name'     => 'Monitoring dan Evaluasi',
+                'icon'     => 'charts',
+                'path'     => '#',
+                'subItems' => $monevMenus,
             ],
             [
-                'name' => 'Perjalanan Dinas',
-                'icon' => 'person',
+                'name'     => 'Perjalanan Dinas',
+                'icon'     => 'person',
+                'path'     => '#',
                 'subItems' => [
                     ['name' => 'Nota Dinas', 'path' => route('nota-dinas.index'), 'pro' => false],
                     ['name' => 'Arsip', 'path' => route('arsip'), 'pro' => false],
@@ -35,35 +68,32 @@ class MenuHelper
             [
                 'name' => 'Master',
                 'icon' => 'database',
-                'subItems' => array_values(array_filter([
-                    Auth::user()->role->name === 'super_admin' ?
-                        ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false]
-                        : null,
-
+                'path' => '#',
+                'subItems' => [
+                    ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
                     ['name' => 'Sub Kegiatan', 'path' => route('sub-kegiatan.index'), 'pro' => false],
-                ])),
+                ],
             ],
         ];
 
+        // 3. Filter berdasarkan Role
         $roleMenuMap = [
-            'super_admin' => ['Dashboard', 'Master', 'Perjalanan Dinas'],
-            'kepala_sub_bidang' => ['Perjalanan Dinas'],
-            'kepala_bidang' => ['Perjalanan Dinas'],
-            'user' => ['Master']
+            'super_admin'       => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi'],
+            'kepala_sub_bidang' => ['Perjalanan Dinas', 'Monitoring dan Evaluasi'],
+            'kepala_bidang'     => ['Perjalanan Dinas', 'Monitoring dan Evaluasi'],
+            'user'              => ['Master']
         ];
 
         $user = Auth::user();
         $userRole = $user->role->name ?? null;
 
-        $userLoginMenu = collect($allMenu)
+        return collect($allMenu)
             ->filter(function ($menu) use ($roleMenuMap, $userRole) {
                 return isset($roleMenuMap[$userRole]) &&
                     in_array($menu['name'], $roleMenuMap[$userRole]);
             })
             ->values()
             ->toArray();
-
-        return $userLoginMenu;
     }
 
     public static function getMenuGroups()

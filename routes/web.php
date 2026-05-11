@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\MonevController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NotaDinasController;
 use App\Http\Controllers\PegawaiController;
@@ -25,6 +26,9 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);
+
+            Route::get('/monev/pptk/{id}', [MonevController::class, 'pptkRekap'])->name('monev.pptk.rekap');
+            Route::get('/monev/sub-kegiatan/{id}', [MonevController::class, 'subKegiatanDetail'])->name('monev.sub-kegiatan.show');
         });
     });
 
