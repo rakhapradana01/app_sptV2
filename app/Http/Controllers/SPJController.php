@@ -2,44 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NotaDinas;
+use App\Models\Spt;
 use Illuminate\Http\Request;
+
+use Carbon\Carbon;
 
 class SPJController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Data dummy untuk table SPJ
-        $spjs = [
-            [
-                'id' => 1,
-                'nomor_spt' => '001/SPT/2026',
-                'nama_pegawai' => 'Rakha Pradana',
-                'tujuan' => 'Jakarta',
-                'tanggal' => '2026-05-12',
-            ],
-            [
-                'id' => 2,
-                'nomor_spt' => '002/SPT/2026',
-                'nama_pegawai' => 'Andi Wijaya',
-                'tujuan' => 'Surabaya',
-                'tanggal' => '2026-05-15',
-            ],
-        ];
+        $spt = Spt::with(['notaDinas.pegawais'])->get();
 
-        return view('pages.spj.index', compact('spjs'));
+        if ($request->ajax()) {
+            return response()->json($spt);
+        }
+
+        return view('pages.spj.index', compact('spt'));
     }
 
     public function show($id)
     {
-        // Data dummy untuk detail SPJ
-        $spj = [
-            'id' => $id,
-            'nomor_spt' => '001/SPT/2026',
-            'nama_pegawai' => 'Rakha Pradana',
-            'tujuan' => 'Jakarta',
-            'tanggal' => '2026-05-12',
-        ];
+        $spt = Spt::with(['notaDinas.pegawais'])->findOrFail($id);
 
-        return view('pages.spj.show', compact('spj'));
+        return view('pages.spj.show', compact('spt'));
     }
 }
