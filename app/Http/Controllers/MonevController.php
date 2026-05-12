@@ -33,20 +33,47 @@ class MonevController extends Controller
         return view('pages.monev.sub-kegiatan-detail', compact('sub'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function storeUraian(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'sub_kegiatan_id' => 'required|exists:sub_kegiatans,id',
+            'uraian' => 'required|string',
+            'ok_total' => 'required|numeric',
+            'ok_terpakai' => 'numeric',
+            'harga_satuan' => 'required|numeric',
+            'total_anggaran' => 'required|numeric',
+            'anggaran_terpakai' => 'numeric',
+        ]);
+
+        Uraian::create($validated);
+
+        return redirect()->back()->with('success', 'Uraian berhasil ditambahkan');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function updateUraian(Request $request, $id)
     {
-        //
+        $validated = $request->validate([
+            'sub_kegiatan_id' => 'required|exists:sub_kegiatans,id',
+            'uraian' => 'required|string',
+            'ok_total' => 'required|numeric',
+            'ok_terpakai' => 'numeric',
+            'harga_satuan' => 'required|numeric',
+            'total_anggaran' => 'required|numeric',
+            'anggaran_terpakai' => 'numeric',
+        ]);
+
+        $uraian = Uraian::findOrFail($id);
+        $uraian->update($validated);
+
+        return redirect()->back()->with('success', 'Uraian berhasil diperbarui');
+    }
+
+    public function destroyUraian($id)
+    {
+        $uraian = Uraian::findOrFail($id);
+        $uraian->delete();
+
+        return redirect()->back()->with('success', 'Uraian berhasil dihapus');
     }
 
     /**

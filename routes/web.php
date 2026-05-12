@@ -30,6 +30,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/monev/{id}', [MonevController::class, 'getBySubActivityId']);
+    Route::post('/monev/uraian', [MonevController::class, 'storeUraian'])->name('uraian.store');
+    Route::put('/monev/uraian/{id}', [MonevController::class, 'updateUraian'])->name('uraian.update');
+    Route::delete('/monev/uraian/{id}', [MonevController::class, 'destroyUraian'])->name('uraian.destroy');
 
     // ======================
     // NOTA DINAS (SUPER ADMIN + KASUBID + Kabid)

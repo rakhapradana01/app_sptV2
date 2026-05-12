@@ -48,12 +48,6 @@ class MenuHelper
                 'prefix' => 'dashboard',
             ],
             [
-                'name'     => 'Monitoring dan Evaluasi',
-                'icon'     => 'charts',
-                'path'     => '#',
-                'subItems' => $monevMenus,
-            ],
-            [
                 'name'     => 'Perjalanan Dinas',
                 'icon'     => 'person',
                 'path'     => '#',
@@ -61,6 +55,12 @@ class MenuHelper
                     ['name' => 'Nota Dinas', 'path' => route('nota-dinas.index'), 'pro' => false],
                     ['name' => 'Arsip', 'path' => route('arsip'), 'pro' => false],
                 ]
+            ],
+            [
+                'name'     => 'Monitoring dan Evaluasi',
+                'icon'     => 'charts',
+                'path'     => '#',
+                'subItems' => $monevMenus,
             ],
             [
                 'name' => 'SPJ',
