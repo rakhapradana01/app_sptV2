@@ -32,4 +32,9 @@ class SubKegiatan extends Model
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_kasubid_id');
     }
+
+    public function uraians()
+    {
+        return $this->hasMany(Uraian::class, 'sub_kegiatan_id');
+    }
 }

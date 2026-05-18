@@ -15,4 +15,22 @@ class Uraian extends Model
         'total_anggaran',
         'anggaran_terpakai',
     ];
+
+    protected $casts = [
+        'ok_total' => 'integer',
+        'ok_terpakai' => 'integer',
+        'harga_satuan' => 'integer',
+        'total_anggaran' => 'integer',
+        'anggaran_terpakai' => 'integer',
+    ];
+
+    public function subKegiatan()
+    {
+        return $this->belongsTo(SubKegiatan::class, 'sub_kegiatan_id');
+    }
+
+    public function spjRincians()
+    {
+        return $this->hasMany(SpjRincian::class, 'uraian_id');
+    }
 }

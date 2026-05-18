@@ -28,7 +28,8 @@ class SPJController extends Controller
         $spt = Spt::with([
             'notaDinas.pegawais',
             'notaDinas.spjRincians',
-            'notaDinas.subKegiatan.pegawai'
+            'notaDinas.subKegiatan.pegawai',
+            'notaDinas.subKegiatan.uraians'
         ])->findOrFail($id);
 
         return view('pages.spj.show', compact('spt'));
@@ -40,6 +41,7 @@ class SPJController extends Controller
 
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
+            'uraian_id' => 'nullable|exists:uraians,id',
             'kode_rekening' => 'nullable|string',
             'jumlah_hari' => 'required|integer',
             'uang_harian' => 'required|numeric',
@@ -60,6 +62,7 @@ class SPJController extends Controller
             ],
             [
                 'kode_rekening' => $request->kode_rekening,
+                'uraian_id' => $request->uraian_id,
                 'jumlah_hari' => $request->jumlah_hari,
                 'uang_harian' => $request->uang_harian,
                 'tiket_pesawat_pergi' => $request->tiket_pesawat_pergi ?? 0,

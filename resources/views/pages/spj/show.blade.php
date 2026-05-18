@@ -86,6 +86,7 @@
                             },
                             rincianForm: { 
                                 pegawai_id: '', 
+                                uraian_id: '',
                                 uraian: '', 
                                 jumlah_hari: '{{ $spt->durasi_hari }}', 
                                 uang_harian: '', 
@@ -98,6 +99,7 @@
                                 this.isEditRincian = false;
                                 this.rincianForm = item ? { ...item } : { 
                                     pegawai_id: '', 
+                                    uraian_id: '',
                                     uraian: '', 
                                     jumlah_hari: '{{ $spt->durasi_hari }}', 
                                     uang_harian: '', 
@@ -336,6 +338,7 @@
                                             <td class="p-2 text-center">
                                                 <button @click="openAddRincian({ 
                                                                                 pegawai_id: {{ $pegawai->id }}, 
+                                                                                uraian_id: '{{ $rincian->uraian_id ?? '' }}',
                                                                                 uraian: '{{ $pegawai->nama }}', 
                                                                                 jumlah_hari: '{{ $rincian->jumlah_hari ?? floor($spt->durasi_hari) }}',
                                                                                 uang_harian: '{{ $rincian->uang_harian ?? '' }}',
@@ -538,6 +541,19 @@
                                         Rekening</label>
                                     <input type="text" name="kode_rekening" x-model="rincianForm.kode_rekening"
                                         class="form-control w-full bg-gray-50" readonly>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Pagu Uraian (Mengurangi OK)
+                                    </label>
+                                    <select name="uraian_id" x-model="rincianForm.uraian_id" class="form-control w-full">
+                                        <option value="">-- Tanpa Pagu Uraian --</option>
+                                        @foreach(($spt->notaDinas->subKegiatan->uraians ?? []) as $uraian)
+                                            <option value="{{ $uraian->id }}">
+                                                {{ $uraian->uraian }} (Sisa: {{ $uraian->ok_total - $uraian->ok_terpakai }} OK)
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Uraian

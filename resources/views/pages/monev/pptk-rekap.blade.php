@@ -109,13 +109,13 @@
                                 (Koefisien)</label>
                             <input type="number" name="ok_total" id="input-ok-total"
                                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                                required min="0" step="0.01">
+                                required min="0" step="1">
                         </div>
                         <div>
                             <label class="block mb-1 font-medium text-gray-700 dark:text-gray-300">OK Terpakai</label>
                             <input type="number" name="ok_terpakai" id="input-ok-terpakai"
                                 class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                                value="0" required min="0" step="0.01">
+                                value="0" required min="0" step="1">
                         </div>
                     </div>
 
@@ -153,6 +153,97 @@
             </form>
         </div>
     </x-ui.modal>
+
+    <!-- Modal Riwayat SPJ (Pengurangan OK) -->
+    <x-ui.modal @open-history-modal.window="
+            open = true; 
+            const data = $event.detail || {};
+            $nextTick(() => {
+                document.getElementById('history-title').innerText = 'Riwayat Penggunaan Pagu: ' + data.uraian;
+                
+                const tbody = document.getElementById('history-table-body');
+                tbody.innerHTML = '';
+                
+                if (data.spj_rincians && data.spj_rincians.length > 0) {
+                    data.spj_rincians.forEach((rincian, index) => {
+                        const sptNomor = rincian.nota_dinas?.spt?.nomor_spt || '-';
+                        const sptId = rincian.nota_dinas?.spt?.id;
+                        const pegawaiNama = rincian.pegawai?.nama || '-';
+                        const pegawaiNip = rincian.pegawai?.nip || '-';
+                        const pegawaiPangkat = rincian.pegawai?.pangkat || '-';
+                        const pegawaiJabatan = rincian.pegawai?.jabatan || '-';
+                        const totalBiaya = new Intl.NumberFormat('id-ID', {
+                            style: 'currency',
+                            currency: 'IDR',
+                            minimumFractionDigits: 0
+                        }).format(rincian.total || 0);
+                        
+                        let actionHtml = '-';
+                        if (sptId) {
+                            actionHtml = `<a href='/spj/${sptId}' class='px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold rounded-lg transition'>Lihat SPJ</a>`;
+                        }
+
+                        tbody.innerHTML += `
+                            <tr class='border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50'>
+                                <td class='px-4 py-3 text-center'>${index + 1}</td>
+                                <td class='px-4 py-3'>
+                                    <div class='font-medium text-gray-900 dark:text-white'>${pegawaiNama}</div>
+                                    <div class='text-xs text-gray-400'>NIP. ${pegawaiNip}</div>
+                                </td>
+                                <td class='px-4 py-3 text-gray-600 dark:text-gray-300'>
+                                    <div class='text-xs font-medium'>${pegawaiJabatan}</div>
+                                    <div class='text-[10px] text-gray-400'>${pegawaiPangkat}</div>
+                                </td>
+                                <td class='px-4 py-3 font-semibold text-blue-600 dark:text-blue-400'>${totalBiaya}</td>
+                                <td class='px-4 py-3 text-center'>${actionHtml}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan='5' class='py-8 text-center text-gray-500 italic'>
+                                Belum ada SPJ yang menggunakan pagu uraian ini.
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        " class="max-w-[800px]">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2" id="history-title">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Riwayat Penggunaan Pagu
+                </h3>
+            </div>
+            
+            <div class="overflow-x-auto max-h-[400px]">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0">
+                        <tr class="text-gray-500 font-semibold uppercase tracking-wider text-xs border-b border-gray-100 dark:border-gray-800">
+                            <th class="px-4 py-3 text-center w-12">No</th>
+                            <th class="px-4 py-3 text-left">Pegawai</th>
+                            <th class="px-4 py-3 text-left">Jabatan / Gol</th>
+                            <th class="px-4 py-3 text-left">Total SPJ</th>
+                            <th class="px-4 py-3 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Filled dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <x-ui.button type="button" @click="open = false" variant="outline">
+                    Tutup
+                </x-ui.button>
+            </div>
+        </div>
+    </x-ui.modal>
 @endsection
 
 @push('scripts')
@@ -183,10 +274,10 @@
                         let html = '';
                         if (response.length > 0) {
                             response.forEach(item => {
-                                const okTotal = parseFloat(item.ok_total) || 0;
-                                const okTerpakai = parseFloat(item.ok_terpakai) || 0;
-                                const totalAnggaran = parseFloat(item.total_anggaran) || 0;
-                                const anggaranTerpakai = parseFloat(item.anggaran_terpakai) || 0;
+                                const okTotal = Math.round(parseFloat(item.ok_total)) || 0;
+                                const okTerpakai = Math.round(parseFloat(item.ok_terpakai)) || 0;
+                                const totalAnggaran = Math.round(parseFloat(item.total_anggaran)) || 0;
+                                const anggaranTerpakai = Math.round(parseFloat(item.anggaran_terpakai)) || 0;
                                 
                                 const sisaKoefisien = okTotal - okTerpakai;
                                 const sisaAnggaran = totalAnggaran - anggaranTerpakai;
@@ -212,6 +303,10 @@
                                             </td>
                                             <td class="px-5 py-3 text-left sm:px-6">
                                                 <div class="flex items-center gap-2">
+                                                    <button class="btn-history px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition" 
+                                                        data-item='${JSON.stringify(item)}'>
+                                                        Riwayat
+                                                    </button>
                                                     <button class="btn-edit-uraian px-3 py-1.5 text-xs font-medium bg-yellow-400 text-yellow-900 rounded-md hover:bg-yellow-500 transition" 
                                                         data-item='${JSON.stringify(item)}'>
                                                         Edit
@@ -256,6 +351,12 @@
                 window.dispatchEvent(new CustomEvent('open-uraian-modal', { detail: item }));
             });
 
+            // Click History
+            $(document).on('click', '.btn-history', function () {
+                const item = $(this).data('item');
+                window.dispatchEvent(new CustomEvent('open-history-modal', { detail: item }));
+            });
+
             // Hitung Otomatis (Total & Terpakai)
             $(document).on('input', '#input-ok-total, #input-ok-terpakai, #input-harga-satuan', function () {
                 const harga = parseFloat($('#input-harga-satuan').val()) || 0;
@@ -271,3 +372,4 @@
         });
     </script>
 @endpush
+

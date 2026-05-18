@@ -21,7 +21,7 @@ class MonevController extends Controller
 
 
    public function getBySubActivityId($id){
-        $result  = Uraian::where('sub_kegiatan_id', $id)->get();
+        $result  = Uraian::with(['spjRincians.pegawai', 'spjRincians.notaDinas.spt'])->where('sub_kegiatan_id', $id)->get();
         return response()->json($result);
    }
 
