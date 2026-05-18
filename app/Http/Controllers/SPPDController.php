@@ -41,8 +41,8 @@ class SPPDController extends Controller
         }
 
 
-        $start = \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->startOfDay();
-        $end = \Carbon\Carbon::parse($nota->sppd->tanggal_kembali)->startOfDay();
+        $start = \Carbon\Carbon::parse($nota->tanggal_mulai)->startOfDay();
+        $end = \Carbon\Carbon::parse($nota->tanggal_selesai ?: $nota->tanggal_mulai)->startOfDay();
 
         $lamaHari = (int) $start->diffInDays($end) + 1;
 

@@ -357,12 +357,12 @@
                     <br>
 
                     Tanggal Kembali :
-                    {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
+                    {{ \Carbon\Carbon::parse($nota->tanggal_selesai ?: $nota->tanggal_mulai)->translatedFormat('d F Y') }}
 
                     <br>
 
                     Lamanya :
-                    {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->diffInDays($nota->tanggal_selesai) + 1 }} Hari
+                    {{ $nota->tanggal_selesai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($nota->tanggal_selesai)) + 1 : 1 }} Hari
 
                 @endif
 

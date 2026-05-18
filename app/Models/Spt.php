@@ -28,7 +28,9 @@ class Spt extends Model
     public function getDurasiHariAttribute()
     {
         $mulai = \Carbon\Carbon::parse($this->notaDinas->tanggal_mulai);
-        $selesai = \Carbon\Carbon::parse($this->notaDinas->tanggal_selesai);
+        $selesai = $this->notaDinas->tanggal_selesai 
+            ? \Carbon\Carbon::parse($this->notaDinas->tanggal_selesai) 
+            : $mulai;
 
         return $mulai->diffInDays($selesai) + 1;
     }

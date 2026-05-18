@@ -154,8 +154,8 @@
                     </td>
                     <td>
                         a. {{ $lamaHari }} Hari<br>
-                        b. {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}<br>
-                        c. {{ \Carbon\Carbon::parse($nota->sppd->tanggal_kembali)->translatedFormat('d F Y') }}
+                        b. {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}<br>
+                        c. {{ \Carbon\Carbon::parse($nota->tanggal_selesai ?: $nota->tanggal_mulai)->translatedFormat('d F Y') }}
                     </td>
                 </tr>
                 <tr>
@@ -202,7 +202,8 @@
         <div class="last-page">
             <table class="main-table">
                 @php
-                    $tgl = \Carbon\Carbon::parse($nota->sppd->tanggal_sppd);
+                    $tglMulai = \Carbon\Carbon::parse($nota->tanggal_mulai);
+                    $tglSelesai = \Carbon\Carbon::parse($nota->tanggal_selesai ?: $nota->tanggal_mulai);
                 @endphp
 
                 <tr>
@@ -221,7 +222,7 @@
                                     Ke : {{ $nota->sppd->tempat_tujuan }}<br>
 
                                     Pada Tanggal :
-                                    {{ \Carbon\Carbon::parse($nota->sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                                    {{ $tglMulai->translatedFormat('d F Y') }}
 
                                     <br>
                                     Pejabat Pelaksana Teknis Kegiatan
@@ -245,7 +246,7 @@
                                 <td style="width:20px;"><b>II.</b></td>
                                 <td>
                                     Tiba di : {{ $nota->sppd->tempat_tujuan }}<br>
-                                    Pada Tanggal : {{ $tgl->translatedFormat('d F Y') }}
+                                    Pada Tanggal : {{ $tglMulai->translatedFormat('d F Y') }}
                                 </td>
                             </tr>
                         </table>
@@ -258,7 +259,7 @@
                                 <td>
                                     Berangkat dari : {{ $nota->sppd->tempat_tujuan }}<br>
                                     Ke : {{ $nota->sppd->tempat_berangkat }}<br>
-                                    Pada Tanggal : {{ $tgl->translatedFormat('d F Y') }}
+                                    Pada Tanggal : {{ $tglSelesai->translatedFormat('d F Y') }}
                                 </td>
                             </tr>
                         </table>
@@ -273,7 +274,7 @@
                                 <td>
                                     Tiba di : {{ $nota->sppd->tempat_tujuan_2 ?? '' }}<br>
                                     Pada Tanggal :
-                                    {{ $nota->sppd->tempat_tujuan_2 ? $tgl->copy()->addDay()->translatedFormat('d F Y') : '' }}
+                                    {{ $nota->sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDay()->translatedFormat('d F Y') : '' }}
                                     <br><br><br>
                                 </td>
                             </tr>
@@ -288,7 +289,7 @@
                                     Berangkat dari : {{ $nota->sppd->tempat_tujuan_2 ?? '' }}<br>
                                     Ke : {{ $nota->sppd->tempat_berangkat ?? ''}}<br>
                                     Pada Tanggal :
-                                    {{ $nota->sppd->tempat_tujuan_2 ? $tgl->copy()->addDays(2)->translatedFormat('d F Y') : '' }}
+                                    {{ $nota->sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDays(2)->translatedFormat('d F Y') : '' }}
                                 </td>
                             </tr>
                         </table>

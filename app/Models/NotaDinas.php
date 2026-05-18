@@ -68,8 +68,14 @@ class NotaDinas extends Model
     {
         return $this->hasOne(Spt::class, 'nota_dinas_id');
     }
+
     public function sppd()
     {
         return $this->hasOne(Sppd::class, 'nota_dinas_id');
+    }
+
+    public function spjRincians()
+    {
+        return $this->hasMany(SpjRincian::class, 'nota_dinas_id');
     }
 }
