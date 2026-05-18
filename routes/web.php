@@ -9,6 +9,7 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SPPDController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SubKegiatanController;
+use App\Http\Controllers\DashboardController;
 
 Route::middleware(['auth'])->group(function () {
 
@@ -17,9 +18,7 @@ Route::middleware(['auth'])->group(function () {
     // ======================
     Route::middleware(['auth'])->group(function () {
 
-        Route::get('/', function () {
-            return view('pages.dashboard.index');
-        })->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
         Route::middleware('role:super_admin')->group(function () {
             Route::resource('pegawai', PegawaiController::class);
