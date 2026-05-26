@@ -196,36 +196,32 @@
     <div class="isi">
 
         <p>
-            Sehubungan dengan kegiatan yang akan dilaksanakan di
-            <b>{{ $nota->lokasi }}</b> pada tanggal
-            <b>
-                {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
-                @if ($nota->tanggal_selesai)
-                    s.d {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
-                @endif
-            </b>,
-            bersama ini disampaikan hal-hal sebagai berikut.
+            {{ rtrim($nota->asal_undangan, '.') }}.
         </p>
 
         <p>
             @php
                 $grouped = $nota->pegawais->groupBy('jabatan')->map->count();
+                $pegawaiList = [];
+                foreach ($grouped as $jabatan => $jumlah) {
+                    $terbilangText = terbilang($jumlah);
+                    $pegawaiList[] = "$jumlah ($terbilangText) orang " . \Illuminate\Support\Str::title($jabatan);
+                }
+
+                if (count($pegawaiList) > 1) {
+                    $last = array_pop($pegawaiList);
+                    $pegawaiString = implode(', ', $pegawaiList) . ' dan ' . $last;
+                } else {
+                    $pegawaiString = reset($pegawaiList);
+                }
             @endphp
-
-            Diusulkan <b>{{ $nota->pegawais->count() }} orang pegawai</b> (
-            @foreach ($grouped as $jabatan => $jumlah)
-                {{ $jumlah }} {{ $jabatan }}@if (!$loop->last)
-                    ,
-                @endif
-            @endforeach
-            )
-            untuk melaksanakan perjalanan dinas {{ Str::lcfirst($nota->kegiatan) }}.
-        </p>
-
-        <p>
-            Pembebanan biaya perjalanan dinas dibebankan pada
-            <b>{{ $nota->subKegiatan->nomor_rekening }}</b> -
-            <b>{{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b>.
+            Berkenaan hal tersebut, dengan hormat diusulkan <b>{{ $pegawaiString }}</b> untuk melaksanakan perjalanan
+            dinas keluar Daerah dalam {{ Str::lcfirst($nota->kegiatan) }}. mulai tanggal
+            <b>{{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}@if ($nota->tanggal_selesai)
+            s.d {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}@endif</b>, dengan
+            pembebanan biaya pada Sub Kegiatan <b>{{ $nota->subKegiatan->nomor_rekening }} -
+                {{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b> pada DPA Badan Pengelolaan Keuangan dan Aset Daerah
+            Provinsi Kalimantan Selatan Tahun Anggaran {{ \Carbon\Carbon::parse($nota->tanggal)->format('Y') }}.
         </p>
 
         <p>
@@ -362,7 +358,8 @@
                     <br>
 
                     Lamanya :
-                    {{ $nota->tanggal_selesai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($nota->tanggal_selesai)) + 1 : 1 }} Hari
+                    {{ $nota->tanggal_selesai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($nota->tanggal_selesai)) + 1 : 1 }}
+                    Hari
 
                 @endif
 
