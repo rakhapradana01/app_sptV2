@@ -4,15 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::table('spj_rincians', function (Blueprint $table) {
-            if (!Schema::hasColumn('spj_rincians', 'uraian_id')) {
-                $table->foreignId('uraian_id')->nullable()->after('pegawai_id')->constrained('uraians')->onDelete('set null');
+            if (!Schema::hasColumn('spj_rincians', 'penginapan')) {
+                $table->integer('penginapan')->default(0)->after('transport');
             }
         });
     }
@@ -23,9 +24,8 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('spj_rincians', function (Blueprint $table) {
-            if (Schema::hasColumn('spj_rincians', 'uraian_id')) {
-                $table->dropForeign(['uraian_id']);
-                $table->dropColumn('uraian_id');
+            if (Schema::hasColumn('spj_rincians', 'penginapan')) {
+                $table->dropColumn('penginapan');
             }
         });
     }

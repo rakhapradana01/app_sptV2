@@ -227,7 +227,7 @@
         </div>
     </div>
     <div x-data="{ openSppd: false, notaId: null, nomor_urut: '', nomorSpt: '' }"
-        @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor; nomorSpt = $event.detail.spt">
+        @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomor_urut = $event.detail.nomor; nomorSpt = $event.detail.spt">
 
         <div x-show="openSppd" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
             <div class="flex items-center justify-center min-h-screen px-4">

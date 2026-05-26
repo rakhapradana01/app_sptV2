@@ -20,6 +20,7 @@ class SpjRincian extends Model
         'tiket_pesawat_pergi',
         'tiket_pesawat_pulang',
         'transport',
+        'penginapan',
         'total',
     ];
 

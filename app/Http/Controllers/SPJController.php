@@ -48,12 +48,14 @@ class SPJController extends Controller
             'tiket_pesawat_pergi' => 'nullable|numeric',
             'tiket_pesawat_pulang' => 'nullable|numeric',
             'transport' => 'nullable|numeric',
+            'penginapan' => 'nullable|numeric',
         ]);
 
         $total = ($request->jumlah_hari * $request->uang_harian) +
             ($request->tiket_pesawat_pergi ?? 0) +
             ($request->tiket_pesawat_pulang ?? 0) +
-            ($request->transport ?? 0);
+            ($request->transport ?? 0) +
+            ($request->penginapan ?? 0);
 
         SpjRincian::updateOrCreate(
             [
@@ -68,6 +70,7 @@ class SPJController extends Controller
                 'tiket_pesawat_pergi' => $request->tiket_pesawat_pergi ?? 0,
                 'tiket_pesawat_pulang' => $request->tiket_pesawat_pulang ?? 0,
                 'transport' => $request->transport ?? 0,
+                'penginapan' => $request->penginapan ?? 0,
                 'total' => $total,
             ]
         );
@@ -181,7 +184,7 @@ class SPJController extends Controller
                 $rincianSheet->setCellValue('B13', ': ' . Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('d F Y'));
                 $rincianSheet->setCellValue('E16', $rincian->jumlah_hari * $rincian->uang_harian);
                 $rincianSheet->setCellValue('E17', $rincian->tiket_pesawat_pergi + $rincian->tiket_pesawat_pulang);
-                $rincianSheet->setCellValue('E18', 0); // Biaya Penginapan
+                $rincianSheet->setCellValue('E18', $rincian->penginapan ?? 0); // Biaya Penginapan
                 $rincianSheet->setCellValue('E19', $rincian->transport);
                 $rincianSheet->setCellValue('E20', '=SUM(E16:E19)');
 

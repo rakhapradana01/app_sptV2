@@ -93,6 +93,7 @@
                                 tiket_pesawat_pergi: 0, 
                                 tiket_pesawat_pulang: 0, 
                                 transport: 0,
+                                penginapan: 0,
                                 kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
                             },
                             openAddRincian(item = null) {
@@ -106,6 +107,7 @@
                                     tiket_pesawat_pergi: 0, 
                                     tiket_pesawat_pulang: 0, 
                                     transport: 0,
+                                    penginapan: 0,
                                     kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
                                 };
                                 this.showRincianModal = true;
@@ -345,6 +347,7 @@
                                                                                 tiket_pesawat_pergi: '{{ $rincian->tiket_pesawat_pergi ?? 0 }}',
                                                                                 tiket_pesawat_pulang: '{{ $rincian->tiket_pesawat_pulang ?? 0 }}',
                                                                                 transport: '{{ $rincian->transport ?? 0 }}',
+                                                                                penginapan: '{{ $rincian->penginapan ?? 0 }}',
                                                                                 kode_rekening: @js($spt->notaDinas->subKegiatan?->nomor_rekening),
                                                                             })" class="text-green-600 hover:text-green-800 p-1"
                                                     title="{{ $rincian ? 'Edit Rincian' : 'Tambah Rincian' }}">
@@ -592,11 +595,17 @@
                                         placeholder="0">
                                 </div>
                                 <div class="col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transport</label>
-                                    <input type="number" name="transport" x-model="rincianForm.transport"
-                                        class="form-control w-full" placeholder="0">
-                                </div>
+                                     <label
+                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transport</label>
+                                     <input type="number" name="transport" x-model="rincianForm.transport"
+                                         class="form-control w-full" placeholder="0">
+                                 </div>
+                                 <div class="col-span-2">
+                                     <label
+                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Penginapan</label>
+                                     <input type="number" name="penginapan" x-model="rincianForm.penginapan"
+                                         class="form-control w-full" placeholder="0">
+                                 </div>
                             </div>
 
                             <div class="flex justify-end gap-3 mt-6">
