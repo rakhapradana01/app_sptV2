@@ -47,58 +47,45 @@
     <x-common.page-breadcrumb pageTitle="Detail SPJ" />
 
     <div class="space-y-6" x-data="{ 
-                            activeTab: 'kuitansi',
-                            showRincianModal: false,
-                            isEditRincian: false,
-                            penerimaId: '{{ $firstPegawai->id ?? '' }}',
-                            penerimaNama: '{{ $firstPegawai->nama ?? '-' }}',
-                            penerimaNip: '{{ $firstPegawai->nip ?? '-' }}',
-                            tanggalKuitansi: '{{ \Carbon\Carbon::parse($spt->notaDinas->tanggal_selesai ?? $spt->notaDinas->tanggal_mulai)->format("Y-m-d") }}',
-                            changePenerima(id, nama, nip) {
-                                this.penerimaId = id;
-                                this.penerimaNama = nama;
-                                this.penerimaNip = nip;
-                            },
-                            formatTanggalIndo(dateStr) {
-                                if (!dateStr) return '';
-                                const months = [
-                                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                                ];
-                                const parts = dateStr.split('-');
-                                if (parts.length !== 3) return dateStr;
-                                const day = parseInt(parts[2], 10);
-                                const month = months[parseInt(parts[1], 10) - 1];
-                                const year = parts[0];
-                                return `${day} ${month} ${year}`;
-                            },
-                            formatBulanTahunIndo(dateStr) {
-                                if (!dateStr) return '';
-                                const months = [
-                                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                                ];
-                                const parts = dateStr.split('-');
-                                if (parts.length !== 3) return dateStr;
-                                const month = months[parseInt(parts[1], 10) - 1];
-                                const year = parts[0];
-                                return `${month} ${year}`;
-                            },
-                            rincianForm: { 
-                                pegawai_id: '', 
-                                uraian_id: '',
-                                uraian: '', 
-                                jumlah_hari: '{{ $spt->durasi_hari }}', 
-                                uang_harian: '', 
-                                tiket_pesawat_pergi: 0, 
-                                tiket_pesawat_pulang: 0, 
-                                transport: 0,
-                                penginapan: 0,
-                                kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
-                            },
-                            openAddRincian(item = null) {
-                                this.isEditRincian = false;
-                                this.rincianForm = item ? { ...item } : { 
+                                activeTab: 'kuitansi',
+                                showRincianModal: false,
+                                isEditRincian: false,
+                                showSptModal: false,
+                                penerimaId: '{{ $firstPegawai->id ?? '' }}',
+                                penerimaNama: '{{ $firstPegawai->nama ?? '-' }}',
+                                penerimaNip: '{{ $firstPegawai->nip ?? '-' }}',
+                                tanggalKuitansi: '{{ \Carbon\Carbon::parse($spt->notaDinas->tanggal_selesai ?? $spt->notaDinas->tanggal_mulai)->format("Y-m-d") }}',
+                                changePenerima(id, nama, nip) {
+                                    this.penerimaId = id;
+                                    this.penerimaNama = nama;
+                                    this.penerimaNip = nip;
+                                },
+                                formatTanggalIndo(dateStr) {
+                                    if (!dateStr) return '';
+                                    const months = [
+                                        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                                    ];
+                                    const parts = dateStr.split('-');
+                                    if (parts.length !== 3) return dateStr;
+                                    const day = parseInt(parts[2], 10);
+                                    const month = months[parseInt(parts[1], 10) - 1];
+                                    const year = parts[0];
+                                    return `${day} ${month} ${year}`;
+                                },
+                                formatBulanTahunIndo(dateStr) {
+                                    if (!dateStr) return '';
+                                    const months = [
+                                        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                                    ];
+                                    const parts = dateStr.split('-');
+                                    if (parts.length !== 3) return dateStr;
+                                    const month = months[parseInt(parts[1], 10) - 1];
+                                    const year = parts[0];
+                                    return `${month} ${year}`;
+                                },
+                                rincianForm: { 
                                     pegawai_id: '', 
                                     uraian_id: '',
                                     uraian: '', 
@@ -109,16 +96,59 @@
                                     transport: 0,
                                     penginapan: 0,
                                     kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
-                                };
-                                this.showRincianModal = true;
-                            },
-                            openEditRincian(item) {
-                                this.isEditRincian = true;
-                                this.rincianForm = { ...item };
-                                this.showRincianModal = true;
-                            }
-                        }">
-        <x-common.component-card title="SPJ: {{ $spt->nomor_spt }}">
+                                },
+                                openAddRincian(item = null) {
+                                    this.isEditRincian = false;
+                                    this.rincianForm = item ? { ...item } : { 
+                                        pegawai_id: '', 
+                                        uraian_id: '',
+                                        uraian: '', 
+                                        jumlah_hari: '{{ $spt->durasi_hari }}', 
+                                        uang_harian: '', 
+                                        tiket_pesawat_pergi: 0, 
+                                        tiket_pesawat_pulang: 0, 
+                                        transport: 0,
+                                        penginapan: 0,
+                                        kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
+                                    };
+                                    this.showRincianModal = true;
+                                },
+                                openEditRincian(item) {
+                                    this.isEditRincian = true;
+                                    this.rincianForm = { ...item };
+                                    this.showRincianModal = true;
+                                }
+                            }">
+        @if(!$spt->has_real_nomor)
+            <div class="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-amber-100 dark:bg-amber-900 rounded-lg text-amber-700 dark:text-amber-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-800 dark:text-amber-200 text-sm">Nomor SPT Belum Diisi Resmi</h4>
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">SPT ini masih menggunakan nomor template/placeholder. Silakan input nomor SPT resmi.</p>
+                    </div>
+                </div>
+                <button @click="showSptModal = true" class="px-4 py-2 text-xs font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition">
+                    Input Nomor SPT Resmi
+                </button>
+            </div>
+        @endif
+
+        <x-common.component-card>
+            <x-slot name="title">
+                <div class="flex items-center gap-2">
+                    <span>SPJ: {{ $spt->nomor_spt }}</span>
+                    <button @click="showSptModal = true" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" title="Edit Nomor SPT">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </x-slot>
             <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                     <p class="text-gray-500">Nama Pegawai</p>
@@ -139,7 +169,8 @@
                 <div class="flex justify-between items-center mb-4">
                     <h5 class="font-bold text-gray-800 dark:text-white">Rincian Biaya Perjalanan</h5>
                     @if($spt->notaDinas->spjRincians->isNotEmpty())
-                        <a :href="'{{ route('spj.exportExcel', $spt->id) }}?penerima_id=' + penerimaId + '&tanggal_kuitansi=' + tanggalKuitansi" target="_blank"
+                        <a :href="'{{ route('spj.exportExcel', $spt->id) }}?penerima_id=' + penerimaId + '&tanggal_kuitansi=' + tanggalKuitansi"
+                            target="_blank"
                             class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 flex items-center gap-2 shadow-sm transition-all duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -188,9 +219,9 @@
                                     <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Penerima
                                         Kuitansi:</label>
                                     <select x-model="penerimaId" @change="
-                                                const sel = $el.options[$el.selectedIndex];
-                                                changePenerima(sel.value, sel.getAttribute('data-nama'), sel.getAttribute('data-nip'));
-                                            "
+                                                    const sel = $el.options[$el.selectedIndex];
+                                                    changePenerima(sel.value, sel.getAttribute('data-nama'), sel.getAttribute('data-nip'));
+                                                "
                                         class="text-xs py-1 px-3 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                                         @foreach($spt->notaDinas->pegawais as $pegawai)
                                             <option value="{{ $pegawai->id }}" data-nama="{{ $pegawai->nama }}"
@@ -199,7 +230,8 @@
                                     </select>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Tanggal Kuitansi:</label>
+                                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-400">Tanggal
+                                        Kuitansi:</label>
                                     <input type="date" x-model="tanggalKuitansi"
                                         class="text-xs py-1 px-3 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                                 </div>
@@ -339,17 +371,18 @@
                                             </td>
                                             <td class="p-2 text-center">
                                                 <button @click="openAddRincian({ 
-                                                                                pegawai_id: {{ $pegawai->id }}, 
-                                                                                uraian_id: '{{ $rincian->uraian_id ?? '' }}',
-                                                                                uraian: '{{ $pegawai->nama }}', 
-                                                                                jumlah_hari: '{{ $rincian->jumlah_hari ?? floor($spt->durasi_hari) }}',
-                                                                                uang_harian: '{{ $rincian->uang_harian ?? '' }}',
-                                                                                tiket_pesawat_pergi: '{{ $rincian->tiket_pesawat_pergi ?? 0 }}',
-                                                                                tiket_pesawat_pulang: '{{ $rincian->tiket_pesawat_pulang ?? 0 }}',
-                                                                                transport: '{{ $rincian->transport ?? 0 }}',
-                                                                                penginapan: '{{ $rincian->penginapan ?? 0 }}',
-                                                                                kode_rekening: @js($spt->notaDinas->subKegiatan?->nomor_rekening),
-                                                                            })" class="text-green-600 hover:text-green-800 p-1"
+                                                                                        pegawai_id: {{ $pegawai->id }}, 
+                                                                                        uraian_id: '{{ $rincian->uraian_id ?? '' }}',
+                                                                                        uraian: '{{ $pegawai->nama }}', 
+                                                                                        jumlah_hari: '{{ $rincian->jumlah_hari ?? floor($spt->durasi_hari) }}',
+                                                                                        uang_harian: '{{ $rincian->uang_harian ?? '' }}',
+                                                                                        tiket_pesawat_pergi: '{{ $rincian->tiket_pesawat_pergi ?? 0 }}',
+                                                                                        tiket_pesawat_pulang: '{{ $rincian->tiket_pesawat_pulang ?? 0 }}',
+                                                                                        transport: '{{ $rincian->transport ?? 0 }}',
+                                                                                        penginapan: '{{ $rincian->penginapan ?? 0 }}',
+                                                                                        kode_rekening: @js($spt->notaDinas->subKegiatan?->nomor_rekening),
+                                                                                    })"
+                                                    class="text-green-600 hover:text-green-800 p-1"
                                                     title="{{ $rincian ? 'Edit Rincian' : 'Tambah Rincian' }}">
                                                     @if($rincian)
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -577,7 +610,7 @@
                                         class="form-control w-full">
                                         <option value="">--Pilih--</option>
                                         <option value="380000">Kalimantan Selatan (Rp 380.000)</option>
-                                        <option value="580000">Jakarta (Rp 580.000)</option>
+                                        <option value="530000">Jakarta (Rp 530.000)</option>
                                     </select>
                                 </div>
                                 <div>
@@ -595,21 +628,54 @@
                                         placeholder="0">
                                 </div>
                                 <div class="col-span-2">
-                                     <label
-                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transport</label>
-                                     <input type="number" name="transport" x-model="rincianForm.transport"
-                                         class="form-control w-full" placeholder="0">
-                                 </div>
-                                 <div class="col-span-2">
-                                     <label
-                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Penginapan</label>
-                                     <input type="number" name="penginapan" x-model="rincianForm.penginapan"
-                                         class="form-control w-full" placeholder="0">
-                                 </div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transport</label>
+                                    <input type="number" name="transport" x-model="rincianForm.transport"
+                                        class="form-control w-full" placeholder="0">
+                                </div>
+                                <div class="col-span-2">
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Penginapan</label>
+                                    <input type="number" name="penginapan" x-model="rincianForm.penginapan"
+                                        class="form-control w-full" placeholder="0">
+                                </div>
                             </div>
 
                             <div class="flex justify-end gap-3 mt-6">
                                 <button type="button" @click="showRincianModal = false"
+                                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Batal</button>
+                                <button type="submit"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Modal Edit SPT -->
+                <div x-show="showSptModal"
+                    class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm"
+                    x-cloak x-transition>
+                    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+                        @click.away="showSptModal = false">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Input / Edit Nomor SPT</h3>
+                            <button @click="showSptModal = false" class="text-gray-400 hover:text-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <form action="{{ route('spt.updateNomor', $spt->id) }}" method="POST" class="p-6 space-y-4">
+                            @csrf
+                            @method('PUT')
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nomor SPT</label>
+                                <input type="text" name="nomor_spt" required value="{{ $spt->nomor_spt }}"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white form-control">
+                            </div>
+                            <div class="flex justify-end gap-3 mt-6">
+                                <button type="button" @click="showSptModal = false"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Batal</button>
                                 <button type="submit"
                                     class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Simpan</button>

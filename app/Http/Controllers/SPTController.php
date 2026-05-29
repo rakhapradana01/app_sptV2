@@ -40,4 +40,18 @@ class SPTController extends Controller
 
         return redirect()->route('arsip')->with('success', 'SPT Berhasil Dibuat!');
     }
+
+    public function updateNomor(Request $request, $id)
+    {
+        $request->validate([
+            'nomor_spt' => 'required|string',
+        ]);
+
+        $spt = Spt::findOrFail($id);
+        $spt->update([
+            'nomor_spt' => $request->nomor_spt,
+        ]);
+
+        return redirect()->back()->with('success', 'Nomor SPT Berhasil Diperbarui!');
+    }
 }

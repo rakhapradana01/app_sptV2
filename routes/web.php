@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/spj/{id}', [App\Http\Controllers\SPJController::class, 'show'])->name('spj.show');
         Route::post('/spj/{id}/rincian', [App\Http\Controllers\SPJController::class, 'storeRincian'])->name('spj.rincian.store');
         Route::get('/spj/{id}/export-excel', [App\Http\Controllers\SPJController::class, 'exportExcel'])->name('spj.exportExcel');
+        Route::put('/spt/{id}/update-nomor', [SPTController::class, 'updateNomor'])->name('spt.updateNomor');
     });
 
     Route::middleware('role:super_admin,kepala_bidang')->group(function () {

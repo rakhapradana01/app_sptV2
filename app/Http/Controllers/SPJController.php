@@ -32,6 +32,10 @@ class SPJController extends Controller
             'notaDinas.subKegiatan.uraians'
         ])->findOrFail($id);
 
+        if (!$spt->has_real_nomor) {
+            return redirect()->route('spj.index')->with('error', 'Harap isi nomor SPT terlebih dahulu sebelum mengakses/membuat SPJ.');
+        }
+
         return view('pages.spj.show', compact('spt'));
     }
 
@@ -138,7 +142,7 @@ class SPJController extends Controller
             $kuitansiTemplate->setCellValue('D7', ($spt->notaDinas->subKegiatan->nomor_rekening ?? '') . '.5.1.02.04.01.0001');
             $kuitansiTemplate->setCellValue('D8', Carbon::parse($spt->notaDinas->tanggal_mulai)->format('Y'));
             $kuitansiTemplate->setCellValue('D12', "='TT_bpkad'!E" . $newTotalRow);
-            
+
             // Set terbilang in D13 from total
             $grandTotalValue = $rincians->sum('total');
             $terbilangText = $this->terbilang($grandTotalValue) . " Rupiah";
@@ -150,7 +154,7 @@ class SPJController extends Controller
 
             $penerimaText = $firstPegawai ? ($firstPegawai->nama . ($countPegawai > 1 ? " dkk" : "")) : '';
             $opText = " (" . $countPegawai . " OP)";
-            $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan dalam rangka " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
+            $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan  " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
             $kuitansiTemplate->setCellValue('D14', $buatPembayaran);
             $kuitansiTemplate->setCellValue('D27', $spt->notaDinas->subKegiatan->nama_kegiatan ?? '');
 
@@ -253,7 +257,7 @@ class SPJController extends Controller
         // 3. Process Tanda Terima Sheet (TT_bpkad)
         if ($tandaTerimaSheet) {
             // Fill dynamic trip title
-            $tripTitle = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan dalam rangka " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '');
+            $tripTitle = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '');
             $tandaTerimaSheet->setCellValue('A1', $tripTitle);
 
             $count = count($rincians);

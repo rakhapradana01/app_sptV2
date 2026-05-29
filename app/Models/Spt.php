@@ -34,4 +34,16 @@ class Spt extends Model
 
         return $mulai->diffInDays($selesai) + 1;
     }
+
+    public function getHasRealNomorAttribute(): bool
+    {
+        if (empty($this->nomor_spt)) {
+            return false;
+        }
+        // If it contains 3 or more spaces in a row (e.g. placeholder template), it's not a real number
+        if (preg_match('/\s{3,}/', $this->nomor_spt)) {
+            return false;
+        }
+        return true;
+    }
 }
