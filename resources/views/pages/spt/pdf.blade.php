@@ -158,7 +158,7 @@
                 2. Waktu Pelaksanaan
                 @if ($nota->tanggal_mulai == $nota->tanggal_selesai)
                     {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
-                @else
+                @elseKoordinasi Program Martapura Asri di Deputi Bidang Pengedalian Kecemaran dan Kerusakan Lingkungan Kementerian Lingkungan Hidup di Jakarta
                     {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }} s/d
                     {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
                 @endif

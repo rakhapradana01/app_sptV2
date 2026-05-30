@@ -6,7 +6,7 @@
     <div class="space-y-6">
         <x-common.component-card title="Daftar SPJ">
             <div class="overflow-x-auto">
-                <table id="spj-table" class="w-full min-w-[800px] border-collapse">
+            <table id="spj-table" class="w-full min-w-[800px] border-collapse">
                     <thead class="bg-light">
                         <tr class="border-b border-gray-100 dark:border-gray-800">
                             <th class="px-5 py-3 text-left sm:px-6 font-semibold text-gray-700">No</th>

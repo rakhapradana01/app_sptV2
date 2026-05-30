@@ -6,12 +6,14 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    Selamat Datang di Sistem Monitoring SPT & SPJ 👋
+                    Selamat Datang di Sistem Monitoring SPT & SPJ
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Berikut adalah ikhtisar realisasi pagu anggaran, target kuota (OK), dan dokumen aktif saat ini.
                 </p>
             </div>
+            
+
             <div class="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg w-fit">
                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                 Sistem Berjalan Aktif
@@ -122,7 +124,149 @@
                 </div>
             </div>
         </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+            {{-- Header + Filter Bulan/Tahun --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">Rekap Perjalanan Pegawai</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        Jumlah nota dinas per pegawai pada bulan
+                        <span id="rekap-label-bulan" class="font-semibold text-blue-600 dark:text-blue-400">{{ $namaBulan }}</span>
+                    </p>
+                </div>
+                {{-- Filter Bulan & Tahun --}}
+                <div class="flex items-center gap-2">
+                    <select id="rekap-select-bulan"
+                        class="text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <select id="rekap-select-tahun"
+                        class="text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        @foreach(range(now()->year - 2, now()->year) as $y)
+                            <option value="{{ $y }}" {{ $y == now()->year ? 'selected' : '' }}>{{ $y }}</option>
+                        @endforeach
+                    </select>
+                    {{-- Spinner --}}
+                    <div id="rekap-spinner" class="hidden">
+                        <svg class="animate-spin w-4 h-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
+            <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700/60">
+                <table class="w-full min-w-[600px] border-collapse text-sm text-left">
+                    <thead class="bg-gray-50 dark:bg-gray-700/40 text-gray-700 dark:text-gray-300 font-semibold text-xs uppercase tracking-wider">
+                        <tr class="border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-6 py-3.5 text-center w-16">No</th>
+                            <th class="px-6 py-3.5">Nama Pegawai / NIP</th>
+                            <th class="px-6 py-3.5 text-center w-40">Total Perjalanan Dinas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap-tbody" class="divide-y divide-gray-100 dark:divide-gray-700/50 text-gray-600 dark:text-gray-300">
+                        @forelse($rekapPegawai as $index => $pegawai)
+                            <tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition duration-150">
+                                <td class="px-6 py-4 text-center font-bold text-gray-400 dark:text-gray-500">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="font-semibold text-gray-900 dark:text-white">{{ $pegawai->nama }}</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">NIP. {{ $pegawai->nip ?? '-' }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($pegawai->nota_dinas_count > 5)
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded-full border border-amber-200/50">
+                                            {{ $pegawai->nota_dinas_count }} Kali
+                                        </span>
+                                    @elseif($pegawai->nota_dinas_count > 0)
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-full border border-blue-200/50">
+                                            {{ $pegawai->nota_dinas_count }} Kali
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-400 dark:bg-gray-700/60 dark:text-gray-500 rounded-full">
+                                            0 Kali
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="py-12 text-center text-gray-400 dark:text-gray-500 italic">
+                                    Belum ada data untuk bulan ini.
+                                </td>
+                            </tr>
+                        @endempty
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- JS: Lazy load rekap pegawai via AJAX --}}
+        <script>
+        (function () {
+            const REKAP_URL = '{{ route('dashboard.rekap') }}';
+            const selectBulan = document.getElementById('rekap-select-bulan');
+            const selectTahun = document.getElementById('rekap-select-tahun');
+            const tbody       = document.getElementById('rekap-tbody');
+            const label       = document.getElementById('rekap-label-bulan');
+            const spinner     = document.getElementById('rekap-spinner');
+
+            function badgeHtml(count) {
+                if (count > 5) {
+                    return `<span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 rounded-full border border-amber-200/50">${count} Kali</span>`;
+                } else if (count > 0) {
+                    return `<span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-full border border-blue-200/50">${count} Kali</span>`;
+                }
+                return `<span class="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-400 dark:bg-gray-700/60 dark:text-gray-500 rounded-full">0 Kali</span>`;
+            }
+
+            function loadRekap() {
+                const bulan = selectBulan.value;
+                const tahun = selectTahun.value;
+
+                spinner.classList.remove('hidden');
+                tbody.style.opacity = '0.4';
+
+                fetch(`${REKAP_URL}?bulan=${bulan}&tahun=${tahun}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    label.textContent = data.namaBulan;
+
+                    if (data.pegawais.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="3" class="py-12 text-center text-gray-400 dark:text-gray-500 italic">Belum ada data untuk bulan ini.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.pegawais.map((p, i) => `
+                        <tr class="hover:bg-gray-50/70 dark:hover:bg-gray-700/20 transition duration-150">
+                            <td class="px-6 py-4 text-center font-bold text-gray-400 dark:text-gray-500">${i + 1}</td>
+                            <td class="px-6 py-4">
+                                <div class="font-semibold text-gray-900 dark:text-white">${p.nama}</div>
+                                <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">NIP. ${p.nip}</div>
+                            </td>
+                            <td class="px-6 py-4 text-center">${badgeHtml(p.nota_dinas_count)}</td>
+                        </tr>
+                    `).join('');
+                })
+                .catch(() => {
+                    tbody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-red-400 italic">Gagal memuat data.</td></tr>`;
+                })
+                .finally(() => {
+                    spinner.classList.add('hidden');
+                    tbody.style.opacity = '1';
+                });
+            }
+
+            selectBulan.addEventListener('change', loadRekap);
+            selectTahun.addEventListener('change', loadRekap);
+        })();
+        </script>
         <!-- 2 Column Layout: Sub Kegiatan progress & Recent Activity -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Left Side: Sub Kegiatan Budget Breakdown (2/3 width) -->
