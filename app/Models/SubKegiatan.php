@@ -19,14 +19,14 @@ class SubKegiatan extends Model
     //     return $this->hasMany(Realisasi::class);
     // }
 
-    public function getTotalRealisasiAttribute()
+    public function getRealisasiAttribute()
     {
-        return $this->realisasis->sum('nominal');
+        return $this->uraians()->sum('anggaran_terpakai');
     }
 
     public function getSisaAttribute()
     {
-        return $this->pagu - $this->total_realisasi;
+        return $this->pagu - $this->realisasi;
     }
     public function pegawai()
     {

@@ -60,7 +60,16 @@ class MenuHelper
                 'name'     => 'Monitoring dan Evaluasi',
                 'icon'     => 'charts',
                 'path'     => '#',
-                'subItems' => $monevMenus,
+                'subItems' => array_merge(
+                    [
+                        [
+                            'name' => 'Sub Kegiatan',
+                            'path' => route('sub-kegiatan.index'),
+                            'pro'  => false,
+                        ]
+                    ],
+                    $monevMenus
+                ),
             ],
             [
                 'name' => 'SPJ',
@@ -74,7 +83,6 @@ class MenuHelper
                 'path' => '#',
                 'subItems' => [
                     ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
-                    ['name' => 'Sub Kegiatan', 'path' => route('sub-kegiatan.index'), 'pro' => false],
                 ],
             ],
         ];

@@ -17,9 +17,17 @@ class SubKegiatanController extends Controller
     }
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'pegawai_kasubid_id' => 'required|exists:pegawais,id',
+            'nama_kegiatan' => 'required|string',
+        ]);
+
         $sub = SubKegiatan::findOrFail($id);
 
-        $sub->update($request->all());
+        $sub->update([
+            'pegawai_kasubid_id' => $request->pegawai_kasubid_id,
+            'nama_kegiatan' => $request->nama_kegiatan,
+        ]);
 
         return response()->json([
             'success' => 'Sub Kegiatan Berhasil Dirubah!'
@@ -36,20 +44,16 @@ class SubKegiatanController extends Controller
     {
         $request->validate([
             'pegawai_kasubid_id' => 'required|exists:pegawais,id',
-            'nomor_rekening' => 'required|string',
             'nama_kegiatan' => 'required|string',
-            'pagu' => 'required|numeric',
-            'harga_satuan' => 'required|numeric',
-            'koefisien' => 'required|numeric',
         ]);
 
         SubKegiatan::create([
             'pegawai_kasubid_id' => $request->pegawai_kasubid_id,
-            'nomor_rekening' => $request->nomor_rekening,
             'nama_kegiatan' => $request->nama_kegiatan,
-            'harga_satuan' => $request->harga_satuan,
-            'koefisien' => $request->koefisien ?? 1,
-            'pagu' => $request->pagu,
+            'nomor_rekening' => '-',
+            'harga_satuan' => 0,
+            'koefisien' => 0,
+            'pagu' => 0,
         ]);
 
         return redirect()->route('sub-kegiatan.index')->with('success', 'Sub Kegiatan berhasil ditambahkan.');

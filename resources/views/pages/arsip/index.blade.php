@@ -38,16 +38,14 @@
                                                 <button @click="open = !open" @click.away="open = false"
                                                     class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                                     <span class="text-xs font-semibold">Cetak</span>
-                                                    <svg class="w-4 h-4 transition-transform"
-                                                        :class="open ? 'rotate-180' : ''" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                    <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''"
+                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M19 9l-7 7-7-7"></path>
                                                     </svg>
                                                 </button>
 
-                                                <div x-show="open" x-cloak
-                                                    x-transition:enter="transition ease-out duration-100"
+                                                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100"
                                                     class="absolute right-0 mt-2 w-52 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
 
                                                     <div class="py-1 flex flex-col text-left">
@@ -56,8 +54,7 @@
                                                             Pilih Dokumen
                                                         </div>
 
-                                                        <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}"
-                                                            target="_blank"
+                                                        <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}" target="_blank"
                                                             class="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                                 viewBox="0 0 24 24">
@@ -71,11 +68,10 @@
 
                                                         {{-- 2. Cetak SPT (Jika ada) --}}
                                                         @if ($nota->spt)
-                                                            <a href="{{ route('nota.cetakSpt', $nota->id) }}"
-                                                                target="_blank"
+                                                            <a href="{{ route('nota.cetakSpt', $nota->id) }}" target="_blank"
                                                                 class="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50">
-                                                                <svg class="w-4 h-4 mr-2" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                                         stroke-width="2"
                                                                         d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
@@ -93,11 +89,10 @@
 
                                                         {{-- 3. Cetak SPPD (Jika ada) --}}
                                                         @if ($nota->sppd)
-                                                            <a href="{{ route('nota.cetakSPPD', $nota->id) }}"
-                                                                target="_blank"
+                                                            <a href="{{ route('nota.cetakSPPD', $nota->id) }}" target="_blank"
                                                                 class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50">
-                                                                <svg class="w-4 h-4 mr-2" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                                         stroke-width="2"
                                                                         d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
@@ -201,8 +196,7 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor SPPD</label>
-                            <input type="text" name="nomor_sppd" required
-                                :value="'000.1.2.3/' + '    ' + '/BPKAD/2026'"
+                            <input type="text" name="nomor_sppd" required :value="'000.1.2.3/' + '    ' + '/BPKAD/2026'"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                         </div>
 
@@ -227,8 +221,9 @@
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan Ke-2</label>
-                                <input type="text" name="tempat_tujuan_2" placeholder="Contoh: Jakarta" required
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tujuan
+                                    Ke-2</label>
+                                <input type="text" name="tempat_tujuan_2" placeholder="Contoh: Jakarta"
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                             </div>
                         </div>

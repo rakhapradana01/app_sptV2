@@ -11,6 +11,12 @@ class PegawaiSeeder extends Seeder
     {
         $pegawais = [
             [
+                'nama' => 'H. FATKHAN S.E., M.M',
+                'nip' => '19750518 201001 1 001',
+                'jabatan' => 'Kepala Badan Pengelolaan Keuangan dan Aset Daerah Provinsi Kalimantan Selatan',
+                'pangkat' => 'Pembina Tk.I (IV/b)',
+            ],
+            [
                 'nama' => 'ADYA FERINA, S.E., M.Ak',
                 'nip' => '19860206 201101 2 005',
                 'jabatan' => 'Kepala Bidang Perencanaan Anggaran Daerah',
