@@ -18,6 +18,7 @@ class NotaDinas extends Model
         'asal_undangan',
         'perihal',
         'lokasi',
+        'jenis_perjalanan',
         'tanggal_mulai',
         'tanggal_selesai',
         'status',

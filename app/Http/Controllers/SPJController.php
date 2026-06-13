@@ -99,7 +99,7 @@ class SPJController extends Controller
         $reader = IOFactory::createReader('Xlsx');
         $spreadsheet = $reader->load($templatePath);
 
-        $isJakarta = stripos($spt->notaDinas->lokasi ?? '', 'jakarta') !== false;
+        $isJakarta = ($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah';
 
         $kuitansiTemplate = $spreadsheet->getSheetByName('Kuitansi_bu_adya');
         $rincianTemplate = $spreadsheet->getSheetByName('R.Perjaldin_bpkad');

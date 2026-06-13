@@ -108,13 +108,27 @@ class DashboardController extends Controller
      */
     public function rekapByBulan(Request $request)
     {
-        $bulan = (int) $request->get('bulan', now()->month);
+        $bulanAwal = (int) $request->get('bulan_awal', $request->get('bulan', now()->month));
+        $bulanAkhir = (int) $request->get('bulan_akhir', $request->get('bulan', now()->month));
         $tahun = (int) $request->get('tahun', now()->year);
 
-        $tanggal   = Carbon::createFromDate($tahun, $bulan, 1);
-        $awalBulan = $tanggal->copy()->startOfMonth()->toDateString();
-        $akhirBulan = $tanggal->copy()->endOfMonth()->toDateString();
-        $namaBulan  = $tanggal->translatedFormat('F Y');
+        if ($bulanAwal > $bulanAkhir) {
+            $temp = $bulanAwal;
+            $bulanAwal = $bulanAkhir;
+            $bulanAkhir = $temp;
+        }
+
+        $tanggalAwal = Carbon::createFromDate($tahun, $bulanAwal, 1)->startOfMonth();
+        $tanggalAkhir = Carbon::createFromDate($tahun, $bulanAkhir, 1)->endOfMonth();
+
+        $awalBulan = $tanggalAwal->toDateString();
+        $akhirBulan = $tanggalAkhir->toDateString();
+
+        if ($bulanAwal === $bulanAkhir) {
+            $namaBulan = $tanggalAwal->translatedFormat('F Y');
+        } else {
+            $namaBulan = $tanggalAwal->translatedFormat('F') . ' - ' . $tanggalAkhir->translatedFormat('F Y');
+        }
 
         $pegawais = Pegawai::withCount([
             'notaDinas' => function ($query) use ($awalBulan, $akhirBulan) {
@@ -135,5 +149,90 @@ class DashboardController extends Controller
             'namaBulan' => $namaBulan,
             'pegawais'  => $pegawais,
         ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $bulanAwal = (int) $request->get('bulan_awal', now()->month);
+        $bulanAkhir = (int) $request->get('bulan_akhir', now()->month);
+        $tahun = (int) $request->get('tahun', now()->year);
+
+        if ($bulanAwal > $bulanAkhir) {
+            $temp = $bulanAwal;
+            $bulanAwal = $bulanAkhir;
+            $bulanAkhir = $temp;
+        }
+
+        $tanggalAwal = Carbon::createFromDate($tahun, $bulanAwal, 1)->startOfMonth();
+        $tanggalAkhir = Carbon::createFromDate($tahun, $bulanAkhir, 1)->endOfMonth();
+
+        $awalBulan = $tanggalAwal->toDateString();
+        $akhirBulan = $tanggalAkhir->toDateString();
+
+        $notaDinasList = \App\Models\NotaDinas::with('pegawais')
+            ->whereBetween('tanggal_mulai', [$awalBulan, $akhirBulan])
+            ->orderBy('tanggal_mulai', 'asc')
+            ->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Rekap Perjalanan Dinas');
+
+        // Headers
+        $headers = ['Tanggal Berangkat', 'Nama Pegawai', 'NIP', 'Keperluan', 'Tujuan'];
+        foreach ($headers as $colIndex => $header) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+            $sheet->setCellValue($colLetter . '1', $header);
+            
+            $sheet->getStyle($colLetter . '1')->getFont()->setBold(true);
+            $sheet->getStyle($colLetter . '1')->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFE2EFDA'); // Subtle light green background
+        }
+
+        $rowNum = 2;
+        foreach ($notaDinasList as $nota) {
+            foreach ($nota->pegawais as $pegawai) {
+                $sheet->setCellValue('A' . $rowNum, Carbon::parse($nota->tanggal_mulai)->format('d-m-Y'));
+                $sheet->setCellValue('B' . $rowNum, $pegawai->nama);
+                $sheet->setCellValue('C' . $rowNum, $pegawai->nip ?? '-');
+                $sheet->setCellValue('D' . $rowNum, $nota->kegiatan ?? $nota->perihal ?? '-');
+                $sheet->setCellValue('E' . $rowNum, $nota->lokasi ?? '-');
+                $rowNum++;
+            }
+        }
+
+        foreach (range(1, 5) as $colIndex) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+            $sheet->getColumnDimension($colLetter)->setAutoSize(true);
+        }
+
+        $styleArray = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        if ($rowNum > 2) {
+            $sheet->getStyle('A1:E' . ($rowNum - 1))->applyFromArray($styleArray);
+        }
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+        if ($bulanAwal === $bulanAkhir) {
+            $namaBulanFile = $tanggalAwal->translatedFormat('F_Y');
+        } else {
+            $namaBulanFile = $tanggalAwal->translatedFormat('F') . '_s.d_' . $tanggalAkhir->translatedFormat('F_Y');
+        }
+        $filename = 'Rekap_Perjalanan_Pegawai_' . $namaBulanFile . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 }

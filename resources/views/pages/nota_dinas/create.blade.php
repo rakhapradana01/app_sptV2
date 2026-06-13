@@ -139,9 +139,17 @@
                         </div>
 
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Tujuan</label>
+                            <label class="block mb-2 text-sm font-medium">Tujuan / Lokasi</label>
                             <input type="text" name="lokasi" class="w-full border rounded-lg p-2"
                                 placeholder="D.K.I Jakarta">
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Jenis Perjalanan</label>
+                            <select name="jenis_perjalanan" class="w-full border rounded-lg p-2">
+                                <option value="dalam_daerah">Dalam Daerah / Dalam Provinsi</option>
+                                <option value="luar_daerah">Luar Daerah / Luar Provinsi</option>
+                            </select>
                         </div>
 
                         <div class="lg:col-span-2" x-data="{

@@ -2,7 +2,7 @@
 
 @section('content')
     @php
-        $isJakarta = \Illuminate\Support\Str::contains(strtolower($spt->notaDinas->lokasi ?? ''), 'jakarta');
+        $isJakarta = ($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah';
         $grandTotal = $spt->notaDinas->spjRincians->sum('total');
         $countPegawai = count($spt->notaDinas->pegawais);
         $firstPegawai = $spt->notaDinas->pegawais->first();
@@ -422,7 +422,7 @@
                             <h5 class="font-bold text-gray-800 dark:text-white">Daftar Pengeluaran Riil (DPR)</h5>
                             <span
                                 class="px-3 py-1 text-xs font-semibold {{ $isJakarta ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400' }} rounded-full">
-                                {{ $isJakarta ? 'Perjalanan DKI Jakarta (Luar Provinsi)' : 'Perjalanan Dalam Provinsi' }}
+                                {{ $isJakarta ? 'Perjalanan Luar Daerah / Luar Provinsi' : 'Perjalanan Dalam Daerah / Dalam Provinsi' }}
                             </span>
                         </div>
 
@@ -440,7 +440,7 @@
                                 <h6 class="font-bold text-gray-800 dark:text-white text-base">Tidak Memerlukan DPR</h6>
                                 <p class="text-sm text-gray-500 max-w-md mx-auto leading-relaxed">
                                     Daftar Pengeluaran Riil (DPR) taksi bandara hanya diterbitkan dan berlaku untuk perjalanan
-                                    dinas luar provinsi (DKI Jakarta). Perjalanan dalam provinsi ini tidak memerlukan pelaporan
+                                    dinas luar provinsi/daerah. Perjalanan dalam daerah/provinsi ini tidak memerlukan pelaporan
                                     pengeluaran riil.
                                 </p>
                             </div>

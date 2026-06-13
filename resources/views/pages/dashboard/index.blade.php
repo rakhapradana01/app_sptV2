@@ -135,8 +135,17 @@
                     </p>
                 </div>
                 {{-- Filter Bulan & Tahun --}}
-                <div class="flex items-center gap-2">
-                    <select id="rekap-select-bulan"
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="rekap-select-bulan-awal"
+                        class="text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <span class="text-xs text-gray-400">s/d</span>
+                    <select id="rekap-select-bulan-akhir"
                         class="text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                         @foreach(range(1, 12) as $m)
                             <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
@@ -157,6 +166,14 @@
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                         </svg>
                     </div>
+                    {{-- Export Excel Button --}}
+                    <a id="rekap-export-btn" href="#"
+                        class="text-xs inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Export Excel
+                    </a>
                 </div>
             </div>
 
@@ -209,11 +226,21 @@
         <script>
         (function () {
             const REKAP_URL = '{{ route('dashboard.rekap') }}';
-            const selectBulan = document.getElementById('rekap-select-bulan');
+            const EXPORT_URL = '{{ route('dashboard.export') }}';
+            const selectBulanAwal = document.getElementById('rekap-select-bulan-awal');
+            const selectBulanAkhir = document.getElementById('rekap-select-bulan-akhir');
             const selectTahun = document.getElementById('rekap-select-tahun');
             const tbody       = document.getElementById('rekap-tbody');
             const label       = document.getElementById('rekap-label-bulan');
             const spinner     = document.getElementById('rekap-spinner');
+            const exportBtn   = document.getElementById('rekap-export-btn');
+
+            function updateExportLink() {
+                const bulanAwal = selectBulanAwal.value;
+                const bulanAkhir = selectBulanAkhir.value;
+                const tahun = selectTahun.value;
+                exportBtn.href = `${EXPORT_URL}?bulan_awal=${bulanAwal}&bulan_akhir=${bulanAkhir}&tahun=${tahun}`;
+            }
 
             function badgeHtml(count) {
                 if (count > 5) {
@@ -225,13 +252,14 @@
             }
 
             function loadRekap() {
-                const bulan = selectBulan.value;
+                const bulanAwal = selectBulanAwal.value;
+                const bulanAkhir = selectBulanAkhir.value;
                 const tahun = selectTahun.value;
 
                 spinner.classList.remove('hidden');
                 tbody.style.opacity = '0.4';
 
-                fetch(`${REKAP_URL}?bulan=${bulan}&tahun=${tahun}`, {
+                fetch(`${REKAP_URL}?bulan_awal=${bulanAwal}&bulan_akhir=${bulanAkhir}&tahun=${tahun}`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
                 .then(r => r.json())
@@ -239,7 +267,7 @@
                     label.textContent = data.namaBulan;
 
                     if (data.pegawais.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="3" class="py-12 text-center text-gray-400 dark:text-gray-500 italic">Belum ada data untuk bulan ini.</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="3" class="py-12 text-center text-gray-400 dark:text-gray-500 italic">Belum ada data untuk periode ini.</td></tr>`;
                         return;
                     }
 
@@ -263,8 +291,27 @@
                 });
             }
 
-            selectBulan.addEventListener('change', loadRekap);
-            selectTahun.addEventListener('change', loadRekap);
+            selectBulanAwal.addEventListener('change', () => {
+                if (parseInt(selectBulanAwal.value) > parseInt(selectBulanAkhir.value)) {
+                    selectBulanAkhir.value = selectBulanAwal.value;
+                }
+                updateExportLink();
+                loadRekap();
+            });
+            selectBulanAkhir.addEventListener('change', () => {
+                if (parseInt(selectBulanAkhir.value) < parseInt(selectBulanAwal.value)) {
+                    selectBulanAwal.value = selectBulanAkhir.value;
+                }
+                updateExportLink();
+                loadRekap();
+            });
+            selectTahun.addEventListener('change', () => {
+                updateExportLink();
+                loadRekap();
+            });
+
+            // Initial link update on load
+            updateExportLink();
         })();
         </script>
         <!-- 2 Column Layout: Sub Kegiatan progress & Recent Activity -->
