@@ -66,7 +66,12 @@ class MenuHelper
                             'name' => 'Sub Kegiatan',
                             'path' => route('sub-kegiatan.index'),
                             'pro'  => false,
-                        ]
+                        ],
+                        [
+                            'name' => 'Rekap Perjalanan Dinas Pegawai',
+                            'path' => "#",
+                            'pro'  => false,
+                        ],
                     ],
                     $monevMenus
                 ),
