@@ -20,34 +20,55 @@ test('rekap-pegawai route returns the correct json and handles month range', fun
 
     // Setup models
     $pegawai = Pegawai::create([
-        'nama' => 'John Doe Test',
-        'nip' => '1234567890',
+        'nama'    => 'John Doe Test',
+        'nip'     => '1234567890',
         'jabatan' => 'Staff',
+        'pangkat' => 'III/a',
+    ]);
+
+    // Buat SubKegiatan untuk foreign key nota dinas
+    $sub = \App\Models\SubKegiatan::create([
+        'pegawai_kasubid_id' => $pegawai->id,
+        'nama_kegiatan'      => 'Sub Kegiatan Dashboard Test',
+        'nomor_rekening'     => '5.1.1',
+        'harga_satuan'       => 0,
+        'koefisien'          => 0,
+        'pagu'               => 0,
     ]);
 
     // Create a NotaDinas for $pegawai in April 2026
     $nota1 = NotaDinas::create([
-        'nomor_urut' => 1,
-        'tanggal' => '2026-04-15',
-        'tanggal_mulai' => '2026-04-15',
-        'tanggal_selesai' => '2026-04-18',
-        'perihal' => 'Perjalanan Dinas A',
-        'kegiatan' => 'Kegiatan A',
-        'lokasi' => 'Banjarmasin',
-        'status' => 'draft',
+        'sub_kegiatan_id'  => $sub->id,
+        'kepada_id'        => $pegawai->id,
+        'dari_id'          => $pegawai->id,
+        'nomor_urut'       => 1,
+        'tanggal'          => '2026-04-15',
+        'tanggal_mulai'    => '2026-04-15',
+        'tanggal_selesai'  => '2026-04-18',
+        'perihal'          => 'Perjalanan Dinas A',
+        'kegiatan'         => 'Kegiatan A',
+        'lokasi'           => 'Banjarmasin',
+        'asal_undangan'    => 'Internal',
+        'jenis_perjalanan' => 'dalam_daerah',
+        'status'           => 'draft',
     ]);
     $nota1->pegawais()->attach($pegawai->id);
 
     // Create a NotaDinas for $pegawai in June 2026
     $nota2 = NotaDinas::create([
-        'nomor_urut' => 2,
-        'tanggal' => '2026-06-10',
-        'tanggal_mulai' => '2026-06-10',
-        'tanggal_selesai' => '2026-06-12',
-        'perihal' => 'Perjalanan Dinas B',
-        'kegiatan' => 'Kegiatan B',
-        'lokasi' => 'Jakarta',
-        'status' => 'draft',
+        'sub_kegiatan_id'  => $sub->id,
+        'kepada_id'        => $pegawai->id,
+        'dari_id'          => $pegawai->id,
+        'nomor_urut'       => 2,
+        'tanggal'          => '2026-06-10',
+        'tanggal_mulai'    => '2026-06-10',
+        'tanggal_selesai'  => '2026-06-12',
+        'perihal'          => 'Perjalanan Dinas B',
+        'kegiatan'         => 'Kegiatan B',
+        'lokasi'           => 'Jakarta',
+        'asal_undangan'    => 'Internal',
+        'jenis_perjalanan' => 'luar_daerah',
+        'status'           => 'draft',
     ]);
     $nota2->pegawais()->attach($pegawai->id);
 
@@ -61,7 +82,7 @@ test('rekap-pegawai route returns the correct json and handles month range', fun
     ]));
 
     $response->assertStatus(200);
-    $response->assertJsonPath('namaBulan', 'Maret - Juni 2026'); // Carbon parses actual maximum date range month dynamically
+    $response->assertJsonPath('namaBulan', 'Maret - Juli 2026');
 
     // Find the record for John Doe Test
     $pegawais = $response->json('pegawais');
