@@ -67,6 +67,12 @@
                         </div>
 
                         <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Nomor Rekening</label>
+                            <input type="text" name="nomor_rekening"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white"
+                                placeholder="Masukkan nomor rekening">
+                        </div>
+                        <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Nama Program</label>
                             <input type="text" name="nama_kegiatan"
                                 class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white"
@@ -107,6 +113,13 @@
                         </div>
 
                         <div>
+                            <label class="block mb-1 text-sm font-medium dark:text-gray-400">Nomor Rekening</label>
+                            <input type="text" id="edit_nomor_rekening"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white"
+                                placeholder="Masukkan nomor rekening">
+                        </div>
+
+                        <div>
                             <label class="block mb-1 text-sm font-medium dark:text-gray-400">Nama Program</label>
                             <input type="text" id="edit_nama_kegiatan"
                                 class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
@@ -137,6 +150,7 @@
                 .then(data => {
                     document.getElementById('edit_id').value = data.id;
                     document.getElementById('edit_pegawai_kasubid_id').value = data.pegawai_kasubid_id;
+                    document.getElementById('edit_nomor_rekening').value = data.nomor_rekening ?? '';
                     document.getElementById('edit_nama_kegiatan').value = data.nama_kegiatan;
 
                     window.dispatchEvent(new CustomEvent('open-edit-modal'));
@@ -156,6 +170,7 @@
                     },
                     body: JSON.stringify({
                         pegawai_kasubid_id: document.getElementById('edit_pegawai_kasubid_id').value,
+                        nomor_rekening: document.getElementById('edit_nomor_rekening').value,
                         nama_kegiatan: document.getElementById('edit_nama_kegiatan').value,
                     })
                 })

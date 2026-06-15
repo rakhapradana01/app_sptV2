@@ -20,6 +20,7 @@ class SubKegiatanController extends Controller
         $request->validate([
             'pegawai_kasubid_id' => 'required|exists:pegawais,id',
             'nama_kegiatan' => 'required|string',
+            'nomor_rekening' => 'required|string'
         ]);
 
         $sub = SubKegiatan::findOrFail($id);
@@ -27,6 +28,7 @@ class SubKegiatanController extends Controller
         $sub->update([
             'pegawai_kasubid_id' => $request->pegawai_kasubid_id,
             'nama_kegiatan' => $request->nama_kegiatan,
+            'nomor_rekening' => $request->nomor_rekening,
         ]);
 
         return response()->json([
@@ -45,12 +47,13 @@ class SubKegiatanController extends Controller
         $request->validate([
             'pegawai_kasubid_id' => 'required|exists:pegawais,id',
             'nama_kegiatan' => 'required|string',
+            'nomor_rekening' => 'required|string',
         ]);
 
         SubKegiatan::create([
             'pegawai_kasubid_id' => $request->pegawai_kasubid_id,
             'nama_kegiatan' => $request->nama_kegiatan,
-            'nomor_rekening' => '-',
+            'nomor_rekening' => $request->nomor_rekening,
             'harga_satuan' => 0,
             'koefisien' => 0,
             'pagu' => 0,

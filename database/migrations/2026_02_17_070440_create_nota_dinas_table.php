@@ -40,7 +40,7 @@ return new class extends Migration
 
             $table->string('lokasi');
             $table->date('tanggal_mulai')->nullable();
-            $table->date('tanggal_selesai');
+            $table->date('tanggal_selesai')->nullable();
 
             $table->enum('status', [
                 'draft',
