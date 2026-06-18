@@ -15,19 +15,6 @@ class DashboardController extends Controller
     public function index()
     {
         $now = Carbon::now();
-        $awalBulan = $now->copy()->startOfMonth()->toDateString();
-        $akhirBulan = $now->copy()->endOfMonth()->toDateString();
-        $namaBulan = $now->translatedFormat('F Y');
-
-        $rekapPegawai = Pegawai::withCount([
-            // Hitung nota dinas di bulan berjalan berdasarkan tanggal_mulai
-            'notaDinas' => function ($query) use ($awalBulan, $akhirBulan) {
-                $query->whereBetween('nota_dinas.tanggal_mulai', [$awalBulan, $akhirBulan]);
-            }
-        ])
-            ->orderBy('nota_dinas_count', 'desc')
-            ->take(10)
-            ->get();
 
         // 1. Total Sub Kegiatan
         $totalSubKegiatan = SubKegiatan::count();
@@ -96,10 +83,30 @@ class DashboardController extends Controller
             'persenOk',
             'totalSpt',
             'subKegiatans',
-            'recentActivities',
-            'rekapPegawai', // <-- Variabel baru
-            'namaBulan'
+            'recentActivities'
         ));
+    }
+
+    /**
+     * Halaman Rekap Perjalanan Pegawai (dipindah dari Dashboard ke Monev)
+     */
+    public function rekapPegawaiPage()
+    {
+        $now = Carbon::now();
+        $awalBulan = $now->copy()->startOfMonth()->toDateString();
+        $akhirBulan = $now->copy()->endOfMonth()->toDateString();
+        $namaBulan = $now->translatedFormat('F Y');
+
+        $rekapPegawai = Pegawai::withCount([
+            'notaDinas' => function ($query) use ($awalBulan, $akhirBulan) {
+                $query->whereBetween('nota_dinas.tanggal_mulai', [$awalBulan, $akhirBulan]);
+            }
+        ])
+            ->orderBy('nota_dinas_count', 'desc')
+            ->take(10)
+            ->get();
+
+        return view('pages.monev.rekap-pegawai', compact('rekapPegawai', 'namaBulan'));
     }
 
     /**

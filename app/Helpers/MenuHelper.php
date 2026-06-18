@@ -70,8 +70,8 @@ class MenuHelper
                             'pro'  => false,
                         ],
                         [
-                            'name' => 'Rekap Perjalanan Dinas Pegawai',
-                            'path' => "#",
+                            'name' => 'Rekap Perjalanan Pegawai',
+                            'path' => route('monev.rekap-pegawai'),
                             'pro'  => false,
                         ],
                     ],

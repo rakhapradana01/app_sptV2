@@ -30,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    Route::get('/monev/rekap-pegawai', [DashboardController::class, 'rekapPegawaiPage'])->name('monev.rekap-pegawai');
     Route::get('/monev/{id}', [MonevController::class, 'getBySubActivityId']);
     Route::post('/monev/uraian', [MonevController::class, 'storeUraian'])->name('uraian.store');
     Route::put('/monev/uraian/{id}', [MonevController::class, 'updateUraian'])->name('uraian.update');

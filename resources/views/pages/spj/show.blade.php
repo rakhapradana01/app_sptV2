@@ -3,21 +3,28 @@
 @section('content')
     @php
         $isStandalone = $spt->isStandalone();
-        $isJakarta = $isStandalone ? (\Illuminate\Support\Str::contains(strtolower($spt->lokasi), 'jakarta')) : (($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah');
+        $isJakarta = $isStandalone ? (\Illuminate\Support\Str::contains(strtolower($spt->lokasi ?? ''), 'jakarta')) : (($spt->notaDinas?->jenis_perjalanan ?? '') === 'luar_daerah');
         $grandTotal = $spt->spj_rincians_efektif->sum('total');
         $countPegawai = count($spt->pegawais_efektif);
         $firstPegawai = $spt->pegawais_efektif->first();
         $penerimaText = $firstPegawai ? ($firstPegawai->nama . ($countPegawai > 1 ? " dkk" : "")) : '';
         $opText = " (" . $countPegawai . " OP)";
-        $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan dalam rangka " . ($spt->kegiatan_efektif ?? '') . " ke " . ($spt->lokasi_efektif ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
+
+        // Effective field variables (standalone or via Nota Dinas)
+        $tanggalMulai   = $spt->tanggal_mulai_efektif;
+        $tanggalSelesai = $spt->tanggal_selesai_efektif;
+        $lokasi         = $spt->lokasi_efektif;
+        $kegiatan       = $spt->kegiatan_efektif;
+
+        $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan dalam rangka " . ($kegiatan ?? '') . " ke " . ($lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
 
         $bendaharaNama = 'NORMILA SARI, SE';
         $bendaharaNip = '19801221 201001 2 003';
         $kpaNama = 'ADYA FERINA, S.E., M.Ak';
         $kpaNip = '19860206 201101 2 005';
         $subKegiatan = $spt->subKegiatan ?? $spt->notaDinas?->subKegiatan;
-        $pptkNama = $subKegiatan->pegawai->nama ?? 'YENNI NURRAHMI,  SE., M.M';
-        $pptkNip = $subKegiatan->pegawai->nip ?? '19810503 200501 2 017';
+        $pptkNama = $subKegiatan?->pegawai?->nama ?? 'YENNI NURRAHMI,  SE., M.M';
+        $pptkNip = $subKegiatan?->pegawai?->nip ?? '19810503 200501 2 017';
 
         if (!function_exists('spj_terbilang')) {
             function spj_terbilang($angka)

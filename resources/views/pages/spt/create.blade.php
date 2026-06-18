@@ -42,7 +42,7 @@
                                 <option value="">-- Pilih Sub Kegiatan (opsional) --</option>
                                 @foreach ($subKegiatans as $sub)
                                     <option value="{{ $sub->id }}" {{ old('sub_kegiatan_id') == $sub->id ? 'selected' : '' }}>
-                                        {{ $sub->nama_sub_kegiatan }}
+                                        {{ $sub->nomor_rekening }} - {{ $sub->nama_kegiatan }} 
                                     </option>
                                 @endforeach
                             </select>
