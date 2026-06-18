@@ -76,11 +76,28 @@
                         let html = '';
                         if (response.length > 0) {
                             response.forEach((item, index) => {
-                                const notaDinas = item.nota_dinas || {};
-                                const pegawais = notaDinas.pegawais ? notaDinas.pegawais.map(p => p.nama).join('<br>') : '-';
-                                const lokasi = notaDinas.lokasi || '-';
-                                const tanggal = notaDinas.tanggal || '-';
-                                const ok = notaDinas.pegawais ? notaDinas.pegawais.length : '-';
+                                const notaDinas = item.nota_dinas || null;
+                                
+                                // Pegawai & OK (Orang Kali)
+                                let pegawaisList = [];
+                                if (notaDinas && notaDinas.pegawais) {
+                                    pegawaisList = notaDinas.pegawais;
+                                } else if (item.pegawais) {
+                                    pegawaisList = item.pegawais;
+                                }
+                                const pegawais = pegawaisList.length > 0 ? pegawaisList.map(p => p.nama).join('<br>') : '-';
+                                const ok = pegawaisList.length > 0 ? pegawaisList.length : '-';
+                                
+                                // Lokasi
+                                const lokasi = (notaDinas && notaDinas.lokasi) ? notaDinas.lokasi : (item.lokasi || '-');
+                                
+                                // Tanggal
+                                let tanggal = '-';
+                                if (notaDinas && notaDinas.tanggal) {
+                                    tanggal = notaDinas.tanggal;
+                                } else if (item.tanggal_mulai) {
+                                    tanggal = item.tanggal_mulai.split('T')[0];
+                                }
                                 
                                 const nomorSpt = item.nomor_spt || '';
                                 const hasRealNomor = nomorSpt.trim() !== '' && !(/\s{3,}/.test(nomorSpt));

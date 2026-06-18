@@ -97,10 +97,25 @@ Route::middleware(['auth'])->group(function () {
     // ======================
     Route::middleware('role:super_admin,kepala_sub_bidang')->group(function () {
 
-        Route::resource('spt', SPTController::class);
+        // SPT via Nota Dinas (existing)
         Route::post('/spt/store/{nota_id}', [SPTController::class, 'store'])->name('spt.store');
-        Route::get('/spt/cetak/{id}', [App\Http\Controllers\SPTController::class, 'cetakSpt'])->name('nota.cetakSpt');
-        Route::get('/nota-dinas/{id}/cetak-spt', [SPTController::class, 'cetakSpt'])->name('nota.cetakSpt');
+        Route::get('/spt/cetak/{id}', [SPTController::class, 'cetakSpt'])->name('nota.cetakSpt');
+        Route::get('/nota-dinas/{id}/cetak-spt', [SPTController::class, 'cetakSpt'])->name('nota.cetakSptAlt');
+        Route::put('/spt/{id}/update-nomor', [SPTController::class, 'updateNomor'])->name('spt.updateNomor');
+
+        // SPT Mandiri (standalone)
+        Route::get('/spt', [SPTController::class, 'index'])->name('spt.index');
+        Route::get('/spt/buat', [SPTController::class, 'create'])->name('spt.create');
+        Route::post('/spt', [SPTController::class, 'storeMandiri'])->name('spt.storeMandiri');
+        Route::get('/spt/{id}/cetak-mandiri', [SPTController::class, 'cetakSptMandiri'])->name('spt.cetakMandiri');
+        Route::delete('/spt/{id}/hapus-mandiri', [SPTController::class, 'destroyMandiri'])->name('spt.destroyMandiri');
+
+        // SPPD Mandiri (standalone)
+        Route::get('/sppd', [SPPDController::class, 'index'])->name('sppd.index');
+        Route::get('/sppd/buat', [SPPDController::class, 'create'])->name('sppd.create');
+        Route::post('/sppd', [SPPDController::class, 'storeMandiri'])->name('sppd.storeMandiri');
+        Route::get('/sppd/{id}/cetak-mandiri', [SPPDController::class, 'cetakSPPDMandiri'])->name('sppd.cetakMandiri');
+        Route::delete('/sppd/{id}/hapus-mandiri', [SPPDController::class, 'destroyMandiri'])->name('sppd.destroyMandiri');
     });
 
     Route::post('/logout', [AuthController::class, 'logout'])

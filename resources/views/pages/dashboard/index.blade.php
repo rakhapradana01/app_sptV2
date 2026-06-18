@@ -400,7 +400,7 @@
                             <div class="flex justify-between items-center pt-1 border-t border-gray-100 dark:border-gray-700/50 mt-1">
                                 <span class="text-[9px] text-gray-400 font-medium line-clamp-1">Tujuan: {{ $act->kepada->nama ?? '-' }}</span>
                                 @if($act->spt)
-                                    <a href="{{ route('spt.show', $act->spt->id) }}" class="text-[9px] font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                    <a href="{{ route('nota.cetakSpt', $act->id) }}" target="_blank" class="text-[9px] font-bold text-blue-600 dark:text-blue-400 hover:underline">
                                         Lihat SPT
                                     </a>
                                 @endif

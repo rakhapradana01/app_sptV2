@@ -13,6 +13,7 @@ class SpjRincian extends Model
     protected $fillable = [
         'kode_rekening',
         'nota_dinas_id',
+        'spt_id',
         'pegawai_id',
         'uraian_id',
         'jumlah_hari',
@@ -65,6 +66,11 @@ class SpjRincian extends Model
     public function notaDinas(): BelongsTo
     {
         return $this->belongsTo(NotaDinas::class);
+    }
+
+    public function spt(): BelongsTo
+    {
+        return $this->belongsTo(Spt::class);
     }
 
     public function pegawai(): BelongsTo

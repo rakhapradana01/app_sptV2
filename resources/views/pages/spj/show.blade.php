@@ -2,20 +2,22 @@
 
 @section('content')
     @php
-        $isJakarta = ($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah';
-        $grandTotal = $spt->notaDinas->spjRincians->sum('total');
-        $countPegawai = count($spt->notaDinas->pegawais);
-        $firstPegawai = $spt->notaDinas->pegawais->first();
+        $isStandalone = $spt->isStandalone();
+        $isJakarta = $isStandalone ? (\Illuminate\Support\Str::contains(strtolower($spt->lokasi), 'jakarta')) : (($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah');
+        $grandTotal = $spt->spj_rincians_efektif->sum('total');
+        $countPegawai = count($spt->pegawais_efektif);
+        $firstPegawai = $spt->pegawais_efektif->first();
         $penerimaText = $firstPegawai ? ($firstPegawai->nama . ($countPegawai > 1 ? " dkk" : "")) : '';
         $opText = " (" . $countPegawai . " OP)";
-        $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan dalam rangka " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
+        $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan dalam rangka " . ($spt->kegiatan_efektif ?? '') . " ke " . ($spt->lokasi_efektif ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
 
         $bendaharaNama = 'NORMILA SARI, SE';
         $bendaharaNip = '19801221 201001 2 003';
         $kpaNama = 'ADYA FERINA, S.E., M.Ak';
         $kpaNip = '19860206 201101 2 005';
-        $pptkNama = $spt->notaDinas->subKegiatan->pegawai->nama ?? 'YENNI NURRAHMI,  SE., M.M';
-        $pptkNip = $spt->notaDinas->subKegiatan->pegawai->nip ?? '19810503 200501 2 017';
+        $subKegiatan = $spt->subKegiatan ?? $spt->notaDinas?->subKegiatan;
+        $pptkNama = $subKegiatan->pegawai->nama ?? 'YENNI NURRAHMI,  SE., M.M';
+        $pptkNip = $subKegiatan->pegawai->nip ?? '19810503 200501 2 017';
 
         if (!function_exists('spj_terbilang')) {
             function spj_terbilang($angka)
@@ -54,7 +56,7 @@
                                 penerimaId: '{{ $firstPegawai->id ?? '' }}',
                                 penerimaNama: '{{ $firstPegawai->nama ?? '-' }}',
                                 penerimaNip: '{{ $firstPegawai->nip ?? '-' }}',
-                                tanggalKuitansi: '{{ \Carbon\Carbon::parse($spt->notaDinas->tanggal_selesai ?? $spt->notaDinas->tanggal_mulai)->format("Y-m-d") }}',
+                                tanggalKuitansi: '{{ \Carbon\Carbon::parse($spt->tanggal_selesai_efektif ?? $spt->tanggal_mulai_efektif)->format("Y-m-d") }}',
                                 changePenerima(id, nama, nip) {
                                     this.penerimaId = id;
                                     this.penerimaNama = nama;
@@ -95,7 +97,7 @@
                                     tiket_pesawat_pulang: 0, 
                                     transport: 0,
                                     penginapan: 0,
-                                    kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
+                                    kode_rekening: '{{ $subKegiatan->nomor_rekening ?? '' }}' 
                                 },
                                 openAddRincian(item = null) {
                                     this.isEditRincian = false;
@@ -109,7 +111,7 @@
                                         tiket_pesawat_pulang: 0, 
                                         transport: 0,
                                         penginapan: 0,
-                                        kode_rekening: '{{ $spt->notaDinas->subKegiatan->nomor_rekening ?? '' }}' 
+                                        kode_rekening: '{{ $subKegiatan->nomor_rekening ?? '' }}' 
                                     };
                                     this.showRincianModal = true;
                                 },
@@ -152,23 +154,23 @@
             <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                     <p class="text-gray-500">Nama Pegawai</p>
-                    <p class="font-semibold text-gray-900">{{ $spt->notaDinas->pegawais->first()->nama ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $spt->pegawais_efektif->first()->nama ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500">Tujuan</p>
-                    <p class="font-semibold text-gray-900">{{ $spt->notaDinas->lokasi ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $spt->lokasi_efektif ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-gray-500">Tanggal</p>
                     <p class="font-semibold text-gray-900">
-                        {{ $spt->notaDinas->tanggal_mulai ? \Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->format('d M Y') : ' ' }}
+                        {{ $spt->tanggal_mulai_efektif ? \Carbon\Carbon::parse($spt->tanggal_mulai_efektif)->format('d M Y') : ' ' }}
                         -
-                        {{ $spt->notaDinas->tanggal_selesai ? \Carbon\Carbon::parse($spt->notaDinas->tanggal_selesai)->format('d M Y') : ' ' }}
+                        {{ $spt->tanggal_selesai_efektif ? \Carbon\Carbon::parse($spt->tanggal_selesai_efektif)->format('d M Y') : ' ' }}
                     </p>
                 </div>
                 <div class="flex justify-between items-center mb-4">
                     <h5 class="font-bold text-gray-800 dark:text-white">Rincian Biaya Perjalanan</h5>
-                    @if($spt->notaDinas->spjRincians->isNotEmpty())
+                    @if($spt->spj_rincians_efektif->isNotEmpty())
                         <a :href="'{{ route('spj.exportExcel', $spt->id) }}?penerima_id=' + penerimaId + '&tanggal_kuitansi=' + tanggalKuitansi"
                             target="_blank"
                             class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 flex items-center gap-2 shadow-sm transition-all duration-200">
@@ -223,7 +225,7 @@
                                                     changePenerima(sel.value, sel.getAttribute('data-nama'), sel.getAttribute('data-nip'));
                                                 "
                                         class="text-xs py-1 px-3 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                                        @foreach($spt->notaDinas->pegawais as $pegawai)
+                                        @foreach($spt->pegawais_efektif as $pegawai)
                                             <option value="{{ $pegawai->id }}" data-nama="{{ $pegawai->nama }}"
                                                 data-nip="{{ $pegawai->nip ?? '-' }}">{{ $pegawai->nama }}</option>
                                         @endforeach
@@ -237,7 +239,7 @@
                                 </div>
                                 <span
                                     class="px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full dark:bg-blue-900 dark:text-blue-200">
-                                    Rek: {{ ($spt->notaDinas->subKegiatan->nomor_rekening ?? '') . '.5.1.02.04.01.0001' }}
+                                    Rek: {{ ($subKegiatan->nomor_rekening ?? '') . '.5.1.02.04.01.0001' }}
                                 </span>
                             </div>
                         </div>
@@ -257,10 +259,10 @@
                                 <div
                                     class="mt-4 md:mt-0 text-left md:text-right text-xs space-y-1 text-gray-500 dark:text-gray-400">
                                     <p>Tahun Anggaran: <span
-                                            class="font-semibold text-gray-800 dark:text-white">{{ Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->format('Y') }}</span>
+                                            class="font-semibold text-gray-800 dark:text-white">{{ Carbon\Carbon::parse($tanggalMulai)->format('Y') }}</span>
                                     </p>
                                     <p>Nomor Rekening: <span
-                                            class="font-semibold text-gray-800 dark:text-white">{{ ($spt->notaDinas->subKegiatan->nomor_rekening ?? '') . '.5.1.02.04.01.0001' }}</span>
+                                            class="font-semibold text-gray-800 dark:text-white">{{ ($subKegiatan->nomor_rekening ?? '') . '.5.1.02.04.01.0001' }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -290,8 +292,8 @@
                                     <span class="font-medium text-gray-400">Untuk Pembayaran</span>
                                     <span class="md:col-span-3 text-gray-900 dark:text-white leading-relaxed">
                                         Pembayaran perjalanan {{ $isJakarta ? 'keluar' : 'dalam' }} provinsi Kalimantan
-                                        Selatan dalam rangka {{ $spt->notaDinas->kegiatan ?? '' }} ke
-                                        {{ $spt->notaDinas->lokasi ?? '' }} dengan no SPT : {{ $spt->nomor_spt ?? '' }} a.n
+                                        Selatan dalam rangka {{ $kegiatan ?? '' }} ke
+                                        {{ $lokasi ?? '' }} dengan no SPT : {{ $spt->nomor_spt ?? '' }} a.n
                                         <span
                                             x-text="penerimaNama + '{{ $countPegawai > 1 ? ' dkk' : '' }}'"></span>{{ $opText }}
                                     </span>
@@ -356,9 +358,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($spt->notaDinas->pegawais as $index => $pegawai)
+                                    @foreach($spt->pegawais_efektif as $index => $pegawai)
                                         @php
-                                            $rincian = $spt->notaDinas->spjRincians->where('pegawai_id', $pegawai->id)->first();
+                                            $rincian = $spt->spj_rincians_efektif->where('pegawai_id', $pegawai->id)->first();
                                         @endphp
                                         <tr class="border-b">
                                             <td class="p-2">{{ $index + 1 }}</td>
@@ -380,7 +382,7 @@
                                                                                         tiket_pesawat_pulang: '{{ $rincian->tiket_pesawat_pulang ?? 0 }}',
                                                                                         transport: '{{ $rincian->transport ?? 0 }}',
                                                                                         penginapan: '{{ $rincian->penginapan ?? 0 }}',
-                                                                                        kode_rekening: @js($spt->notaDinas->subKegiatan?->nomor_rekening),
+                                                                                        kode_rekening: @js($subKegiatan?->nomor_rekening),
                                                                                     })"
                                                     class="text-green-600 hover:text-green-800 p-1"
                                                     title="{{ $rincian ? 'Edit Rincian' : 'Tambah Rincian' }}">
@@ -402,7 +404,7 @@
                                         </tr>
                                     @endforeach
                                     @php
-                                        $grandTotal = $spt->notaDinas->spjRincians->sum('total');
+                                        $grandTotal = $spt->spj_rincians_efektif->sum('total');
                                     @endphp
                                     <tr class="font-bold bg-gray-50 dark:bg-gray-700">
                                         <td colspan="2" class="p-2 text-right">TOTAL</td>
@@ -447,9 +449,9 @@
                         @else
                             <div class="space-y-6 max-w-4xl mx-auto">
                                 @php $hasDpr = false; @endphp
-                                @foreach($spt->notaDinas->pegawais as $pegawai)
+                                @foreach($spt->pegawais_efektif as $pegawai)
                                     @php
-                                        $rincian = $spt->notaDinas->spjRincians->where('pegawai_id', $pegawai->id)->first();
+                                        $rincian = $spt->spj_rincians_efektif->where('pegawai_id', $pegawai->id)->first();
                                     @endphp
                                     @if($rincian && ($rincian->transport > 0))
                                         @php $hasDpr = true; @endphp
@@ -476,9 +478,9 @@
                                             <p
                                                 class="text-xs text-gray-500 leading-relaxed bg-gray-50 dark:bg-gray-800/40 p-4 rounded-xl border border-gray-50 dark:border-gray-800">
                                                 "Berdasarkan Surat Perintah Perjalanan Dinas Nomor :
-                                                <strong>{{ $spt->notaDinas->sppd->nomor_sppd ?? '800.1.11.1/    /BPKAD/' . Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->format('Y') }}</strong>,
+                                                <strong>{{ $spt->sppd_efektif?->nomor_sppd ?? '800.1.11.1/    /BPKAD/' . Carbon\Carbon::parse($tanggalMulai)->format('Y') }}</strong>,
                                                 tanggal
-                                                <strong>{{ Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('d F Y') }}</strong>
+                                                <strong>{{ Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d F Y') }}</strong>
                                                 dengan ini kami menyatakan dengan sesungguhnya bahwa biaya di bawah ini benar-benar
                                                 dikeluarkan untuk taksi bandara."
                                             </p>
@@ -497,7 +499,7 @@
                                                             <td class="p-3 font-semibold text-gray-900 dark:text-white">1</td>
                                                             <td class="p-3 text-gray-900 dark:text-white leading-relaxed">
                                                                 Biaya Taksi : Tempat Kedudukan (Banjarbaru) -
-                                                                ({{ $spt->notaDinas->lokasi }}) PP
+                                                                ({{ $lokasi }}) PP
                                                             </td>
                                                             <td class="p-3 text-right font-bold text-amber-600 dark:text-amber-400">
                                                                 Rp {{ number_format($rincian->transport, 0, ',', '.') }}
@@ -526,7 +528,7 @@
                                                 <div
                                                     class="text-center p-3 border border-gray-50 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/10 rounded-lg">
                                                     <p class="text-gray-400 mb-1">Banjarbaru,
-                                                        {{ Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('d F Y') }}
+                                                        {{ Carbon\Carbon::parse($tanggalMulai)->translatedFormat('d F Y') }}
                                                     </p>
                                                     <p class="font-semibold text-gray-400 uppercase tracking-wider mb-7">Pelaksana SPPD
                                                     </p>
@@ -584,7 +586,7 @@
                                     </label>
                                     <select name="uraian_id" x-model="rincianForm.uraian_id" class="form-control w-full">
                                         <option value="">-- Tanpa Pagu Uraian --</option>
-                                        @foreach(($spt->notaDinas->subKegiatan->uraians ?? []) as $uraian)
+                                        @foreach(($subKegiatan->uraians ?? []) as $uraian)
                                             <option value="{{ $uraian->id }}">
                                                 {{ $uraian->uraian }} (Sisa: {{ $uraian->ok_total - $uraian->ok_terpakai }} OK)
                                             </option>

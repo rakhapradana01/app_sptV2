@@ -14,7 +14,7 @@ class SPJController extends Controller
 {
     public function index(Request $request)
     {
-        $spt = Spt::with(['notaDinas.pegawais'])->get();
+        $spt = Spt::with(['notaDinas.pegawais', 'pegawais'])->get();
 
         if ($request->ajax()) {
             return response()->json($spt);
@@ -27,9 +27,13 @@ class SPJController extends Controller
     {
         $spt = Spt::with([
             'notaDinas.pegawais',
-            'notaDinas.spjRincians',
+            'notaDinas.spjRincians.pegawai',
             'notaDinas.subKegiatan.pegawai',
-            'notaDinas.subKegiatan.uraians'
+            'notaDinas.subKegiatan.uraians',
+            'pegawais',
+            'spjRincians.pegawai',
+            'subKegiatan.pegawai',
+            'subKegiatan.uraians'
         ])->findOrFail($id);
 
         if (!$spt->has_real_nomor) {
@@ -64,7 +68,8 @@ class SPJController extends Controller
         SpjRincian::updateOrCreate(
             [
                 'nota_dinas_id' => $spt->nota_dinas_id,
-                'pegawai_id' => $request->pegawai_id
+                'spt_id'        => $spt->isStandalone() ? $spt->id : null,
+                'pegawai_id'    => $request->pegawai_id
             ],
             [
                 'kode_rekening' => $request->kode_rekening,
@@ -87,7 +92,10 @@ class SPJController extends Controller
         $spt = Spt::with([
             'notaDinas.pegawais',
             'notaDinas.spjRincians.pegawai',
-            'notaDinas.subKegiatan.pegawai'
+            'notaDinas.subKegiatan.pegawai',
+            'pegawais',
+            'spjRincians.pegawai',
+            'subKegiatan.pegawai'
         ])->findOrFail($id);
 
         $templatePath = resource_path('tamplates/tamplate_spj.xlsx');
@@ -99,14 +107,25 @@ class SPJController extends Controller
         $reader = IOFactory::createReader('Xlsx');
         $spreadsheet = $reader->load($templatePath);
 
-        $isJakarta = ($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah';
+        // Effective Standalone Fields
+        $isStandalone = $spt->isStandalone();
+        $pegawais = $spt->pegawais_efektif;
+        $rincians = $spt->spj_rincians_efektif;
+        $subKegiatan = $spt->subKegiatan ?? $spt->notaDinas?->subKegiatan;
+        $nomorRekening = $subKegiatan?->nomor_rekening ?? '';
+        $kegiatan = $spt->kegiatan_efektif;
+        $lokasi = $spt->lokasi_efektif;
+        $tanggalMulai = $spt->tanggal_mulai_efektif;
+        $tanggalSelesai = $spt->tanggal_selesai_efektif;
+        $sppd = $spt->sppd_efektif;
+        $nomorSppd = $sppd?->nomor_sppd ?? '';
+
+        $isJakarta = $isStandalone ? (\Illuminate\Support\Str::contains(strtolower($lokasi), 'jakarta')) : (($spt->notaDinas->jenis_perjalanan ?? '') === 'luar_daerah');
 
         $kuitansiTemplate = $spreadsheet->getSheetByName('Kuitansi_bu_adya');
         $rincianTemplate = $spreadsheet->getSheetByName('R.Perjaldin_bpkad');
         $dprTemplate = $spreadsheet->getSheetByName('DPR_jkt');
         $tandaTerimaSheet = $spreadsheet->getSheetByName('TT_bpkad');
-
-        $rincians = $spt->notaDinas->spjRincians;
 
         if ($rincians->isEmpty()) {
             return redirect()->back()->with('error', 'Belum ada rincian biaya SPJ yang diisi.');
@@ -116,8 +135,8 @@ class SPJController extends Controller
         $bendaharaNip = '19801221 201001 2 003';
         $kpaNama = 'ADYA FERINA, S.E., M.Ak';
         $kpaNip = '19860206 201101 2 005';
-        $pptkNama = $spt->notaDinas->subKegiatan->pegawai->nama ?? 'YENNI NURRAHMI,  SE., M.M';
-        $pptkNip = $spt->notaDinas->subKegiatan->pegawai->nip ?? '19810503 200501 2 017';
+        $pptkNama = $subKegiatan->pegawai->nama ?? 'YENNI NURRAHMI,  SE., M.M';
+        $pptkNip = $subKegiatan->pegawai->nip ?? '19810503 200501 2 017';
 
         $count = count($rincians);
         $maxSlots = 6;
@@ -127,11 +146,11 @@ class SPJController extends Controller
         // 1. Process Kuitansi Sheet (Single sheet with Grand Total of all employees)
         if ($kuitansiTemplate) {
             $penerimaId = request('penerima_id');
-            $firstPegawai = $spt->notaDinas->pegawais->where('id', $penerimaId)->first() ?? $spt->notaDinas->pegawais->first();
-            $countPegawai = count($spt->notaDinas->pegawais);
+            $firstPegawai = $pegawais->where('id', $penerimaId)->first() ?? $pegawais->first();
+            $countPegawai = count($pegawais);
 
             $tanggalKuitansiRaw = request('tanggal_kuitansi');
-            $tanggalKuitansi = $tanggalKuitansiRaw ? Carbon::parse($tanggalKuitansiRaw) : Carbon::parse($spt->notaDinas->tanggal_selesai ?? $spt->notaDinas->tanggal_mulai);
+            $tanggalKuitansi = $tanggalKuitansiRaw ? Carbon::parse($tanggalKuitansiRaw) : Carbon::parse($tanggalSelesai ?? $tanggalMulai);
 
             // Rename to 'Kuitansi'
             $kuitansiTemplate->setTitle('Kuitansi');
@@ -139,8 +158,8 @@ class SPJController extends Controller
             // Fill Kuitansi
             $tanggalFormat = $tanggalKuitansi->translatedFormat('d F Y');
             $kuitansiTemplate->setCellValue('I2', $tanggalFormat);
-            $kuitansiTemplate->setCellValue('D7', ($spt->notaDinas->subKegiatan->nomor_rekening ?? '') . '.5.1.02.04.01.0001');
-            $kuitansiTemplate->setCellValue('D8', Carbon::parse($spt->notaDinas->tanggal_mulai)->format('Y'));
+            $kuitansiTemplate->setCellValue('D7', ($nomorRekening ? $nomorRekening . '.5.1.02.04.01.0001' : ''));
+            $kuitansiTemplate->setCellValue('D8', Carbon::parse($tanggalMulai)->format('Y'));
             $kuitansiTemplate->setCellValue('D12', "='TT_bpkad'!E" . $newTotalRow);
 
             // Set terbilang in D13 from total
@@ -154,9 +173,9 @@ class SPJController extends Controller
 
             $penerimaText = $firstPegawai ? ($firstPegawai->nama . ($countPegawai > 1 ? " dkk" : "")) : '';
             $opText = " (" . $countPegawai . " OP)";
-            $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan  " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
+            $buatPembayaran = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan  " . ($kegiatan ?? '') . " ke " . ($lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '') . " a.n " . $penerimaText . $opText;
             $kuitansiTemplate->setCellValue('D14', $buatPembayaran);
-            $kuitansiTemplate->setCellValue('D27', $spt->notaDinas->subKegiatan->nama_kegiatan ?? '');
+            $kuitansiTemplate->setCellValue('D27', $subKegiatan->nama_kegiatan ?? '');
 
             $bulanTahunFormat = "Banjarbaru, " . $tanggalKuitansi->translatedFormat('d F Y');
             $kuitansiTemplate->setCellValue('F30', $bulanTahunFormat);
@@ -184,15 +203,15 @@ class SPJController extends Controller
                 $spreadsheet->addSheet($rincianSheet);
 
                 // Fill Rincian Perjalanan Dinas
-                $rincianSheet->setCellValue('B12', ': ' . ($spt->notaDinas->sppd->nomor_sppd ?? '800.1.11.1/    /BPKAD/' . Carbon::parse($spt->notaDinas->tanggal_mulai)->format('Y')));
-                $rincianSheet->setCellValue('B13', ': ' . Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('d F Y'));
+                $rincianSheet->setCellValue('B12', ': ' . ($nomorSppd ?: '800.1.11.1/    /BPKAD/' . Carbon::parse($tanggalMulai)->format('Y')));
+                $rincianSheet->setCellValue('B13', ': ' . Carbon::parse($tanggalMulai)->translatedFormat('d F Y'));
                 $rincianSheet->setCellValue('E16', $rincian->jumlah_hari * $rincian->uang_harian);
                 $rincianSheet->setCellValue('E17', $rincian->tiket_pesawat_pergi + $rincian->tiket_pesawat_pulang);
                 $rincianSheet->setCellValue('E18', $rincian->penginapan ?? 0); // Biaya Penginapan
                 $rincianSheet->setCellValue('E19', $rincian->transport);
                 $rincianSheet->setCellValue('E20', '=SUM(E16:E19)');
 
-                $tanggalRampungFormat = "Banjarbaru, " . Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('F Y');
+                $tanggalRampungFormat = "Banjarbaru, " . Carbon::parse($tanggalMulai)->translatedFormat('F Y');
                 $rincianSheet->setCellValue('E22', $tanggalRampungFormat);
                 $rincianSheet->setCellValue('E24', '=E20');
                 $rincianSheet->setCellValue('A24', '=E20');
@@ -220,9 +239,9 @@ class SPJController extends Controller
                 $dprSheet->setTitle('DPR_' . $shortName);
                 $spreadsheet->addSheet($dprSheet);
 
-                $sppdNomor = "Berdasarkan Surat Perintah Perjalanan Dinas Nomor : " . ($spt->notaDinas->sppd->nomor_sppd ?? '800.1.11.1/    /BPKAD/' . Carbon::parse($spt->notaDinas->tanggal_mulai)->format('Y')) . ", tanggal " . Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('d F Y') . " dengan ini kami menyatakan dengan sesungguhnya bahwa :";
-                $uraianDpr = "Biaya Taksi :\nTempat Kedudukan (Banjarbaru) - (" . ($spt->notaDinas->lokasi ?? '') . ") PP";
-                $tanggalRampungFormat = "Banjarbaru, " . Carbon::parse($spt->notaDinas->tanggal_mulai)->translatedFormat('d F Y');
+                $sppdNomor = "Berdasarkan Surat Perintah Perjalanan Dinas Nomor : " . ($nomorSppd ?: '800.1.11.1/    /BPKAD/' . Carbon::parse($tanggalMulai)->format('Y')) . ", tanggal " . Carbon::parse($tanggalMulai)->translatedFormat('d F Y') . " dengan ini kami menyatakan dengan sesungguhnya bahwa :";
+                $uraianDpr = "Biaya Taksi :\nTempat Kedudukan (Banjarbaru) - (" . ($lokasi ?? '') . ") PP";
+                $tanggalRampungFormat = "Banjarbaru, " . Carbon::parse($tanggalMulai)->translatedFormat('d F Y');
 
                 // Fill DPR - Page 1
                 $dprSheet->setCellValue('C4', ': ' . $pegawai->nama);
@@ -257,7 +276,7 @@ class SPJController extends Controller
         // 3. Process Tanda Terima Sheet (TT_bpkad)
         if ($tandaTerimaSheet) {
             // Fill dynamic trip title
-            $tripTitle = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan " . ($spt->notaDinas->kegiatan ?? '') . " ke " . ($spt->notaDinas->lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '');
+            $tripTitle = "Pembayaran perjalanan " . ($isJakarta ? 'keluar' : 'dalam') . " provinsi Kalimantan Selatan " . ($kegiatan ?? '') . " ke " . ($lokasi ?? '') . " dengan no SPT : " . ($spt->nomor_spt ?? '');
             $tandaTerimaSheet->setCellValue('A1', $tripTitle);
 
             $count = count($rincians);
@@ -337,12 +356,12 @@ class SPJController extends Controller
 
         $filename = 'SPJ_' . str_replace('/', '_', $spt->nomor_spt) . '.xlsx';
 
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');
-        exit;
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type'  => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 
     private function terbilang($angka)
