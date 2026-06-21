@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="SPPD Mandiri" />
+    <x-common.page-breadcrumb pageTitle="SPPD" />
 
     <div class="space-y-6">
-        <x-common.component-card title="Daftar SPPD Mandiri">
+        <x-common.component-card title="Daftar SPPD">
             <div class="px-2 mb-4">
                 @if (in_array(auth()->user()->role->name, ['super_admin', 'kepala_sub_bidang']))
                     <a href="{{ route('sppd.create') }}">

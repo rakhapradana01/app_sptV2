@@ -1,10 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Buat SPPD Mandiri" />
+    <x-common.page-breadcrumb pageTitle="Buat SPPD" />
 
     <div class="space-y-6">
-        <x-common.component-card title="Form SPPD Mandiri">
+        <x-common.component-card title="Form SPPD">
 
             @if ($errors->any())
                 <div class="mx-2 mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-sm">
