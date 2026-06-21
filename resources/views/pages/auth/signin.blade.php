@@ -80,6 +80,12 @@
                                             Sign In
                                         </button>
                                     </div>
+                                    <div class="text-center mt-4">
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                                            Belum memiliki akun?
+                                            <a href="{{ route('register') }}" class="text-brand-500 hover:text-brand-600 font-semibold">Sign Up</a>
+                                        </p>
+                                    </div>
                                 </div>
                             </form>
                         </div>

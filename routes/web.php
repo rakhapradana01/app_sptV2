@@ -10,6 +10,7 @@ use App\Http\Controllers\SPPDController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SubKegiatanController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 
 Route::middleware(['auth'])->group(function () {
 
@@ -25,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::middleware('role:super_admin')->group(function () {
             Route::resource('pegawai', PegawaiController::class);
+            Route::resource('users', UserController::class);
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);
@@ -127,3 +129,6 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticated'])
     ->name('login.authenticated');
+
+Route::get('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');

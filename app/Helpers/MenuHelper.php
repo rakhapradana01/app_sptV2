@@ -88,9 +88,15 @@ class MenuHelper
                 'name' => 'Master',
                 'icon' => 'database',
                 'path' => '#',
-                'subItems' => [
-                    ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
-                ],
+                'subItems' => (function() {
+                    $items = [
+                        ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
+                    ];
+                    if (\Illuminate\Support\Facades\Auth::user() && \Illuminate\Support\Facades\Auth::user()->role && \Illuminate\Support\Facades\Auth::user()->role->name === 'super_admin') {
+                        $items[] = ['name' => 'Akun', 'path' => route('users.index'), 'pro' => false];
+                    }
+                    return $items;
+                })(),
             ],
         ];
         $roleMenuMap = [

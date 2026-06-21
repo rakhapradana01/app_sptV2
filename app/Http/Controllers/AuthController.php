@@ -49,4 +49,42 @@ class AuthController extends Controller
 
         return redirect()->route('login');
     }
+
+    public function register()
+    {
+        $roles = \App\Models\Role::whereNotIn('name', ['super_admin', 'admin'])->get();
+        return view('pages.auth.signup', compact('roles'));
+    }
+
+    public function storeRegister(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|min:2|unique:users,username',
+            'password' => 'required|string|min:6|confirmed',
+            'role_id' => [
+                'required',
+                \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin', 'admin'])
+            ],
+        ], [
+            'username.unique' => 'Username sudah digunakan oleh akun lain.',
+            'password.min' => 'Password minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role_id' => $request->role_id,
+        ]);
+
+        Auth::login($user);
+
+        if ($user->role->name === 'super_admin') {
+            return redirect()->route('dashboard');
+        }
+
+        return redirect()->route('nota-dinas.index');
+    }
 }
