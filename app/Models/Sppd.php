@@ -20,6 +20,9 @@ class Sppd extends Model
         'tanggal_selesai',
         'kegiatan',
         'nomor_spt_ref',
+        'dinas_id',
+        'bidang_id',
+        'sub_bidang_id',
     ];
 
     protected $casts = [
@@ -35,6 +38,21 @@ class Sppd extends Model
     public function notaDinas(): BelongsTo
     {
         return $this->belongsTo(NotaDinas::class, 'nota_dinas_id');
+    }
+
+    public function dinas(): BelongsTo
+    {
+        return $this->belongsTo(Dinas::class);
+    }
+
+    public function bidang(): BelongsTo
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
+    public function subBidang(): BelongsTo
+    {
+        return $this->belongsTo(SubBidang::class);
     }
 
     /**

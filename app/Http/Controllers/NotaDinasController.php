@@ -23,25 +23,44 @@ class NotaDinasController extends Controller
 
     public function arsip()
     {
-        $notaDinas = NotaDinas::where('status', \App\Models\NotaDinas::DISETUJUI_KABID)
-            ->latest()
-            ->paginate(10);
+        $user = auth()->user();
+        $query = NotaDinas::where('status', \App\Models\NotaDinas::DISETUJUI_KABID);
+
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            if (!$user->bidang_id) {
+                $query->whereRaw('1 = 0'); // bidang belum diset, tampilkan kosong
+            } else {
+                $query->where('bidang_id', $user->bidang_id);
+            }
+        }
+
+        $notaDinas = $query->latest()->paginate(10);
 
         return view('pages.arsip.index', compact('notaDinas'));
     }
 
     public function index()
     {
-        $notaDinas = NotaDinas::with([
+        $user = auth()->user();
+        $query = NotaDinas::with([
             'subKegiatan',
             'kepada',
             'melalui'
-        ])->latest()->paginate(10);
+        ]);
+
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            if (!$user->bidang_id) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where('bidang_id', $user->bidang_id);
+            }
+        }
+
+        $notaDinas = $query->latest()->paginate(10);
 
         $querySub = SubKegiatan::query();
-        $user = auth()->user();
         if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+            $querySub->where('bidang_id', $user->bidang_id);
         }
         $subKegiatans = $querySub->get();
         $pegawais = Pegawai::all();
@@ -82,7 +101,7 @@ class NotaDinasController extends Controller
         $querySub = SubKegiatan::query();
         $user = auth()->user();
         if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+            $querySub->where('bidang_id', $user->bidang_id);
         }
         $subKegiatans = $querySub->get();
 
@@ -122,6 +141,7 @@ class NotaDinasController extends Controller
             'lampiran' => 'nullable|string'
         ]);
 
+        $user = auth()->user();
         $nota = NotaDinas::create([
             'nomor_urut' => $request->nomor_urut ?? null,
             'asal_undangan' => $validated['asal_undangan'],
@@ -138,7 +158,10 @@ class NotaDinasController extends Controller
             'kegiatan' => $validated['kegiatan'],
             'status' => NotaDinas::DIAJUKAN_KABID,
             'sifat' => $validated['sifat'],
-            'lampiran' => $validated['lampiran']
+            'lampiran' => $validated['lampiran'],
+            'dinas_id' => $user->dinas_id ?? null,
+            'bidang_id' => $user->bidang_id ?? null,
+            'sub_bidang_id' => $user->sub_bidang_id ?? null,
         ]);
 
         if (!empty($validated['pegawai_ids'])) {

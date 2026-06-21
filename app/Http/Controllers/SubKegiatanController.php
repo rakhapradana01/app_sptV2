@@ -14,7 +14,7 @@ class SubKegiatanController extends Controller
         
         $user = auth()->user();
         if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $query->where('unit_kerja_id', $user->unit_kerja_id);
+            $query->where('bidang_id', $user->bidang_id);
         }
 
         $subKegiatan = $query->paginate(10);

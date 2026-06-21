@@ -35,12 +35,16 @@ class SPTController extends Controller
             'jenis_anggaran' => 'required|in:DPA,DPPA',
         ]);
 
+        $user = auth()->user();
         Spt::updateOrCreate(
             ['nota_dinas_id' => $nota_id],
             [
                 'nomor_spt'      => $request->nomor_spt,
                 'jenis_anggaran' => $request->jenis_anggaran,
                 'tahun_anggaran' => $request->tahun_anggaran ?? date('Y'),
+                'dinas_id'       => $user->dinas_id ?? null,
+                'bidang_id'      => $user->bidang_id ?? null,
+                'sub_bidang_id'  => $user->sub_bidang_id ?? null,
             ]
         );
 
@@ -67,9 +71,19 @@ class SPTController extends Controller
 
     public function index()
     {
-        $spts = Spt::with(['pegawais', 'subKegiatan'])
-            ->whereNull('nota_dinas_id')
-            ->latest()
+        $user = auth()->user();
+        $query = Spt::with(['pegawais', 'subKegiatan'])
+            ->whereNull('nota_dinas_id');
+
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            if (!$user->bidang_id) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where('bidang_id', $user->bidang_id);
+            }
+        }
+
+        $spts = $query->latest()
             ->paginate(10);
 
         return view('pages.spt.index', compact('spts'));
@@ -80,7 +94,7 @@ class SPTController extends Controller
         $querySub = SubKegiatan::query();
         $user = auth()->user();
         if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+            $querySub->where('bidang_id', $user->bidang_id);
         }
         $subKegiatans = $querySub->get();
         $pegawais     = Pegawai::orderBy('nama')->get();
@@ -103,6 +117,7 @@ class SPTController extends Controller
             'pegawai_ids.*'   => 'exists:pegawais,id',
         ]);
 
+        $user = auth()->user();
         $spt = Spt::create([
             'nota_dinas_id'  => null,
             'nomor_spt'      => $validated['nomor_spt'],
@@ -113,6 +128,9 @@ class SPTController extends Controller
             'lokasi'         => $validated['lokasi'],
             'kegiatan'       => $validated['kegiatan'],
             'sub_kegiatan_id' => $validated['sub_kegiatan_id'] ?? null,
+            'dinas_id'       => $user->dinas_id ?? null,
+            'bidang_id'      => $user->bidang_id ?? null,
+            'sub_bidang_id'  => $user->sub_bidang_id ?? null,
         ]);
 
         $spt->pegawais()->sync($validated['pegawai_ids']);

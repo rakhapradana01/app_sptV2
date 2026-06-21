@@ -22,9 +22,10 @@ class SPPDController extends Controller
             'tempat_berangkat' => 'required|string',
             'tempat_tujuan'   => 'required|string',
             'tanggal_sppd'    => 'required|date',
-            'tempat_tujuan_2' => 'string'
+            'tempat_tujuan_2' => 'nullable|string'
         ]);
-        $nota = NotaDinas::findOrfail($notaId);
+        $nota = NotaDinas::findOrFail($notaId);
+        $user = auth()->user();
 
         Sppd::create([
             'nota_dinas_id'    => $nota->id,
@@ -33,7 +34,10 @@ class SPPDController extends Controller
             'tempat_berangkat' => $request->tempat_berangkat,
             'tempat_tujuan'    => $request->tempat_tujuan,
             'tanggal_sppd'     => $request->tanggal_sppd,
-            'tempat_tujuan_2'  => $request->tempat_tujuan_2
+            'tempat_tujuan_2'  => $request->tempat_tujuan_2,
+            'dinas_id'         => $user->dinas_id ?? null,
+            'bidang_id'        => $user->bidang_id ?? null,
+            'sub_bidang_id'    => $user->sub_bidang_id ?? null,
         ]);
         return redirect()->back()->with('success', 'Data SPPD berhasil dibuat.');
     }
@@ -65,9 +69,19 @@ class SPPDController extends Controller
 
     public function index()
     {
-        $sppds = Sppd::with('pegawais')
-            ->whereNull('nota_dinas_id')
-            ->latest()
+        $user = auth()->user();
+        $query = Sppd::with('pegawais')
+            ->whereNull('nota_dinas_id');
+
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            if (!$user->bidang_id) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where('bidang_id', $user->bidang_id);
+            }
+        }
+
+        $sppds = $query->latest()
             ->paginate(10);
 
         return view('pages.sppd.index', compact('sppds'));
@@ -97,6 +111,7 @@ class SPPDController extends Controller
             'pegawai_ids.*'    => 'exists:pegawais,id',
         ]);
 
+        $user = auth()->user();
         $sppd = Sppd::create([
             'nota_dinas_id'    => null,
             'nomor_sppd'       => $validated['nomor_sppd'],
@@ -109,6 +124,9 @@ class SPPDController extends Controller
             'tanggal_mulai'    => $validated['tanggal_mulai'],
             'tanggal_selesai'  => $validated['tanggal_selesai'] ?? null,
             'kegiatan'         => $validated['kegiatan'],
+            'dinas_id'         => $user->dinas_id ?? null,
+            'bidang_id'        => $user->bidang_id ?? null,
+            'sub_bidang_id'    => $user->sub_bidang_id ?? null,
         ]);
 
         $sppd->pegawais()->sync($validated['pegawai_ids']);

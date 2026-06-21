@@ -94,6 +94,9 @@ class MenuHelper
                     ];
                     if (\Illuminate\Support\Facades\Auth::user() && \Illuminate\Support\Facades\Auth::user()->role && \Illuminate\Support\Facades\Auth::user()->role->name === 'super_admin') {
                         $items[] = ['name' => 'Akun', 'path' => route('users.index'), 'pro' => false];
+                        $items[] = ['name' => 'Dinas', 'path' => route('dinas.index'), 'pro' => false];
+                        $items[] = ['name' => 'Bidang', 'path' => route('bidang.index'), 'pro' => false];
+                        $items[] = ['name' => 'Sub Bidang', 'path' => route('sub-bidang.index'), 'pro' => false];
                     }
                     return $items;
                 })(),

@@ -15,18 +15,43 @@ class DashboardController extends Controller
     public function index()
     {
         $now = Carbon::now();
+        $user = auth()->user();
 
         // 1. Total Sub Kegiatan
-        $totalSubKegiatan = SubKegiatan::count();
+        $subKegiatanQuery = SubKegiatan::query();
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $subKegiatanQuery->where('bidang_id', $user->bidang_id);
+        }
+        $totalSubKegiatan = $subKegiatanQuery->count();
 
         // 2. Total PPTK
-        $totalPptk = Pegawai::whereHas('subKegiatans')->count();
+        $pptkQuery = Pegawai::query();
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $pptkQuery->whereHas('subKegiatans', function ($q) use ($user) {
+                $q->where('bidang_id', $user->bidang_id);
+            });
+        } else {
+            $pptkQuery->whereHas('subKegiatans');
+        }
+        $totalPptk = $pptkQuery->count();
 
         // 3. Total Pagu (Total Anggaran Uraian)
-        $totalPagu = Uraian::sum('total_anggaran');
+        $paguQuery = Uraian::query();
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $paguQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                $q->where('bidang_id', $user->bidang_id);
+            });
+        }
+        $totalPagu = $paguQuery->sum('total_anggaran');
 
         // 4. Total Realisasi (Anggaran Terpakai Uraian)
-        $totalRealisasi = Uraian::sum('anggaran_terpakai');
+        $realisasiQuery = Uraian::query();
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $realisasiQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                $q->where('bidang_id', $user->bidang_id);
+            });
+        }
+        $totalRealisasi = $realisasiQuery->sum('anggaran_terpakai');
 
         // 5. Sisa Anggaran
         $sisaAnggaran = $totalPagu - $totalRealisasi;
@@ -35,18 +60,30 @@ class DashboardController extends Controller
         $persenRealisasi = $totalPagu > 0 ? round(($totalRealisasi / $totalPagu) * 100) : 0;
 
         // 7. Total OK Target & Terpakai
-        $okTotal = Uraian::sum('ok_total');
-        $okTerpakai = Uraian::sum('ok_terpakai');
+        $okTotalQuery = Uraian::query();
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $okTotalQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                $q->where('bidang_id', $user->bidang_id);
+            });
+        }
+        $okTotal = $okTotalQuery->sum('ok_total');
+        $okTerpakai = $okTotalQuery->sum('ok_terpakai');
         $persenOk = $okTotal > 0 ? round(($okTerpakai / $okTotal) * 100) : 0;
 
         // 8. Total SPT
-        $totalSpt = Spt::count();
+        $sptQuery = Spt::query();
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $sptQuery->where('bidang_id', $user->bidang_id);
+        }
+        $totalSpt = $sptQuery->count();
 
         // 9. Sub Kegiatan Budget Breakdown
         $querySub = SubKegiatan::with(['pegawai', 'uraians']);
-        $user = auth()->user();
         if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+            $querySub->where('bidang_id', $user->bidang_id);
+        }
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $querySub->where('bidang_id', $user->bidang_id);
         }
 
         $subKegiatans = $querySub->get()
@@ -71,8 +108,11 @@ class DashboardController extends Controller
             ->take(5);
 
         // 10. Aktivitas Terbaru (Nota Dinas)
-        $recentActivities = NotaDinas::with(['subKegiatan', 'kepada', 'spt'])
-            ->orderBy('created_at', 'desc')
+        $recentQuery = NotaDinas::with(['subKegiatan', 'kepada', 'spt']);
+        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
+            $recentQuery->where('bidang_id', $user->bidang_id);
+        }
+        $recentActivities = $recentQuery->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
