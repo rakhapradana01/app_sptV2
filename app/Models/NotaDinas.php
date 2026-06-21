@@ -25,7 +25,10 @@ class NotaDinas extends Model
         'kegiatan',
         'revisi',
         'lampiran',
-        'sifat'
+        'sifat',
+        'dinas_id',
+        'bidang_id',
+        'sub_bidang_id'
     ];
 
     const DRAFT = 'draft';
@@ -40,6 +43,21 @@ class NotaDinas extends Model
     public function subKegiatan()
     {
         return $this->belongsTo(SubKegiatan::class);
+    }
+
+    public function dinas()
+    {
+        return $this->belongsTo(Dinas::class);
+    }
+
+    public function bidang()
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
+    public function subBidang()
+    {
+        return $this->belongsTo(SubBidang::class);
     }
 
     public function kepada()

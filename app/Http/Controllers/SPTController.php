@@ -77,7 +77,12 @@ class SPTController extends Controller
 
     public function create()
     {
-        $subKegiatans = SubKegiatan::all();
+        $querySub = SubKegiatan::query();
+        $user = auth()->user();
+        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
+            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+        }
+        $subKegiatans = $querySub->get();
         $pegawais     = Pegawai::orderBy('nama')->get();
 
         return view('pages.spt.create', compact('subKegiatans', 'pegawais'));

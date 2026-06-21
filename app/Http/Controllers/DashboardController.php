@@ -43,8 +43,13 @@ class DashboardController extends Controller
         $totalSpt = Spt::count();
 
         // 9. Sub Kegiatan Budget Breakdown
-        $subKegiatans = SubKegiatan::with(['pegawai', 'uraians'])
-            ->get()
+        $querySub = SubKegiatan::with(['pegawai', 'uraians']);
+        $user = auth()->user();
+        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
+            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+        }
+
+        $subKegiatans = $querySub->get()
             ->map(function ($sub) {
                 $pagu = $sub->uraians->sum('total_anggaran');
                 $realisasi = $sub->uraians->sum('anggaran_terpakai');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Dinas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,9 +12,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('role')->latest()->paginate(10);
+        $users = User::with(['role', 'dinas', 'bidang', 'subBidang'])->latest()->paginate(10);
         $roles = Role::whereNotIn('name', ['super_admin', 'admin'])->get();
-        return view('pages.master.users.index', compact('users', 'roles'));
+        $dinas = Dinas::orderBy('nama_dinas')->get();
+        return view('pages.master.users.index', compact('users', 'roles', 'dinas'));
     }
 
     public function store(Request $request)
@@ -26,6 +28,9 @@ class UserController extends Controller
                 'required',
                 \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin', 'admin'])
             ],
+            'dinas_id' => 'nullable|exists:dinas,id',
+            'bidang_id' => 'nullable|exists:bidangs,id',
+            'sub_bidang_id' => 'nullable|exists:sub_bidangs,id',
         ], [
             'username.unique' => 'Username sudah digunakan oleh akun lain.',
             'password.min' => 'Password minimal 6 karakter.',
@@ -36,6 +41,9 @@ class UserController extends Controller
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role_id' => $request->role_id,
+            'dinas_id' => $request->dinas_id,
+            'bidang_id' => $request->bidang_id,
+            'sub_bidang_id' => $request->sub_bidang_id,
         ]);
 
         return redirect()->route('users.index')
@@ -54,6 +62,9 @@ class UserController extends Controller
                 'required',
                 \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin', 'admin'])
             ],
+            'dinas_id' => 'nullable|exists:dinas,id',
+            'bidang_id' => 'nullable|exists:bidangs,id',
+            'sub_bidang_id' => 'nullable|exists:sub_bidangs,id',
         ], [
             'username.unique' => 'Username sudah digunakan oleh akun lain.',
             'password.min' => 'Password minimal 6 karakter.',
@@ -63,6 +74,9 @@ class UserController extends Controller
             'name' => $request->name,
             'username' => $request->username,
             'role_id' => $request->role_id,
+            'dinas_id' => $request->dinas_id,
+            'bidang_id' => $request->bidang_id,
+            'sub_bidang_id' => $request->sub_bidang_id,
         ];
 
         if ($request->filled('password')) {

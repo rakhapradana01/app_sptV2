@@ -38,7 +38,12 @@ class NotaDinasController extends Controller
             'melalui'
         ])->latest()->paginate(10);
 
-        $subKegiatans = SubKegiatan::all();
+        $querySub = SubKegiatan::query();
+        $user = auth()->user();
+        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
+            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+        }
+        $subKegiatans = $querySub->get();
         $pegawais = Pegawai::all();
 
         return view('pages.nota_dinas.index', compact(
@@ -74,13 +79,17 @@ class NotaDinasController extends Controller
 
     public function create()
     {
-        $subKegiatans = SubKegiatan::all();
+        $querySub = SubKegiatan::query();
+        $user = auth()->user();
+        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
+            $querySub->where('unit_kerja_id', $user->unit_kerja_id);
+        }
+        $subKegiatans = $querySub->get();
 
         $kepalaBadan = Pegawai::where('jabatan', 'like','Kepala Badan%')->get();
         $kepalaBidang = Pegawai::where('jabatan', 'like', 'Kepala Bidang%')->get();
         $kasubid = Pegawai::where('jabatan', 'like', 'Kepala Sub Bidang%')->get();
         $staff = Pegawai::all();
-        $subKegiatans = SubKegiatan::all();
 
         return view('pages.nota_dinas.create', compact(
             'kepalaBadan',

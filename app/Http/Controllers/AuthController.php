@@ -53,7 +53,8 @@ class AuthController extends Controller
     public function register()
     {
         $roles = \App\Models\Role::whereNotIn('name', ['super_admin', 'admin'])->get();
-        return view('pages.auth.signup', compact('roles'));
+        $dinas = \App\Models\Dinas::orderBy('nama_dinas')->get();
+        return view('pages.auth.signup', compact('roles', 'dinas'));
     }
 
     public function storeRegister(Request $request)
@@ -66,6 +67,9 @@ class AuthController extends Controller
                 'required',
                 \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin', 'admin'])
             ],
+            'dinas_id' => 'nullable|exists:dinas,id',
+            'bidang_id' => 'nullable|exists:bidangs,id',
+            'sub_bidang_id' => 'nullable|exists:sub_bidangs,id',
         ], [
             'username.unique' => 'Username sudah digunakan oleh akun lain.',
             'password.min' => 'Password minimal 6 karakter.',
@@ -77,6 +81,9 @@ class AuthController extends Controller
             'username' => $request->username,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'role_id' => $request->role_id,
+            'dinas_id' => $request->dinas_id,
+            'bidang_id' => $request->bidang_id,
+            'sub_bidang_id' => $request->sub_bidang_id,
         ]);
 
         Auth::login($user);

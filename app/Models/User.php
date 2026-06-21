@@ -16,7 +16,10 @@ class User extends Authenticatable
         'name',
         'username',
         'password',
-        'role_id'
+        'role_id',
+        'dinas_id',
+        'bidang_id',
+        'sub_bidang_id'
     ];
 
 
@@ -28,6 +31,21 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function dinas(): BelongsTo
+    {
+        return $this->belongsTo(Dinas::class);
+    }
+
+    public function bidang(): BelongsTo
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
+    public function subBidang(): BelongsTo
+    {
+        return $this->belongsTo(SubBidang::class);
     }
 
 

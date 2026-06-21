@@ -67,6 +67,47 @@
                                         @endif
                                     </div>
 
+                                    <div x-data="cascadingDropdowns" class="space-y-4">
+                                        <div>
+                                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                                Dinas <span class="text-gray-400">(Opsional)</span>
+                                            </label>
+                                            <select id="dinas_id" name="dinas_id" x-model="dinas_id" @change="fetchBidangs"
+                                                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                                                <option value="">Tanpa Dinas</option>
+                                                @foreach($dinas as $d)
+                                                    <option value="{{ $d->id }}">{{ $d->nama_dinas }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div x-show="dinas_id && bidangs.length > 0">
+                                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                                Bidang <span class="text-gray-400">(Opsional)</span>
+                                            </label>
+                                            <select id="bidang_id" name="bidang_id" x-model="bidang_id" @change="fetchSubBidangs"
+                                                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                                                <option value="">Pilih Bidang</option>
+                                                <template x-for="bidang in bidangs" :key="bidang.id">
+                                                    <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <div x-show="bidang_id && subBidangs.length > 0">
+                                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                                Sub Bidang <span class="text-gray-400">(Opsional)</span>
+                                            </label>
+                                            <select id="sub_bidang_id" name="sub_bidang_id"
+                                                class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                                                <option value="">Pilih Sub Bidang</option>
+                                                <template x-for="sub in subBidangs" :key="sub.id">
+                                                    <option :value="sub.id" x-text="sub.nama_sub_bidang"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                             Password<span class="text-error-500">*</span>
@@ -145,3 +186,34 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('cascadingDropdowns', () => ({
+            dinas_id: '',
+            bidang_id: '',
+            bidangs: [],
+            subBidangs: [],
+            
+            async fetchBidangs() {
+                this.bidang_id = '';
+                this.bidangs = [];
+                this.subBidangs = [];
+                if (this.dinas_id) {
+                    let response = await fetch(`/api/bidangs/${this.dinas_id}`);
+                    this.bidangs = await response.json();
+                }
+            },
+
+            async fetchSubBidangs() {
+                this.subBidangs = [];
+                if (this.bidang_id) {
+                    let response = await fetch(`/api/sub-bidangs/${this.bidang_id}`);
+                    this.subBidangs = await response.json();
+                }
+            }
+        }));
+    });
+</script>
+@endpush

@@ -21,6 +21,9 @@ class Spt extends Model
         'lokasi',
         'kegiatan',
         'sub_kegiatan_id',
+        'dinas_id',
+        'bidang_id',
+        'sub_bidang_id',
     ];
 
     protected $casts = [
@@ -40,6 +43,21 @@ class Spt extends Model
     public function subKegiatan(): BelongsTo
     {
         return $this->belongsTo(SubKegiatan::class, 'sub_kegiatan_id');
+    }
+
+    public function dinas(): BelongsTo
+    {
+        return $this->belongsTo(Dinas::class);
+    }
+
+    public function bidang(): BelongsTo
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
+    public function subBidang(): BelongsTo
+    {
+        return $this->belongsTo(SubBidang::class);
     }
 
     /**

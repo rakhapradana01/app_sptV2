@@ -9,7 +9,6 @@
                     Selamat Datang di Sistem Monitoring SPT & SPJ
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Berikut adalah ikhtisar realisasi pagu anggaran, target kuota (OK), dan dokumen aktif saat ini.
                 </p>
             </div>
             

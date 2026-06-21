@@ -12,7 +12,10 @@ class SubKegiatan extends Model
         'pegawai_kasubid_id',
         'koefisien',
         'harga_satuan',
-        'pagu'
+        'pagu',
+        'dinas_id',
+        'bidang_id',
+        'sub_bidang_id'
     ];
     // public function realisasis()
     // {
@@ -31,6 +34,21 @@ class SubKegiatan extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_kasubid_id');
+    }
+
+    public function dinas()
+    {
+        return $this->belongsTo(Dinas::class);
+    }
+
+    public function bidang()
+    {
+        return $this->belongsTo(Bidang::class);
+    }
+
+    public function subBidang()
+    {
+        return $this->belongsTo(SubBidang::class);
     }
 
     public function uraians()

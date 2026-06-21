@@ -10,7 +10,14 @@ class SubKegiatanController extends Controller
 {
     public function index()
     {
-        $subKegiatan = SubKegiatan::paginate(10);
+        $query = SubKegiatan::query();
+        
+        $user = auth()->user();
+        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
+            $query->where('unit_kerja_id', $user->unit_kerja_id);
+        }
+
+        $subKegiatan = $query->paginate(10);
         // dd($subKegiatan->all());
         $pegawais = Pegawai::paginate(10);
         return view('pages.master.sub_kegiatan.index', compact('subKegiatan', 'pegawais'));

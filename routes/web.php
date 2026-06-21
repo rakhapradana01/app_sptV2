@@ -9,6 +9,9 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\SPPDController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SubKegiatanController;
+use App\Http\Controllers\DinasController;
+use App\Http\Controllers\BidangController;
+use App\Http\Controllers\SubBidangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 
@@ -27,6 +30,9 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('role:super_admin')->group(function () {
             Route::resource('pegawai', PegawaiController::class);
             Route::resource('users', UserController::class);
+            Route::resource('dinas', DinasController::class);
+            Route::resource('bidang', BidangController::class);
+            Route::resource('sub-bidang', SubBidangController::class);
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);
