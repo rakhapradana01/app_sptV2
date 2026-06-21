@@ -100,3 +100,66 @@ test('rekap-pegawai route returns the correct json and handles month range', fun
     $responseExcel->assertStatus(200);
     $responseExcel->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 });
+
+test('rekap-pegawai-tahunan route returns the correct yearly breakdown', function () {
+    // Setup roles
+    $role = Role::create(['name' => 'super_admin']);
+    $user = User::create([
+        'name' => 'Admin Test 2',
+        'username' => 'admin_test_2',
+        'password' => bcrypt('password'),
+        'role_id' => $role->id,
+    ]);
+
+    // Setup models
+    $pegawai = Pegawai::create([
+        'nama'    => 'Jane Smith Test',
+        'nip'     => '0987654321',
+        'jabatan' => 'Staff',
+        'pangkat' => 'III/a',
+    ]);
+
+    // Buat SubKegiatan untuk foreign key nota dinas
+    $sub = \App\Models\SubKegiatan::create([
+        'pegawai_kasubid_id' => $pegawai->id,
+        'nama_kegiatan'      => 'Sub Kegiatan Dashboard Test 2',
+        'nomor_rekening'     => '5.1.2',
+        'harga_satuan'       => 0,
+        'koefisien'          => 0,
+        'pagu'               => 0,
+    ]);
+
+    // Create a NotaDinas for $pegawai in April 2026
+    $nota1 = NotaDinas::create([
+        'sub_kegiatan_id'  => $sub->id,
+        'kepada_id'        => $pegawai->id,
+        'dari_id'          => $pegawai->id,
+        'nomor_urut'       => 1,
+        'tanggal'          => '2026-04-15',
+        'tanggal_mulai'    => '2026-04-15',
+        'tanggal_selesai'  => '2026-04-18',
+        'perihal'          => 'Perjalanan Dinas A',
+        'kegiatan'         => 'Kegiatan A',
+        'lokasi'           => 'Banjarmasin',
+        'asal_undangan'    => 'Internal',
+        'jenis_perjalanan' => 'dalam_daerah',
+        'status'           => 'draft',
+    ]);
+    $nota1->pegawais()->attach($pegawai->id);
+
+    $this->actingAs($user);
+
+    $response = $this->getJson(route('dashboard.rekap.tahunan', [
+        'tahun' => 2026,
+    ]));
+
+    $response->assertStatus(200);
+    $response->assertJsonPath('tahun', 2026);
+
+    $pegawais = $response->json('pegawais');
+    $jane = collect($pegawais)->firstWhere('nama', 'Jane Smith Test');
+    expect($jane)->not->toBeNull();
+    expect($jane['apr'])->toBe(1);
+    expect($jane['jan'])->toBe(0);
+    expect($jane['total'])->toBe(1);
+});

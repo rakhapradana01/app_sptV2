@@ -90,23 +90,78 @@ class DashboardController extends Controller
     /**
      * Halaman Rekap Perjalanan Pegawai (dipindah dari Dashboard ke Monev)
      */
-    public function rekapPegawaiPage()
+    public function rekapPegawaiPage(Request $request)
     {
-        $now = Carbon::now();
-        $awalBulan = $now->copy()->startOfMonth()->toDateString();
-        $akhirBulan = $now->copy()->endOfMonth()->toDateString();
-        $namaBulan = $now->translatedFormat('F Y');
+        $tahun = (int) $request->get('tahun', now()->year);
 
         $rekapPegawai = Pegawai::withCount([
-            'notaDinas' => function ($query) use ($awalBulan, $akhirBulan) {
-                $query->whereBetween('nota_dinas.tanggal_mulai', [$awalBulan, $akhirBulan]);
-            }
+            'notaDinas as jan' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 1),
+            'notaDinas as feb' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 2),
+            'notaDinas as mar' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 3),
+            'notaDinas as apr' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 4),
+            'notaDinas as mei' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 5),
+            'notaDinas as jun' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 6),
+            'notaDinas as jul' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 7),
+            'notaDinas as ags' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 8),
+            'notaDinas as sep' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 9),
+            'notaDinas as okt' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 10),
+            'notaDinas as nov' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 11),
+            'notaDinas as des' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 12),
+            'notaDinas as total' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun),
         ])
-            ->orderBy('nota_dinas_count', 'desc')
-            ->take(10)
+            ->orderBy('total', 'desc')
             ->get();
 
-        return view('pages.monev.rekap-pegawai', compact('rekapPegawai', 'namaBulan'));
+        return view('pages.monev.rekap-pegawai', compact('rekapPegawai', 'tahun'));
+    }
+
+    /**
+     * AJAX endpoint: rekap perjalanan pegawai per tahun (breakdown bulanan)
+     * GET /dashboard/rekap-pegawai-tahunan?tahun=2026
+     */
+    public function rekapByTahun(Request $request)
+    {
+        $tahun = (int) $request->get('tahun', now()->year);
+
+        $pegawais = Pegawai::withCount([
+            'notaDinas as jan' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 1),
+            'notaDinas as feb' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 2),
+            'notaDinas as mar' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 3),
+            'notaDinas as apr' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 4),
+            'notaDinas as mei' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 5),
+            'notaDinas as jun' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 6),
+            'notaDinas as jul' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 7),
+            'notaDinas as ags' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 8),
+            'notaDinas as sep' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 9),
+            'notaDinas as okt' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 10),
+            'notaDinas as nov' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 11),
+            'notaDinas as des' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 12),
+            'notaDinas as total' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun),
+        ])
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(fn($p) => [
+                'nama'  => $p->nama,
+                'nip'   => $p->nip ?? '-',
+                'jan'   => $p->jan,
+                'feb'   => $p->feb,
+                'mar'   => $p->mar,
+                'apr'   => $p->apr,
+                'mei'   => $p->mei,
+                'jun'   => $p->jun,
+                'jul'   => $p->jul,
+                'ags'   => $p->ags,
+                'sep'   => $p->sep,
+                'okt'   => $p->okt,
+                'nov'   => $p->nov,
+                'des'   => $p->des,
+                'total' => $p->total,
+            ]);
+
+        return response()->json([
+            'tahun'    => $tahun,
+            'pegawais' => $pegawais,
+        ]);
     }
 
     /**

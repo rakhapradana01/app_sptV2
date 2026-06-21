@@ -20,6 +20,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/rekap-pegawai', [DashboardController::class, 'rekapByBulan'])->name('dashboard.rekap');
+        Route::get('/dashboard/rekap-pegawai-tahunan', [DashboardController::class, 'rekapByTahun'])->name('dashboard.rekap.tahunan');
         Route::get('/dashboard/export-rekap', [DashboardController::class, 'exportExcel'])->name('dashboard.export');
 
         Route::middleware('role:super_admin')->group(function () {
