@@ -33,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('dinas', DinasController::class);
             Route::resource('bidang', BidangController::class);
             Route::resource('sub-bidang', SubBidangController::class);
+        });
+
+        Route::middleware('role:super_admin,admin')->group(function () {
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);

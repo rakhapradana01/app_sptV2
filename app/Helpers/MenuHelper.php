@@ -89,14 +89,17 @@ class MenuHelper
                 'icon' => 'database',
                 'path' => '#',
                 'subItems' => (function() {
-                    $items = [
-                        ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false],
-                    ];
-                    if (\Illuminate\Support\Facades\Auth::user() && \Illuminate\Support\Facades\Auth::user()->role && \Illuminate\Support\Facades\Auth::user()->role->name === 'super_admin') {
+                    $items = [];
+                    $role = \Illuminate\Support\Facades\Auth::user()?->role?->name;
+                    if ($role === 'super_admin') {
+                        $items[] = ['name' => 'Pegawai', 'path' => route('pegawai.index'), 'pro' => false];
                         $items[] = ['name' => 'Akun', 'path' => route('users.index'), 'pro' => false];
                         $items[] = ['name' => 'Dinas', 'path' => route('dinas.index'), 'pro' => false];
                         $items[] = ['name' => 'Bidang', 'path' => route('bidang.index'), 'pro' => false];
                         $items[] = ['name' => 'Sub Bidang', 'path' => route('sub-bidang.index'), 'pro' => false];
+                    }
+                    if (in_array($role, ['super_admin', 'admin'])) {
+                        $items[] = ['name' => 'Sub Kegiatan', 'path' => route('sub-kegiatan.index'), 'pro' => false];
                     }
                     return $items;
                 })(),
@@ -104,6 +107,7 @@ class MenuHelper
         ];
         $roleMenuMap = [
             'super_admin'       => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'admin'             => ['Dashboard', 'Master', 'Monitoring dan Evaluasi'],
             'kepala_sub_bidang' => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'kepala_bidang'     => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'user'              => ['Master']

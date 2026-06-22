@@ -29,6 +29,12 @@ class PegawaiSeeder extends Seeder
                 'pangkat' => 'Pembina (IV/a)',
             ],
             [
+                'nama' => 'supri',
+                'nip' => '19810503 200501 2 017',
+                'jabatan' => 'Kepala Sub Bidang PAPKD I',
+                'pangkat' => 'Pembina (IV/a)',
+            ],
+            [
                 'nama' => 'MUHAMMAD KHARIS ELYANI, S.E., M.M.',
                 'nip' => '19870304 201101 1 001',
                 'jabatan' => 'Kepala Sub Bidang Perencanaan Anggaran Daerah I',

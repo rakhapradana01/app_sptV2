@@ -106,30 +106,31 @@
             </div>
 
             <!-- Modal Tambah User -->
-            <x-ui.modal x-data="{
-                    open: false,
-                    dinas_id: '', bidang_id: '', sub_bidang_id: '',
-                    bidangs: [], subBidangs: [],
-                    async fetchBidangs() {
-                        this.bidang_id = ''; this.sub_bidang_id = '';
-                        this.bidangs = []; this.subBidangs = [];
-                        if (this.dinas_id) {
-                            let response = await fetch('/api/bidangs/'+this.dinas_id);
-                            this.bidangs = await response.json();
-                        }
-                    },
-                    async fetchSubBidangs() {
-                        this.sub_bidang_id = '';
-                        this.subBidangs = [];
-                        if (this.bidang_id) {
-                            let response = await fetch('/api/sub-bidangs/'+this.bidang_id);
-                            this.subBidangs = await response.json();
-                        }
-                    }
-                }" 
-                @open-user-create-modal.window="open = true; dinas_id=''; bidang_id=''; sub_bidang_id=''; bidangs=[]; subBidangs=[];" 
+            <x-ui.modal 
+                @open-user-create-modal.window="open = true" 
                 :isOpen="false" class="max-w-[600px]">
-                <div class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
+                <div x-data="{
+                        dinas_id: '', bidang_id: '', sub_bidang_id: '',
+                        bidangs: [], subBidangs: [],
+                        async fetchBidangs() {
+                            this.bidang_id = ''; this.sub_bidang_id = '';
+                            this.bidangs = []; this.subBidangs = [];
+                            if (this.dinas_id) {
+                                let response = await fetch('/api/bidangs/'+this.dinas_id);
+                                this.bidangs = await response.json();
+                            }
+                        },
+                        async fetchSubBidangs() {
+                            this.sub_bidang_id = '';
+                            this.subBidangs = [];
+                            if (this.bidang_id) {
+                                let response = await fetch('/api/sub-bidangs/'+this.bidang_id);
+                                this.subBidangs = await response.json();
+                            }
+                        }
+                    }" 
+                    @open-user-create-modal.window="dinas_id=''; bidang_id=''; sub_bidang_id=''; bidangs=[]; subBidangs=[];"
+                    class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
                     <div class="mb-6">
                         <h4 class="text-xl font-bold text-gray-900 dark:text-white">
                             Tambah Akun Baru
@@ -180,7 +181,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
-                                    Dinas <span class="text-gray-400">(Opsional)</span>
+                                    Dinas <span class="text-gray-400"></span>
                                 </label>
                                 <select name="dinas_id" x-model="dinas_id" @change="fetchBidangs"
                                     class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
@@ -193,33 +194,33 @@
 
                             <div x-show="dinas_id && bidangs.length > 0">
                                 <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
-                                    Bidang <span class="text-gray-400">(Opsional)</span>
+                                    Bidang <span class="text-gray-400"></span>
                                 </label>
                                 <select name="bidang_id" x-model="bidang_id" @change="fetchSubBidangs"
                                     class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                     <option value="">Pilih Bidang</option>
                                     <template x-for="bidang in bidangs" :key="bidang.id">
-                                        <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
+                                        <option :value="bidang.id" x-text="bidang.nama_bidang" :selected="bidang.id == bidang_id"></option>
                                     </template>
                                 </select>
                             </div>
 
                             <div x-show="bidang_id && subBidangs.length > 0">
                                 <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
-                                    Sub Bidang <span class="text-gray-400">(Opsional)</span>
+                                    Sub Bidang <span class="text-gray-400"></span>
                                 </label>
                                 <select name="sub_bidang_id" x-model="sub_bidang_id"
                                     class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                     <option value="">Pilih Sub Bidang</option>
                                     <template x-for="sub in subBidangs" :key="sub.id">
-                                        <option :value="sub.id" x-text="sub.nama_sub_bidang"></option>
+                                        <option :value="sub.id" x-text="sub.nama_sub_bidang" :selected="sub.id == sub_bidang_id"></option>
                                     </template>
                                 </select>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <button @click="open = false" type="button"
+                            <button @click="$dispatch('close-modal') || (open = false)" type="button"
                                 class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">
                                 Batal
                             </button>
@@ -233,44 +234,46 @@
             </x-ui.modal>
 
             <!-- Modal Edit User -->
-            <x-ui.modal x-data="{
-                    open: false, id: '', name: '', username: '', role_id: '',
-                    dinas_id: '', bidang_id: '', sub_bidang_id: '',
-                    bidangs: [], subBidangs: [],
-                    async fetchBidangs() {
-                        this.bidang_id = ''; this.sub_bidang_id = '';
-                        this.bidangs = []; this.subBidangs = [];
-                        if (this.dinas_id) {
-                            let response = await fetch('/api/bidangs/'+this.dinas_id);
-                            this.bidangs = await response.json();
-                        }
-                    },
-                    async fetchSubBidangs() {
-                        this.sub_bidang_id = '';
-                        this.subBidangs = [];
-                        if (this.bidang_id) {
-                            let response = await fetch('/api/sub-bidangs/'+this.bidang_id);
-                            this.subBidangs = await response.json();
-                        }
-                    },
-                    async loadInitialData() {
-                        if (this.dinas_id) {
-                            let r1 = await fetch('/api/bidangs/'+this.dinas_id);
-                            this.bidangs = await r1.json();
-                        }
-                        if (this.bidang_id) {
-                            let r2 = await fetch('/api/sub-bidangs/'+this.bidang_id);
-                            this.subBidangs = await r2.json();
-                        }
-                    }
-                }" 
-                @open-user-edit-modal.window="
-                    open = true; id = $event.detail.id; name = $event.detail.name; username = $event.detail.username; role_id = $event.detail.role_id;
-                    dinas_id = $event.detail.dinas_id; bidang_id = $event.detail.bidang_id; sub_bidang_id = $event.detail.sub_bidang_id;
-                    loadInitialData();
-                " 
+            <x-ui.modal 
+                @open-user-edit-modal.window="open = true" 
                 :isOpen="false" class="max-w-[600px]">
-                <div class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
+                <div x-data="{
+                        id: '', name: '', username: '', role_id: '',
+                        dinas_id: '', bidang_id: '', sub_bidang_id: '',
+                        bidangs: [], subBidangs: [],
+                        async fetchBidangs() {
+                            this.bidang_id = ''; this.sub_bidang_id = '';
+                            this.bidangs = []; this.subBidangs = [];
+                            if (this.dinas_id) {
+                                let response = await fetch('/api/bidangs/'+this.dinas_id);
+                                this.bidangs = await response.json();
+                            }
+                        },
+                        async fetchSubBidangs() {
+                            this.sub_bidang_id = '';
+                            this.subBidangs = [];
+                            if (this.bidang_id) {
+                                let response = await fetch('/api/sub-bidangs/'+this.bidang_id);
+                                this.subBidangs = await response.json();
+                            }
+                        },
+                        async loadInitialData() {
+                            if (this.dinas_id) {
+                                let r1 = await fetch('/api/bidangs/'+this.dinas_id);
+                                this.bidangs = await r1.json();
+                            }
+                            if (this.bidang_id) {
+                                let r2 = await fetch('/api/sub-bidangs/'+this.bidang_id);
+                                this.subBidangs = await r2.json();
+                            }
+                        }
+                    }" 
+                    @open-user-edit-modal.window="
+                        id = $event.detail.id; name = $event.detail.name; username = $event.detail.username; role_id = $event.detail.role_id;
+                        dinas_id = $event.detail.dinas_id; bidang_id = $event.detail.bidang_id; sub_bidang_id = $event.detail.sub_bidang_id;
+                        loadInitialData();
+                    "
+                    class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
                     <div class="mb-6">
                         <h4 class="text-xl font-bold text-gray-900 dark:text-white">
                             Edit Akun Pengguna
@@ -341,7 +344,7 @@
                                     class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                     <option value="">Pilih Bidang</option>
                                     <template x-for="bidang in bidangs" :key="bidang.id">
-                                        <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
+                                        <option :value="bidang.id" x-text="bidang.nama_bidang" :selected="bidang.id == bidang_id"></option>
                                     </template>
                                 </select>
                             </div>
@@ -354,14 +357,14 @@
                                     class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
                                     <option value="">Pilih Sub Bidang</option>
                                     <template x-for="sub in subBidangs" :key="sub.id">
-                                        <option :value="sub.id" x-text="sub.nama_sub_bidang"></option>
+                                        <option :value="sub.id" x-text="sub.nama_sub_bidang" :selected="sub.id == sub_bidang_id"></option>
                                     </template>
                                 </select>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <button @click="open = false" type="button"
+                            <button @click="$dispatch('close-modal') || (open = false)" type="button"
                                 class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">
                                 Batal
                             </button>

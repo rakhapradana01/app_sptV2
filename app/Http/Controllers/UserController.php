@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with(['role', 'dinas', 'bidang', 'subBidang'])->latest()->paginate(10);
-        $roles = Role::whereNotIn('name', ['super_admin', 'admin'])->get();
+        $roles = Role::whereNotIn('name', ['super_admin'])->get();
         $dinas = Dinas::orderBy('nama_dinas')->get();
         return view('pages.master.users.index', compact('users', 'roles', 'dinas'));
     }
@@ -26,7 +26,7 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
             'role_id' => [
                 'required',
-                \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin', 'admin'])
+                \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin'])
             ],
             'dinas_id' => 'nullable|exists:dinas,id',
             'bidang_id' => 'nullable|exists:bidangs,id',
@@ -60,7 +60,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:6',
             'role_id' => [
                 'required',
-                \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin', 'admin'])
+                \Illuminate\Validation\Rule::exists('roles', 'id')->whereNotIn('name', ['super_admin'])
             ],
             'dinas_id' => 'nullable|exists:dinas,id',
             'bidang_id' => 'nullable|exists:bidangs,id',

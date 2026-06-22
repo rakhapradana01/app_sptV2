@@ -14,6 +14,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $superAdmin = Role::where('name', 'super_admin')->first();
+        $admin      = Role::where('name', 'admin')->first();
         $kasubid    = Role::where('name', 'kepala_sub_bidang')->first();
         $kabid      = Role::where('name', 'kepala_bidang')->first();
         $kaban      = Role::where('name', 'kepala_badan')->first();
@@ -24,6 +25,13 @@ class UserSeeder extends Seeder
             'username' => 'superadmin00',
             'password' => Hash::make('Password123'),
             'role_id' => $superAdmin->id
+        ]);
+
+        User::create([
+            'name' => 'Admin Bidang',
+            'username' => 'admin01',
+            'password' => Hash::make('Password123'),
+            'role_id' => $admin->id,
         ]);
 
         User::create([

@@ -33,6 +33,10 @@ class AuthController extends Controller
                 return redirect()->route('dashboard');
             }
 
+            if ($user->role->name === 'admin') {
+                return redirect()->route('sub-kegiatan.index');
+            }
+
             return redirect()->route('nota-dinas.index');
         }
 
@@ -90,6 +94,10 @@ class AuthController extends Controller
 
         if ($user->role->name === 'super_admin') {
             return redirect()->route('dashboard');
+        }
+
+        if ($user->role->name === 'admin') {
+            return redirect()->route('sub-kegiatan.index');
         }
 
         return redirect()->route('nota-dinas.index');
