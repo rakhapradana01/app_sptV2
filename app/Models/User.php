@@ -17,10 +17,16 @@ class User extends Authenticatable
         'username',
         'password',
         'role_id',
+        'pegawai_id',
         'dinas_id',
         'bidang_id',
         'sub_bidang_id'
     ];
+
+    public function pegawai(): BelongsTo
+    {
+        return $this->belongsTo(Pegawai::class);
+    }
 
 
     protected $hidden = [
@@ -49,6 +55,11 @@ class User extends Authenticatable
     }
 
 
+    public function subKegiatans()
+    {
+        return $this->hasMany(SubKegiatan::class, 'user_id');
+    }
+    
     protected function casts(): array
     {
         return [

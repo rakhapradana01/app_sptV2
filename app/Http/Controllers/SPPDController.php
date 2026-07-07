@@ -73,11 +73,17 @@ class SPPDController extends Controller
         $query = Sppd::with('pegawais')
             ->whereNull('nota_dinas_id');
 
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            if (!$user->bidang_id) {
-                $query->whereRaw('1 = 0');
-            } else {
-                $query->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $query->where('bidang_id', $user->bidang_id);
+                }
             }
         }
 
@@ -89,9 +95,14 @@ class SPPDController extends Controller
 
     public function create()
     {
-        $pegawais = Pegawai::orderBy('nama')->get();
-
-        return view('pages.sppd.create', compact('pegawais'));
+        $user = auth()->user();
+        $queryPeg = Pegawai::orderBy('nama');
+        if ($user && $user->bidang_id) {
+            $queryPeg->where('bidang_id', $user->bidang_id);
+        }
+        $pegawais = $queryPeg->get();
+ 
+         return view('pages.sppd.create', compact('pegawais'));
     }
 
     public function storeMandiri(Request $request)

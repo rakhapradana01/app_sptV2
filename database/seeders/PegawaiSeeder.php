@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Dinas;
 use Illuminate\Database\Seeder;
 use App\Models\Pegawai;
 
@@ -179,6 +180,13 @@ class PegawaiSeeder extends Seeder
                 'pangkat' => null,
             ],
         ];
+
+        // Semua pegawai ini milik BPKAD
+        $dinas = Dinas::where('nama_dinas', 'like', '%BPKAD%')->first();
+        $dinasId = $dinas?->id;
+
+        // Tambahkan dinas_id ke semua entri
+        $pegawais = array_map(fn($p) => array_merge($p, ['dinas_id' => $dinasId]), $pegawais);
 
         Pegawai::insert($pegawais);
     }

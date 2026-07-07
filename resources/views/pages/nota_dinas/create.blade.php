@@ -36,7 +36,8 @@
                             <label class="block mb-2 text-sm font-medium">Melalui (kepala bidang)</label>
                             <select name="melalui_id" class="w-full border rounded-lg p-2">
                                 @foreach ($kepalaBidang as $pegawai)
-                                    <option value="{{ $pegawai->id }}">
+                                    <option value="{{ $pegawai->id }}"
+                                        {{ $kepalaBidang->count() === 1 ? 'selected' : '' }}>
                                         {{ $pegawai->nama }}
                                     </option>
                                 @endforeach
@@ -45,14 +46,23 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-medium">Dari (kepala sub bidang)</label>
-                            <select name="dari_id" x-model="selectedKasubid" class="w-full border rounded-lg p-2">
-                                <option value="">-- Pilih --</option>
-                                @foreach ($kasubid as $pegawai)
-                                    <option value="{{ $pegawai->id }}">
-                                        {{ $pegawai->nama }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            @if ($userLogin->pegawai_id)
+                                {{-- User login sudah terhubung ke data pegawai --}}
+                                <input type="hidden" name="dari_id" value="{{ $userLogin->pegawai_id }}">
+                                <input type="text" readonly
+                                    value="{{ $userLogin->name }} ({{ $userLogin->pegawai->nama ?? '-' }})"
+                                    class="w-full border rounded-lg p-2 bg-gray-100 text-gray-700 cursor-not-allowed">
+                            @else
+                                {{-- User belum terhubung ke data pegawai, tampilkan peringatan --}}
+                                <div class="w-full border border-yellow-400 rounded-lg p-2 bg-yellow-50">
+                                    <p class="text-yellow-700 text-sm font-medium">
+                                        ⚠️ Akun <strong>{{ $userLogin->name }}</strong> belum terhubung ke data pegawai.
+                                    </p>
+                                    <p class="text-yellow-600 text-xs mt-1">
+                                        Hubungi admin untuk menghubungkan akun Anda ke data pegawai agar bisa membuat Nota Dinas.
+                                    </p>
+                                </div>
+                            @endif
                         </div>
 
                         <div>
@@ -61,7 +71,7 @@
                                 class="w-full border rounded-lg p-2">
                                 <option value="">-- Pilih --</option>
 
-                                <template x-for="sub in subKegiatans.filter(s => s.pegawai_kasubid_id == selectedKasubid)"
+                                <template x-for="sub in subKegiatans.filter(s => s.user_id == selectedKasubid || s.pegawai_kasubid_id == selectedKasubid)"
                                     :key="sub.id">
                                     <option :value="sub.id" x-text="sub.nomor_rekening + ' - ' + sub.nama_kegiatan">
                                     </option>
@@ -237,7 +247,7 @@
     <script>
         function notaDinasForm() {
             return {
-                selectedKasubid: '',
+                selectedKasubid: '{{ $userLogin->id }}',
                 subKegiatans: @json($subKegiatans),
                 pegawaisDilibatkan: [],
                 addPegawai(select) {

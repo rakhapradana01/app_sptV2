@@ -27,15 +27,23 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard/rekap-pegawai-tahunan', [DashboardController::class, 'rekapByTahun'])->name('dashboard.rekap.tahunan');
         Route::get('/dashboard/export-rekap', [DashboardController::class, 'exportExcel'])->name('dashboard.export');
 
-        Route::middleware('role:super_admin')->group(function () {
+        Route::middleware('role:super_admin,admin')->group(function () {
+            // Harus sebelum resource agar tidak bentrok dengan {pegawai} parameter
+            Route::get('/pegawai/template', [PegawaiController::class, 'downloadTemplate'])->name('pegawai.template');
+            Route::post('/pegawai/import', [PegawaiController::class, 'importExcel'])->name('pegawai.import');
             Route::resource('pegawai', PegawaiController::class);
             Route::resource('users', UserController::class);
+        });
+
+        Route::middleware('role:super_admin')->group(function () {
+            Route::post('/dinas/import', [DinasController::class, 'importExcel'])->name('dinas.import');
+            Route::get('/dinas/template', [DinasController::class, 'downloadTemplate'])->name('dinas.template');
             Route::resource('dinas', DinasController::class);
             Route::resource('bidang', BidangController::class);
             Route::resource('sub-bidang', SubBidangController::class);
         });
 
-        Route::middleware('role:super_admin,admin')->group(function () {
+        Route::middleware('role:super_admin,admin,kepala_sub_bidang')->group(function () {
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);
@@ -54,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:super_admin,kepala_sub_bidang,kepala_bidang')->group(function () {
 
         Route::get('/monev/pptk/{id}', [MonevController::class, 'pptkRekap'])->name('monev.pptk.rekap');
-        Route::get('/monev/sub-kegiatan/{id}', [MonevController::class, 'subKegiatanDetail'])->name('monev.sub-kegiatan.show');
+        Route::get('/monev/sub-kegiatan/{id}', [MonevController::class, 'subKegiatanShow'])->name('monev.sub-kegiatan.show');
 
         Route::resource('nota-dinas', NotaDinasController::class)
             ->parameters(['nota-dinas' => 'nota']);
@@ -139,5 +147,9 @@ Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticated'])
     ->name('login.authenticated');
 
-Route::get('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');
+
+// Register — hanya super_admin yang bisa menambah akun baru
+Route::middleware(['auth', 'role:super_admin'])->group(function () {
+    Route::get('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');
+});

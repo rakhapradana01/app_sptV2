@@ -4,31 +4,69 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Dinas;
+use App\Models\User;
 
 class AuthController extends Controller
 {
     public function index()
     {
-        return view('pages.auth.signin');
+        $dinas = Dinas::orderBy('nama_dinas')->get();
+
+        return view('pages.auth.signin', compact('dinas'));
     }
 
     public function authenticated(Request $request)
     {
-        $data = $request->validate([
+        // 1. Validasi awal: Jika bukan superadmin00, dinas wajib diisi
+        $isSuperAdmin = $request->input('username') === 'superadmin00';
+        
+        $rules = [
             'username' => 'required|min:2',
-            'password' => 'required|min:6'
-        ], [
-            'username.required' => 'Username wajib diisi',
-            'username.min' => 'Username minimal 2 karakter',
-            'password.required' => 'Password minimal 2 karakter',
-            'password.min' => 'Password minimal 6 karakter',
-        ]);
+            'password' => 'required|min:6',
+        ];
 
-        if (Auth::attempt($data)) {
+        $messages = [
+            'username.required' => 'Username wajib diisi.',
+            'username.min'      => 'Username minimal 2 karakter.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min'      => 'Password minimal 6 karakter.',
+        ];
 
+        if (!$isSuperAdmin) {
+            $rules['dinas'] = 'required|exists:dinas,id';
+            $messages['dinas.required'] = 'Silakan pilih Dinas terlebih dahulu.';
+            $messages['dinas.exists'] = 'Dinas tidak valid.';
+        }
+
+        $data = $request->validate($rules, $messages);
+
+        // 2. Cari user
+        if ($isSuperAdmin) {
+            $user = User::where('username', 'superadmin00')->first();
+        } else {
+            $user = User::where('username', $data['username'])
+                        ->where('dinas_id', $data['dinas'])
+                        ->first();
+        }
+
+        // Jika kombinasi tidak cocok di database
+        if (!$user) {
+            return redirect()->route('login')
+                ->withInput($request->only('username', 'dinas'))
+                ->with(['error' => $isSuperAdmin ? 'Akun Super Admin tidak terdaftar.' : 'Username tidak terdaftar di Dinas yang dipilih.']);
+        }
+
+        // 3. Jika user ditemukan di dinas tersebut, baru kita lakukan verifikasi password
+        $credentials = [
+            'username' => $data['username'],
+            'password' => $data['password']
+        ];
+
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            $user = Auth::user();
 
+            // Pengalihan halaman berdasarkan role
             if ($user->role->name === 'super_admin') {
                 return redirect()->route('dashboard');
             }
@@ -40,8 +78,10 @@ class AuthController extends Controller
             return redirect()->route('nota-dinas.index');
         }
 
+        // Jika password salah
         return redirect()->route('login')
-            ->with(['error' => 'Username atau password salah']);
+            ->withInput($request->only('username', 'dinas'))
+            ->with(['error' => 'Username atau password salah.']);
     }
 
     public function logout(Request $request)
@@ -57,7 +97,7 @@ class AuthController extends Controller
     public function register()
     {
         $roles = \App\Models\Role::whereNotIn('name', ['super_admin', 'admin'])->get();
-        $dinas = \App\Models\Dinas::orderBy('nama_dinas')->get();
+        $dinas = Dinas::orderBy('nama_dinas')->get();
         return view('pages.auth.signup', compact('roles', 'dinas'));
     }
 
@@ -80,7 +120,7 @@ class AuthController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $user = \App\Models\User::create([
+        $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),

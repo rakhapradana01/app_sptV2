@@ -10,6 +10,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Tom Select CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+
     @notifyCss
     <script>
         document.addEventListener('alpine:init', () => {
@@ -143,6 +146,118 @@ window.addEventListener('resize', checkMobile);">
         <x-ui.toast type="warning" :message="session('warning')" />
     @endif
     <script src="{{asset('js/jquery.min.js')}}"></script>
+
+    <!-- Tom Select JS & Global Init -->
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        /* Tom Select dark mode and theme styling matching our design */
+        .ts-wrapper {
+            width: 100% !important;
+            display: block !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            height: auto !important;
+        }
+        .ts-wrapper.single .ts-control {
+            background-color: transparent !important;
+            background-image: none !important;
+            border-color: #d1d5db !important; /* border-gray-300 */
+            border-radius: 0.5rem !important; /* rounded-lg */
+            height: 2.75rem !important; /* h-11 */
+            padding: 0.5rem 1rem !important;
+            display: flex !important;
+            align-items: center !important;
+            font-size: 0.875rem !important; /* text-sm */
+            color: #1f2937 !important; /* text-gray-800 */
+        }
+        .dark .ts-wrapper.single .ts-control {
+            border-color: #374151 !important; /* dark:border-gray-700 */
+            color: rgba(255, 255, 255, 0.9) !important; /* dark:text-white/90 */
+        }
+        .ts-wrapper.single .ts-control input {
+            color: #1f2937 !important;
+        }
+        .dark .ts-wrapper.single .ts-control input {
+            color: white !important;
+        }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            border-color: #e5e7eb !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            background: #ffffff !important;
+        }
+        .dark .ts-dropdown {
+            background: #111827 !important; /* dark bg-gray-900 */
+            border-color: #374151 !important;
+        }
+        .ts-dropdown .active {
+            background-color: #3b82f6 !important; /* bg-blue-500 */
+            color: #ffffff !important;
+        }
+        .dark .ts-dropdown .option {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        /* Style search input inside dropdown */
+        .ts-dropdown .dropdown-input-wrap {
+            padding: 8px !important;
+            border-bottom: 1px solid #f3f4f6 !important;
+        }
+        .dark .ts-dropdown .dropdown-input-wrap {
+            border-bottom: 1px solid #374151 !important;
+        }
+        .ts-dropdown .dropdown-input {
+            width: 100% !important;
+            height: 2.25rem !important;
+            border-radius: 0.375rem !important;
+            border: 1px solid #d1d5db !important;
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.875rem !important;
+            background-color: #ffffff !important;
+            color: #1f2937 !important;
+            outline: none !important;
+        }
+        .dark .ts-dropdown .dropdown-input {
+            background-color: #1f2937 !important;
+            border-color: #4b5563 !important;
+            color: #ffffff !important;
+        }
+        .ts-dropdown .dropdown-input:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15) !important;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const initTomSelects = () => {
+                document.querySelectorAll('select:not(.no-search):not(.tomselected)').forEach(select => {
+                    if (select.closest('[x-show="!open"]') || select.closest('.hidden')) return;
+
+                    try {
+                        new TomSelect(select, {
+                            create: false,
+                            plugins: ['dropdown_input'],
+                            onChange: function(val) {
+                                select.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        });
+                    } catch (e) {
+                        // Suppress initialization warnings
+                    }
+                });
+            };
+
+            // Initial run
+            setTimeout(initTomSelects, 100);
+
+            // Listen to any events that open modal containers or modify DOM
+            const observer = new MutationObserver(() => {
+                initTomSelects();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
 </body>
 
 @stack('scripts')

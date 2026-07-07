@@ -14,7 +14,24 @@ class SPJController extends Controller
 {
     public function index(Request $request)
     {
-        $spt = Spt::with(['notaDinas.pegawais', 'pegawais'])->get();
+        $user = auth()->user();
+        $query = Spt::with(['notaDinas.pegawais', 'pegawais']);
+
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $query->where('bidang_id', $user->bidang_id);
+                }
+            }
+        }
+
+        $spt = $query->get();
 
         if ($request->ajax()) {
             return response()->json($spt);

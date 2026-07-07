@@ -75,11 +75,17 @@ class SPTController extends Controller
         $query = Spt::with(['pegawais', 'subKegiatan'])
             ->whereNull('nota_dinas_id');
 
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            if (!$user->bidang_id) {
-                $query->whereRaw('1 = 0');
-            } else {
-                $query->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $query->where('bidang_id', $user->bidang_id);
+                }
             }
         }
 
@@ -93,11 +99,25 @@ class SPTController extends Controller
     {
         $querySub = SubKegiatan::query();
         $user = auth()->user();
-        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $querySub->whereRaw('1 = 0');
+                } else {
+                    $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $querySub->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
         $subKegiatans = $querySub->get();
-        $pegawais     = Pegawai::orderBy('nama')->get();
+        $queryPeg = Pegawai::orderBy('nama');
+        if ($user && $user->bidang_id) {
+            $queryPeg->where('bidang_id', $user->bidang_id);
+        }
+        $pegawais = $queryPeg->get();
 
         return view('pages.spt.create', compact('subKegiatans', 'pegawais'));
     }

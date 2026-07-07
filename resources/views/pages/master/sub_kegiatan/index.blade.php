@@ -25,7 +25,7 @@
                         @foreach ($subKegiatan as $item)
                             <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
                                 <td class="px-5 py-4 sm:px-6">{{ $subKegiatan->firstItem() + $loop->index }}</td>
-                                <td class="px-5 py-4 sm:px-6">{{ $item->pegawai->nama ?? '-' }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $item->owner?->name ?? $item->pegawai?->nama ?? '-' }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->nama_kegiatan }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->koefisien }}</td>
                                 <td class="px-5 py-4 sm:px-6">Rp{{ number_format($item->pagu, 0, ',', '.') }}</td>
@@ -55,16 +55,6 @@
                     <form method="POST" action="{{ route('sub-kegiatan.store') }}"
                         class="space-y-4">
                         @csrf
-                        <div>
-                            <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Pilih Pegawai (Pemilik)</label>
-                            <select name="pegawai_kasubid_id"
-                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
-                                <option value="">-- Pilih --</option>
-                                @foreach ($pegawais as $pegawai)
-                                    <option value="{{ $pegawai->id }}">{{ $pegawai->nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
 
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Nomor Rekening</label>
@@ -78,6 +68,7 @@
                                 class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white"
                                 placeholder="Masukkan nama program">
                         </div>
+
 
                         <div class="flex justify-end gap-2 mt-4">
                             <button type="button" @click="open = false" class="px-4 py-2 border rounded-lg dark:text-white dark:border-gray-700">Batal</button>
@@ -101,16 +92,6 @@
 
                         <input type="hidden" id="edit_id">
 
-                        <div>
-                            <label class="block mb-1 text-sm font-medium dark:text-gray-400">Pilih Pegawai (Pemilik)</label>
-                            <select id="edit_pegawai_kasubid_id"
-                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
-                                <option value="">-- Pilih --</option>
-                                @foreach ($pegawais as $pegawai)
-                                    <option value="{{ $pegawai->id }}">{{ $pegawai->nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
 
                         <div>
                             <label class="block mb-1 text-sm font-medium dark:text-gray-400">Nomor Rekening</label>
@@ -149,7 +130,6 @@
                 .then(res => res.json())
                 .then(data => {
                     document.getElementById('edit_id').value = data.id;
-                    document.getElementById('edit_pegawai_kasubid_id').value = data.pegawai_kasubid_id;
                     document.getElementById('edit_nomor_rekening').value = data.nomor_rekening ?? '';
                     document.getElementById('edit_nama_kegiatan').value = data.nama_kegiatan;
 
@@ -169,9 +149,8 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        pegawai_kasubid_id: document.getElementById('edit_pegawai_kasubid_id').value,
                         nomor_rekening: document.getElementById('edit_nomor_rekening').value,
-                        nama_kegiatan: document.getElementById('edit_nama_kegiatan').value,
+                        nama_kegiatan:  document.getElementById('edit_nama_kegiatan').value,
                     })
                 })
                 .then(res => res.json())

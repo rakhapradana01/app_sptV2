@@ -63,6 +63,11 @@
                                         @else
                                             -
                                         @endif
+                                        @if($user->pegawai)
+                                            <div class="mt-1 text-emerald-600 dark:text-emerald-400 font-semibold">
+                                                <strong>Pegawai:</strong> {{ $user->pegawai->nama }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border border-blue-200/50">
@@ -72,7 +77,7 @@
                                     <td class="px-5 py-4 sm:px-6">
                                         <div class="flex items-center gap-2">
                                             <x-ui.button variant="yellow" size="xs"
-                                                @click="$dispatch('open-user-edit-modal', { id: '{{ $user->id }}', name: '{{ addslashes($user->name) }}', username: '{{ addslashes($user->username) }}', role_id: '{{ $user->role_id }}', dinas_id: '{{ $user->dinas_id }}', bidang_id: '{{ $user->bidang_id }}', sub_bidang_id: '{{ $user->sub_bidang_id }}' })">
+                                                @click="$dispatch('open-user-edit-modal', { id: '{{ $user->id }}', name: '{{ addslashes($user->name) }}', username: '{{ addslashes($user->username) }}', role_id: '{{ $user->role_id }}', dinas_id: '{{ $user->dinas_id }}', bidang_id: '{{ $user->bidang_id }}', sub_bidang_id: '{{ $user->sub_bidang_id }}', pegawai_id: '{{ $user->pegawai_id }}' })">
                                                 Edit
                                             </x-ui.button>
 
@@ -129,7 +134,7 @@
                             }
                         }
                     }" 
-                    @open-user-create-modal.window="dinas_id=''; bidang_id=''; sub_bidang_id=''; bidangs=[]; subBidangs=[];"
+                    @open-user-create-modal.window="dinas_id=''; bidang_id=''; sub_bidang_id=''; pegawai_id=''; bidangs=[]; subBidangs=[];"
                     class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
                     <div class="mb-6">
                         <h4 class="text-xl font-bold text-gray-900 dark:text-white">
@@ -177,7 +182,18 @@
                                 @endforeach
                             </select>
                         </div>
-
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
+                                Hubungkan ke Pegawai <span class="text-gray-400">(Opsional)</span>
+                            </label>
+                            <select name="pegawai_id"
+                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                <option value="">-- Pilih Pegawai (Tidak terhubung) --</option>
+                                @foreach($pegawais as $pegawai)
+                                    <option value="{{ $pegawai->id }}">{{ $pegawai->nama }} ({{ $pegawai->nip ?? '-' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="space-y-4">
                             <div>
                                 <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
@@ -239,7 +255,7 @@
                 :isOpen="false" class="max-w-[600px]">
                 <div x-data="{
                         id: '', name: '', username: '', role_id: '',
-                        dinas_id: '', bidang_id: '', sub_bidang_id: '',
+                        dinas_id: '', bidang_id: '', sub_bidang_id: '', pegawai_id: '',
                         bidangs: [], subBidangs: [],
                         async fetchBidangs() {
                             this.bidang_id = ''; this.sub_bidang_id = '';
@@ -271,6 +287,7 @@
                     @open-user-edit-modal.window="
                         id = $event.detail.id; name = $event.detail.name; username = $event.detail.username; role_id = $event.detail.role_id;
                         dinas_id = $event.detail.dinas_id; bidang_id = $event.detail.bidang_id; sub_bidang_id = $event.detail.sub_bidang_id;
+                        pegawai_id = $event.detail.pegawai_id;
                         loadInitialData();
                     "
                     class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
@@ -282,7 +299,7 @@
                             Perbarui nama, username, peran, atau sandi baru untuk akun ini.
                         </p>
                     </div>
-                    <form method="POST" :action="`{{ url('users') }}/${id}`" class="space-y-4">
+                    <form method="POST" :action="'/users/' + id" class="space-y-4">
                         @csrf
                         @method('PUT')
                         <div>
@@ -318,6 +335,19 @@
                                 <option value="" disabled>Pilih Role</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->id }}">{{ ucwords(str_replace('_', ' ', $role->name)) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
+                                Hubungkan ke Pegawai <span class="text-gray-400">(Opsional)</span>
+                            </label>
+                            <select name="pegawai_id" x-model="pegawai_id"
+                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                <option value="">-- Pilih Pegawai (Tidak terhubung) --</option>
+                                @foreach($pegawais as $pegawai)
+                                    <option value="{{ $pegawai->id }}">{{ $pegawai->nama }} ({{ $pegawai->nip ?? '-' }})</option>
                                 @endforeach
                             </select>
                         </div>

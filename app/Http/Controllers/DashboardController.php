@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NotaDinas;
 use App\Models\Pegawai;
+use App\Models\Spt;
 use App\Models\SubKegiatan;
 use App\Models\Uraian;
-use App\Models\Spt;
-use App\Models\NotaDinas;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -17,19 +17,34 @@ class DashboardController extends Controller
         $now = Carbon::now();
         $user = auth()->user();
 
-        // 1. Total Sub Kegiatan
         $subKegiatanQuery = SubKegiatan::query();
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $subKegiatanQuery->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $subKegiatanQuery->where('sub_bidang_id', $user->sub_bidang_id);
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $subKegiatanQuery->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
         $totalSubKegiatan = $subKegiatanQuery->count();
 
         // 2. Total PPTK
         $pptkQuery = Pegawai::query();
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $pptkQuery->whereHas('subKegiatans', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
-            });
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $pptkQuery->whereHas('subKegiatans', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $pptkQuery->where('bidang_id', $user->bidang_id);
+                } else {
+                    $pptkQuery->whereHas('subKegiatans');
+                }
+            } else {
+                $pptkQuery->whereHas('subKegiatans');
+            }
         } else {
             $pptkQuery->whereHas('subKegiatans');
         }
@@ -37,19 +52,35 @@ class DashboardController extends Controller
 
         // 3. Total Pagu (Total Anggaran Uraian)
         $paguQuery = Uraian::query();
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $paguQuery->whereHas('subKegiatan', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
-            });
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $paguQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $paguQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                        $q->where('bidang_id', $user->bidang_id);
+                    });
+                }
+            }
         }
         $totalPagu = $paguQuery->sum('total_anggaran');
-
+ 
         // 4. Total Realisasi (Anggaran Terpakai Uraian)
         $realisasiQuery = Uraian::query();
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $realisasiQuery->whereHas('subKegiatan', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
-            });
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $realisasiQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $realisasiQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                        $q->where('bidang_id', $user->bidang_id);
+                    });
+                }
+            }
         }
         $totalRealisasi = $realisasiQuery->sum('anggaran_terpakai');
 
@@ -61,29 +92,46 @@ class DashboardController extends Controller
 
         // 7. Total OK Target & Terpakai
         $okTotalQuery = Uraian::query();
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $okTotalQuery->whereHas('subKegiatan', function ($q) use ($user) {
-                $q->where('bidang_id', $user->bidang_id);
-            });
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $okTotalQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $okTotalQuery->whereHas('subKegiatan', function ($q) use ($user) {
+                        $q->where('bidang_id', $user->bidang_id);
+                    });
+                }
+            }
         }
         $okTotal = $okTotalQuery->sum('ok_total');
         $okTerpakai = $okTotalQuery->sum('ok_terpakai');
         $persenOk = $okTotal > 0 ? round(($okTerpakai / $okTotal) * 100) : 0;
-
+ 
         // 8. Total SPT
         $sptQuery = Spt::query();
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $sptQuery->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $sptQuery->where('sub_bidang_id', $user->sub_bidang_id);
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $sptQuery->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
         $totalSpt = $sptQuery->count();
 
         // 9. Sub Kegiatan Budget Breakdown
         $querySub = SubKegiatan::with(['pegawai', 'uraians']);
-        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('bidang_id', $user->bidang_id);
-        }
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $querySub->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $querySub->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
 
         $subKegiatans = $querySub->get()
@@ -109,8 +157,14 @@ class DashboardController extends Controller
 
         // 10. Aktivitas Terbaru (Nota Dinas)
         $recentQuery = NotaDinas::with(['subKegiatan', 'kepada', 'spt']);
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            $recentQuery->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $recentQuery->where('sub_bidang_id', $user->sub_bidang_id);
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $recentQuery->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
         $recentActivities = $recentQuery->orderBy('created_at', 'desc')
             ->take(5)
@@ -137,23 +191,64 @@ class DashboardController extends Controller
      */
     public function rekapPegawaiPage(Request $request)
     {
-        $tahun = (int) $request->get('tahun', now()->year);
+        $tahun = (int) $request->input('tahun', now()->year);
 
-        $rekapPegawai = Pegawai::withCount([
-            'notaDinas as jan' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 1),
-            'notaDinas as feb' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 2),
-            'notaDinas as mar' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 3),
-            'notaDinas as apr' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 4),
-            'notaDinas as mei' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 5),
-            'notaDinas as jun' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 6),
-            'notaDinas as jul' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 7),
-            'notaDinas as ags' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 8),
-            'notaDinas as sep' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 9),
-            'notaDinas as okt' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 10),
-            'notaDinas as nov' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 11),
-            'notaDinas as des' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 12),
-            'notaDinas as total' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun),
-        ])
+        $user = auth()->user();
+        $queryPeg = Pegawai::where('dinas_id', $user?->dinas_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $queryPeg->whereHas('subKegiatans', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $queryPeg->where('bidang_id', $user->bidang_id);
+                }
+            }
+        }
+
+        $filterNota = function($month) use ($user, $tahun) {
+            return function ($q) use ($user, $tahun, $month) {
+                $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', $month);
+                if ($user) {
+                    if ($user->role->name === 'kepala_sub_bidang') {
+                        $q->where('nota_dinas.sub_bidang_id', $user->sub_bidang_id);
+                    } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                        if ($user->bidang_id) {
+                            $q->where('nota_dinas.bidang_id', $user->bidang_id);
+                        }
+                    }
+                }
+            };
+        };
+
+        $rekapPegawai = $queryPeg
+            ->withCount([
+                'notaDinas as jan' => $filterNota(1),
+                'notaDinas as feb' => $filterNota(2),
+                'notaDinas as mar' => $filterNota(3),
+                'notaDinas as apr' => $filterNota(4),
+                'notaDinas as mei' => $filterNota(5),
+                'notaDinas as jun' => $filterNota(6),
+                'notaDinas as jul' => $filterNota(7),
+                'notaDinas as ags' => $filterNota(8),
+                'notaDinas as sep' => $filterNota(9),
+                'notaDinas as okt' => $filterNota(10),
+                'notaDinas as nov' => $filterNota(11),
+                'notaDinas as des' => $filterNota(12),
+                'notaDinas as total' => function ($q) use ($user, $tahun) {
+                    $q->whereYear('nota_dinas.tanggal_mulai', $tahun);
+                    if ($user) {
+                        if ($user->role->name === 'kepala_sub_bidang') {
+                            $q->where('nota_dinas.sub_bidang_id', $user->sub_bidang_id);
+                        } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                            if ($user->bidang_id) {
+                                $q->where('nota_dinas.bidang_id', $user->bidang_id);
+                            }
+                        }
+                    }
+                },
+            ])
             ->orderBy('total', 'desc')
             ->get();
 
@@ -166,23 +261,64 @@ class DashboardController extends Controller
      */
     public function rekapByTahun(Request $request)
     {
-        $tahun = (int) $request->get('tahun', now()->year);
+        $tahun = (int) $request->input('tahun', now()->year);
 
-        $pegawais = Pegawai::withCount([
-            'notaDinas as jan' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 1),
-            'notaDinas as feb' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 2),
-            'notaDinas as mar' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 3),
-            'notaDinas as apr' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 4),
-            'notaDinas as mei' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 5),
-            'notaDinas as jun' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 6),
-            'notaDinas as jul' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 7),
-            'notaDinas as ags' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 8),
-            'notaDinas as sep' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 9),
-            'notaDinas as okt' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 10),
-            'notaDinas as nov' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 11),
-            'notaDinas as des' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', 12),
-            'notaDinas as total' => fn($q) => $q->whereYear('nota_dinas.tanggal_mulai', $tahun),
-        ])
+        $user = auth()->user();
+        $queryPeg = Pegawai::where('dinas_id', $user?->dinas_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $queryPeg->whereHas('subKegiatans', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $queryPeg->where('bidang_id', $user->bidang_id);
+                }
+            }
+        }
+
+        $filterNota = function($month) use ($user, $tahun) {
+            return function ($q) use ($user, $tahun, $month) {
+                $q->whereYear('nota_dinas.tanggal_mulai', $tahun)->whereMonth('nota_dinas.tanggal_mulai', $month);
+                if ($user) {
+                    if ($user->role->name === 'kepala_sub_bidang') {
+                        $q->where('nota_dinas.sub_bidang_id', $user->sub_bidang_id);
+                    } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                        if ($user->bidang_id) {
+                            $q->where('nota_dinas.bidang_id', $user->bidang_id);
+                        }
+                    }
+                }
+            };
+        };
+
+        $pegawais = $queryPeg
+            ->withCount([
+                'notaDinas as jan' => $filterNota(1),
+                'notaDinas as feb' => $filterNota(2),
+                'notaDinas as mar' => $filterNota(3),
+                'notaDinas as apr' => $filterNota(4),
+                'notaDinas as mei' => $filterNota(5),
+                'notaDinas as jun' => $filterNota(6),
+                'notaDinas as jul' => $filterNota(7),
+                'notaDinas as ags' => $filterNota(8),
+                'notaDinas as sep' => $filterNota(9),
+                'notaDinas as okt' => $filterNota(10),
+                'notaDinas as nov' => $filterNota(11),
+                'notaDinas as des' => $filterNota(12),
+                'notaDinas as total' => function ($q) use ($user, $tahun) {
+                    $q->whereYear('nota_dinas.tanggal_mulai', $tahun);
+                    if ($user) {
+                        if ($user->role->name === 'kepala_sub_bidang') {
+                            $q->where('nota_dinas.sub_bidang_id', $user->sub_bidang_id);
+                        } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                            if ($user->bidang_id) {
+                                $q->where('nota_dinas.bidang_id', $user->bidang_id);
+                            }
+                        }
+                    }
+                },
+            ])
             ->orderBy('total', 'desc')
             ->get()
             ->map(fn($p) => [
@@ -215,9 +351,10 @@ class DashboardController extends Controller
      */
     public function rekapByBulan(Request $request)
     {
-        $bulanAwal = (int) $request->get('bulan_awal', $request->get('bulan', now()->month));
-        $bulanAkhir = (int) $request->get('bulan_akhir', $request->get('bulan', now()->month));
-        $tahun = (int) $request->get('tahun', now()->year);
+        $user = auth()->user();
+        $bulanAwal  = (int) $request->input('bulan_awal', $request->input('bulan', now()->month));
+        $bulanAkhir = (int) $request->input('bulan_akhir', $request->input('bulan', now()->month));
+        $tahun      = (int) $request->input('tahun', now()->year);
 
         if ($bulanAwal > $bulanAkhir) {
             $temp = $bulanAwal;
@@ -237,9 +374,31 @@ class DashboardController extends Controller
             $namaBulan = $tanggalAwal->translatedFormat('F') . ' - ' . $tanggalAkhir->translatedFormat('F Y');
         }
 
-        $pegawais = Pegawai::withCount([
-            'notaDinas' => function ($query) use ($awalBulan, $akhirBulan) {
+        $queryPeg = Pegawai::query();
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                $queryPeg->whereHas('subKegiatans', function ($q) use ($user) {
+                    $q->where('sub_bidang_id', $user->sub_bidang_id);
+                });
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $queryPeg->where('bidang_id', $user->bidang_id);
+                }
+            }
+        }
+
+        $pegawais = $queryPeg->withCount([
+            'notaDinas' => function ($query) use ($awalBulan, $akhirBulan, $user) {
                 $query->whereBetween('nota_dinas.tanggal_mulai', [$awalBulan, $akhirBulan]);
+                if ($user) {
+                    if ($user->role->name === 'kepala_sub_bidang') {
+                        $query->where('nota_dinas.sub_bidang_id', $user->sub_bidang_id);
+                    } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                        if ($user->bidang_id) {
+                            $query->where('nota_dinas.bidang_id', $user->bidang_id);
+                        }
+                    }
+                }
             }
         ])
             ->orderBy('nota_dinas_count', 'desc')
@@ -260,9 +419,9 @@ class DashboardController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $bulanAwal = (int) $request->get('bulan_awal', now()->month);
-        $bulanAkhir = (int) $request->get('bulan_akhir', now()->month);
-        $tahun = (int) $request->get('tahun', now()->year);
+        $bulanAwal  = (int) $request->input('bulan_awal', now()->month);
+        $bulanAkhir = (int) $request->input('bulan_akhir', now()->month);
+        $tahun      = (int) $request->input('tahun', now()->year);
 
         if ($bulanAwal > $bulanAkhir) {
             $temp = $bulanAwal;
@@ -276,10 +435,26 @@ class DashboardController extends Controller
         $awalBulan = $tanggalAwal->toDateString();
         $akhirBulan = $tanggalAkhir->toDateString();
 
-        $notaDinasList = \App\Models\NotaDinas::with('pegawais')
+        $user = auth()->user();
+        $queryNota = NotaDinas::with('pegawais')
             ->whereBetween('tanggal_mulai', [$awalBulan, $akhirBulan])
-            ->orderBy('tanggal_mulai', 'asc')
-            ->get();
+            ->orderBy('tanggal_mulai', 'asc');
+
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $queryNota->whereRaw('1 = 0');
+                } else {
+                    $queryNota->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $queryNota->where('bidang_id', $user->bidang_id);
+                }
+            }
+        }
+
+        $notaDinasList = $queryNota->get();
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();

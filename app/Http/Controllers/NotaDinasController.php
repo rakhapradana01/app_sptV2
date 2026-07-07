@@ -6,6 +6,7 @@ use App\Models\NotaDinas;
 use App\Models\Pegawai;
 use App\Models\Role;
 use App\Models\SubKegiatan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -26,11 +27,17 @@ class NotaDinasController extends Controller
         $user = auth()->user();
         $query = NotaDinas::where('status', \App\Models\NotaDinas::DISETUJUI_KABID);
 
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            if (!$user->bidang_id) {
-                $query->whereRaw('1 = 0'); // bidang belum diset, tampilkan kosong
-            } else {
-                $query->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $query->where('bidang_id', $user->bidang_id);
+                }
             }
         }
 
@@ -48,22 +55,42 @@ class NotaDinasController extends Controller
             'melalui'
         ]);
 
-        if ($user && in_array($user->role->name, ['kepala_bidang', 'kepala_sub_bidang'])) {
-            if (!$user->bidang_id) {
-                $query->whereRaw('1 = 0');
-            } else {
-                $query->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $query->whereRaw('1 = 0');
+                } else {
+                    $query->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $query->where('bidang_id', $user->bidang_id);
+                }
             }
         }
 
         $notaDinas = $query->latest()->paginate(10);
 
         $querySub = SubKegiatan::query();
-        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $querySub->whereRaw('1 = 0');
+                } else {
+                    $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $querySub->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
         $subKegiatans = $querySub->get();
-        $pegawais = Pegawai::all();
+        $queryPeg = Pegawai::query();
+        if ($user && $user->bidang_id) {
+            $queryPeg->where('bidang_id', $user->bidang_id);
+        }
+        $pegawais = $queryPeg->get();
 
         return view('pages.nota_dinas.index', compact(
             'notaDinas',
@@ -75,7 +102,12 @@ class NotaDinasController extends Controller
     public function createPegawai($notaId)
     {
         $nota = NotaDinas::findOrFail($notaId);
-        $pegawai = Pegawai::all();
+        $user = auth()->user();
+        $queryPeg = Pegawai::query();
+        if ($user && $user->bidang_id) {
+            $queryPeg->where('bidang_id', $user->bidang_id);
+        }
+        $pegawai = $queryPeg->get();
 
         return view('nota-dinas.pegawai.create', compact('nota', 'pegawai'));
     }
@@ -100,20 +132,51 @@ class NotaDinasController extends Controller
     {
         $querySub = SubKegiatan::query();
         $user = auth()->user();
-        if ($user && !in_array($user->role->name, ['super_admin', 'admin'])) {
-            $querySub->where('bidang_id', $user->bidang_id);
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $querySub->whereRaw('1 = 0');
+                } else {
+                    $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $querySub->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
         $subKegiatans = $querySub->get();
 
-        $kepalaBadan = Pegawai::where('jabatan', 'like','Kepala Badan%')->get();
-        $kepalaBidang = Pegawai::where('jabatan', 'like', 'Kepala Bidang%')->get();
-        $kasubid = Pegawai::where('jabatan', 'like', 'Kepala Sub Bidang%')->get();
-        $staff = Pegawai::all();
+        $kepalaBadan = Pegawai::where('jabatan', 'like', 'Kepala Badan%')->get();
+
+        // Filter kepala bidang: ambil pegawai dari user yang punya role kepala_bidang
+        // dan bidang_id yang sama dengan user yang sedang login
+        $kepalaBidangUserIds = User::whereHas('role', fn($q) => $q->where('name', 'kepala_bidang'))
+            ->where('bidang_id', $user->bidang_id)
+            ->whereNotNull('pegawai_id')
+            ->pluck('pegawai_id');
+
+        $kepalaBidang = Pegawai::whereIn('id', $kepalaBidangUserIds)->get();
+
+        // Jika tidak ada kepala bidang via relasi user, fallback ke semua kepala bidang
+        if ($kepalaBidang->isEmpty()) {
+            $kepalaBidang = Pegawai::where('jabatan', 'like', 'Kepala Bidang%')->get();
+        }
+
+        // "Dari" = user yang sedang login (bukan dari jabatan di tabel pegawai)
+        // dari_id diisi dari $user->pegawai_id (relasi user -> pegawai)
+        $userLogin = $user->load('pegawai');
+
+        $queryStaff = Pegawai::query();
+        if ($user && $user->bidang_id) {
+            $queryStaff->where('bidang_id', $user->bidang_id);
+        }
+        $staff = $queryStaff->get();
 
         return view('pages.nota_dinas.create', compact(
             'kepalaBadan',
             'kepalaBidang',
-            'kasubid',
+            'userLogin',
             'staff',
             'subKegiatans'
         ));
@@ -246,7 +309,12 @@ class NotaDinasController extends Controller
                 return $items->count();
             });
 
-        $pegawais = Pegawai::all();
+        $user = auth()->user();
+        $queryPeg = Pegawai::query();
+        if ($user && $user->bidang_id) {
+            $queryPeg->where('bidang_id', $user->bidang_id);
+        }
+        $pegawais = $queryPeg->get();
 
         return view('pages.nota_dinas.preview', [
             'nota' => $nota,
