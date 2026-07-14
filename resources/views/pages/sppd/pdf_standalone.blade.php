@@ -222,8 +222,8 @@
                                     Pejabat Pelaksana Teknis Kegiatan
                                     <br><br><br><br>
 
-                                    <b>......................................................</b><br>
-                                    NIP. ..................................................
+                                    <b>{{ auth()->user()->pegawai->nama ?? auth()->user()->name }}</b><br>
+                                    NIP. {{ auth()->user()->pegawai->nip ?? '-' }}
                                 </td>
                             </tr>
                         </table>

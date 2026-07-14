@@ -81,6 +81,39 @@
             width: 40%;
             text-align: left;
         }
+
+        .paraf-container {
+            clear: both;
+            margin-top: 5px;
+            width: 20%;
+            position: relative;
+            left: 150px;
+        }
+
+        .paraf-box {
+            width: 100%;
+        }
+
+        .paraf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+
+        .paraf-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            height: 15px;
+        }
+
+        .paraf-table td:first-child {
+            width: 40%;
+            font-weight: bold;
+        }
+
+        .paraf-table td:last-child {
+            width: 60%;
+        }
     </style>
 </head>
 
@@ -184,6 +217,25 @@
             <div class="font-bold underline">H. FATKHAN, SE, MM</div>
             <div>Pembina Tingkat I (IV/b)</div>
             <div>NIP. 19750518 201001 1 001</div>
+        </div>
+    </div>
+
+    <div class="paraf-container">
+        <div class="paraf-box">
+            <table class="paraf-table">
+                <tr>
+                    <td>Sekretaris</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Kabid</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Kasubid</td>
+                    <td></td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>
