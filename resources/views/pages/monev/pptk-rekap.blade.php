@@ -1,15 +1,15 @@
 @extends('layouts.app')
-
+@section('title','Uraian')
 @section('content')
-    <x-common.page-breadcrumb pageTitle="Sub Kegiatan" />
+    <x-common.page-breadcrumb pageTitle="Uraian" />
     <div class="space-y-6">
-        <x-common.component-card title="Monev: {{ $pptk->nama }}">
+        <x-common.component-card title="Monitoring Uraian : {{ $pptk->nama }}">
             <div class="space-y-6">
 
                 <!-- Dropdown Pilih Sub Kegiatan -->
                 <div class="form-group">
                     <label class="block mb-2 font-bold text-gray-700">Pilih Sub Kegiatan:</label>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between gap-2">
                         <select class="form-control" id="sub-kegiatan">
                             @foreach ($pptk->subKegiatans as $sub)
                                 <option value="{{ $sub->id }}">{{ $sub->nomor_rekening }} - {{ $sub->nama_kegiatan }}</option>

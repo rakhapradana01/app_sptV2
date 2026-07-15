@@ -186,7 +186,7 @@ class MenuHelper
         ];
         $roleMenuMap = [
             'super_admin'       => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
-            'admin'             => ['Dashboard', 'Master', 'Monitoring dan Evaluasi'],
+            'admin'             => ['Dashboard', 'Master', 'Monitoring dan Evaluasi','Perjalanan Dinas','SPJ'],
             'kepala_sub_bidang' => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'kepala_bidang'     => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'user'              => ['Master']
