@@ -1,5 +1,5 @@
 @extends('layouts.app')
-
+@section('title', 'Arsip Nota Dinas')
 @section('content')
     <x-common.page-breadcrumb pageTitle="Arsip Nota Dinas" />
     <div class="space-y-6 min-h-screen flex flex-col">

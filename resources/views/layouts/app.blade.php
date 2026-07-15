@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Dashboard' }} | Aplikasi SPT</title>
-
+    <title>@yield('title', 'Dashboard') | Aplikasi SPT</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Tom Select CSS -->
@@ -76,7 +76,7 @@
 
     <!-- Apply dark mode immediately to prevent flash -->
     <script>
-        (function() {
+        (function () {
             const savedTheme = localStorage.getItem('theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemTheme;
@@ -115,8 +115,7 @@ window.addEventListener('resize', checkMobile);">
         @include('layouts.sidebar')
 
         <div class="flex-1 w-full transition-all duration-300 ease-in-out
-    xl:ml-[290px]"
-            :class="{
+    xl:ml-[290px]" :class="{
                 'xl:ml-[290px]': $store.sidebar.isExpanded || $store.sidebar.isHovered,
                 'xl:ml-[90px]': !$store.sidebar.isExpanded && !$store.sidebar.isHovered,
                 'ml-0': $store.sidebar.isMobileOpen
@@ -160,53 +159,73 @@ window.addEventListener('resize', checkMobile);">
             box-shadow: none !important;
             height: auto !important;
         }
+
         .ts-wrapper.single .ts-control {
             background-color: transparent !important;
             background-image: none !important;
-            border-color: #d1d5db !important; /* border-gray-300 */
-            border-radius: 0.5rem !important; /* rounded-lg */
-            height: 2.75rem !important; /* h-11 */
+            border-color: #d1d5db !important;
+            /* border-gray-300 */
+            border-radius: 0.5rem !important;
+            /* rounded-lg */
+            height: 2.75rem !important;
+            /* h-11 */
             padding: 0.5rem 1rem !important;
             display: flex !important;
             align-items: center !important;
-            font-size: 0.875rem !important; /* text-sm */
-            color: #1f2937 !important; /* text-gray-800 */
+            font-size: 0.875rem !important;
+            /* text-sm */
+            color: #1f2937 !important;
+            /* text-gray-800 */
         }
+
         .dark .ts-wrapper.single .ts-control {
-            border-color: #374151 !important; /* dark:border-gray-700 */
-            color: rgba(255, 255, 255, 0.9) !important; /* dark:text-white/90 */
+            border-color: #374151 !important;
+            /* dark:border-gray-700 */
+            color: rgba(255, 255, 255, 0.9) !important;
+            /* dark:text-white/90 */
         }
+
         .ts-wrapper.single .ts-control input {
             color: #1f2937 !important;
         }
+
         .dark .ts-wrapper.single .ts-control input {
             color: white !important;
         }
+
         .ts-dropdown {
             border-radius: 0.5rem !important;
             border-color: #e5e7eb !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
             background: #ffffff !important;
         }
+
         .dark .ts-dropdown {
-            background: #111827 !important; /* dark bg-gray-900 */
+            background: #111827 !important;
+            /* dark bg-gray-900 */
             border-color: #374151 !important;
         }
+
         .ts-dropdown .active {
-            background-color: #3b82f6 !important; /* bg-blue-500 */
+            background-color: #3b82f6 !important;
+            /* bg-blue-500 */
             color: #ffffff !important;
         }
+
         .dark .ts-dropdown .option {
             color: rgba(255, 255, 255, 0.8) !important;
         }
+
         /* Style search input inside dropdown */
         .ts-dropdown .dropdown-input-wrap {
             padding: 8px !important;
             border-bottom: 1px solid #f3f4f6 !important;
         }
+
         .dark .ts-dropdown .dropdown-input-wrap {
             border-bottom: 1px solid #374151 !important;
         }
+
         .ts-dropdown .dropdown-input {
             width: 100% !important;
             height: 2.25rem !important;
@@ -218,11 +237,13 @@ window.addEventListener('resize', checkMobile);">
             color: #1f2937 !important;
             outline: none !important;
         }
+
         .dark .ts-dropdown .dropdown-input {
             background-color: #1f2937 !important;
             border-color: #4b5563 !important;
             color: #ffffff !important;
         }
+
         .ts-dropdown .dropdown-input:focus {
             border-color: #3b82f6 !important;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15) !important;
@@ -238,7 +259,7 @@ window.addEventListener('resize', checkMobile);">
                         new TomSelect(select, {
                             create: false,
                             plugins: ['dropdown_input'],
-                            onChange: function(val) {
+                            onChange: function (val) {
                                 select.dispatchEvent(new Event('change', { bubbles: true }));
                             }
                         });
