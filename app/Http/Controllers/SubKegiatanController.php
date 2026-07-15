@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dinas;
 use App\Models\SubKegiatan;
 use Illuminate\Http\Request;
 
@@ -29,31 +30,47 @@ class SubKegiatanController extends Controller
         // super_admin: tidak ada filter, lihat semua
 
         $subKegiatan = $query->paginate(10);
+        $dinas       = Dinas::orderBy('nama_dinas')->get();
 
-        return view('pages.master.sub_kegiatan.index', compact('subKegiatan'));
+        return view('pages.master.sub_kegiatan.index', compact('subKegiatan', 'dinas'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
+        $role = $user?->role?->name;
 
-        $validated = $request->validate([
+        // Admin & super_admin bisa pilih sub bidang tujuan dari form
+        $isAdmin = in_array($role, ['admin', 'super_admin']);
+
+        $rules = [
             'nama_kegiatan'  => 'required|string|max:255',
             'nomor_rekening' => 'required|string',
             'harga_satuan'   => 'nullable|integer|min:0',
             'koefisien'      => 'nullable|integer|min:0',
             'pagu'           => 'nullable|integer|min:0',
-        ]);
+        ];
+
+        if ($isAdmin) {
+            $rules['dinas_id']      = 'required|exists:dinas,id';
+            $rules['bidang_id']     = 'required|exists:bidangs,id';
+            $rules['sub_bidang_id'] = 'required|exists:sub_bidangs,id';
+        }
+
+        $validated = $request->validate($rules);
 
         $validated['harga_satuan'] = $validated['harga_satuan'] ?? 0;
         $validated['koefisien']    = $validated['koefisien'] ?? 0;
         $validated['pagu']         = $validated['pagu'] ?? 0;
 
-        // Auto-fill: kasubid yang login adalah pemilik sub kegiatan
-        $validated['user_id']       = $user->id;
-        $validated['dinas_id']      = $user->dinas_id;
-        $validated['bidang_id']     = $user->bidang_id;
-        $validated['sub_bidang_id'] = $user->sub_bidang_id;
+        $validated['user_id'] = $user->id;
+
+        if (!$isAdmin) {
+            // Kasubid: auto-fill dari profil user yang login
+            $validated['dinas_id']      = $user->dinas_id;
+            $validated['bidang_id']     = $user->bidang_id;
+            $validated['sub_bidang_id'] = $user->sub_bidang_id;
+        }
 
         SubKegiatan::create($validated);
 

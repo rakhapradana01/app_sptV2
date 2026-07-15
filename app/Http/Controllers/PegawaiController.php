@@ -260,4 +260,9 @@ class PegawaiController extends Controller
             'Cache-Control'       => 'max-age=0',
         ]);
     }
+    public function getBidangByDinas($dinas_id)
+{
+    $bidangs = Bidang::where('dinas_id', $dinas_id)->get(['id', 'nama_bidang']); // Sesuaikan 'nama_bidang' dengan nama kolom di database-mu
+    return response()->json($bidangs);
+}
 }

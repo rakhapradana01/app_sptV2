@@ -10,7 +10,7 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 11pt;
+            font-size: 12pt;
             line-height: 1.4;
             margin: 0;
         }
@@ -61,17 +61,19 @@
 
         .content-table td {
             vertical-align: top;
-            padding: 2px 0;
+            padding: 1px 0;
         }
 
         .list-petugas {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             border-collapse: collapse;
+            font-size: 12pt;
+            line-height: 1.2;
         }
 
         .ttd-container {
-            margin-top: 40px;
+            margin-top: 20px;
             width: 100%;
             position: relative;
         }
@@ -97,7 +99,7 @@
         .paraf-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10pt;
+            font-size: 12pt;
         }
 
         .paraf-table td {
@@ -158,7 +160,7 @@
                             <td style="width: 25px;">{{ $index + 1 }}.</td>
                             <td style="width: 80px;">Nama</td>
                             <td style="width: 10px;">:</td>
-                            <td class="font-bold">{{ $pegawai->nama }}</td>
+                            <td>{{ $pegawai->nama }}</td>
                         </tr>
                         <tr>
                             <td></td>
@@ -213,14 +215,14 @@
             </div>
             <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
             <div>PROVINSI KALIMANTAN SELATAN,</div>
-            <br><br><br><br>
+            <br><br><br>
             <div class="font-bold underline">H. FATKHAN, SE, MM</div>
             <div>Pembina Tingkat I (IV/b)</div>
             <div>NIP. 19750518 201001 1 001</div>
         </div>
     </div>
 
-    <div class="paraf-container">
+    <!-- <div class="paraf-container">
         <div class="paraf-box">
             <table class="paraf-table">
                 <tr>
@@ -237,7 +239,7 @@
                 </tr>
             </table>
         </div>
-    </div>
+    </div> -->
 </body>
 
 </html>

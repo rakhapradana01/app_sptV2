@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('dinas', DinasController::class);
             Route::resource('bidang', BidangController::class);
             Route::resource('sub-bidang', SubBidangController::class);
+            Route::get('/api/bidang/{dinas_id}', [App\Http\Controllers\PegawaiController::class, 'getBidangByDinas'])->name('api.bidang');
         });
 
         Route::middleware('role:super_admin,admin,kepala_sub_bidang')->group(function () {

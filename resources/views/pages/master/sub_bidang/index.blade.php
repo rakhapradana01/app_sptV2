@@ -45,7 +45,7 @@
                                             <form action="{{ route('sub-bidang.destroy', $sb->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus sub bidang ini?');" class="inline-block">
                                                 @csrf
                                                 @method('DELETE')
-                                                <x-ui.button variant="danger" size="xs" type="submit">Hapus</x-ui.button>
+                                                <x-ui.button variant="red" size="xs" type="submit">Hapus</x-ui.button>
                                             </form>
                                         </div>
                                     </td>
@@ -65,120 +65,185 @@
                     {{ $subBidangs->links() }}
                 </div>
             @endif
-
-            <!-- Modal Create -->
-            <x-ui.modal x-data="{
-                    open: false,
-                    dinas_id: '', bidang_id: '',
-                    bidangs: [],
-                    async fetchBidangs() {
-                        this.bidang_id = '';
-                        this.bidangs = [];
-                        if (this.dinas_id) {
-                            let response = await fetch('/api/bidangs/'+this.dinas_id);
-                            this.bidangs = await response.json();
-                        }
-                    }
-                }" 
-                @open-sub-bidang-create-modal.window="open = true; dinas_id=''; bidang_id=''; bidangs=[];" 
-                :isOpen="false" class="max-w-[500px]">
-                <div class="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
-                    <div class="mb-6">
-                        <h4 class="text-xl font-bold text-gray-900 dark:text-white">Tambah Sub Bidang</h4>
-                    </div>
-                    <form method="POST" action="{{ route('sub-bidang.store') }}" class="space-y-4">
-                        @csrf
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Dinas <span class="text-rose-500">*</span></label>
-                            <select name="dinas_id" x-model="dinas_id" @change="fetchBidangs" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="" disabled selected>Pilih Dinas</option>
-                                @foreach($dinas as $d)
-                                    <option value="{{ $d->id }}">{{ $d->nama_dinas }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div x-show="dinas_id && bidangs.length > 0">
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Bidang <span class="text-rose-500">*</span></label>
-                            <select name="bidang_id" x-model="bidang_id" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="" disabled>Pilih Bidang</option>
-                                <template x-for="bidang in bidangs" :key="bidang.id">
-                                    <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Nama Sub Bidang <span class="text-rose-500">*</span></label>
-                            <input type="text" name="nama_sub_bidang" required placeholder="Masukkan nama sub bidang" class="dark:bg-dark-900 h-10 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
-                        </div>
-                        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <button @click="open = false" type="button" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">Batal</button>
-                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Simpan</button>
-                        </div>
-                    </form>
-                </div>
-            </x-ui.modal>
-
-            <!-- Modal Edit -->
-            <x-ui.modal x-data="{
-                    open: false, id: '', dinas_id: '', bidang_id: '', nama_sub_bidang: '',
-                    bidangs: [],
-                    async fetchBidangs() {
-                        this.bidang_id = '';
-                        this.bidangs = [];
-                        if (this.dinas_id) {
-                            let response = await fetch('/api/bidangs/'+this.dinas_id);
-                            this.bidangs = await response.json();
-                        }
-                    },
-                    async loadInitialData() {
-                        if (this.dinas_id) {
-                            let r1 = await fetch('/api/bidangs/'+this.dinas_id);
-                            this.bidangs = await r1.json();
-                        }
-                    }
-                }" 
-                @open-sub-bidang-edit-modal.window="
-                    open = true; id = $event.detail.id; dinas_id = $event.detail.dinas_id; bidang_id = $event.detail.bidang_id; nama_sub_bidang = $event.detail.nama_sub_bidang;
-                    loadInitialData();
-                " 
-                :isOpen="false" class="max-w-[500px]">
-                <div class="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
-                    <div class="mb-6">
-                        <h4 class="text-xl font-bold text-gray-900 dark:text-white">Edit Sub Bidang</h4>
-                    </div>
-                    <form method="POST" :action="`{{ url('sub-bidang') }}/${id}`" class="space-y-4">
-                        @csrf
-                        @method('PUT')
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Dinas <span class="text-rose-500">*</span></label>
-                            <select name="dinas_id" x-model="dinas_id" @change="fetchBidangs" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="" disabled>Pilih Dinas</option>
-                                @foreach($dinas as $d)
-                                    <option value="{{ $d->id }}">{{ $d->nama_dinas }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Bidang <span class="text-rose-500">*</span></label>
-                            <select name="bidang_id" x-model="bidang_id" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="" disabled>Pilih Bidang</option>
-                                <template x-for="bidang in bidangs" :key="bidang.id">
-                                    <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Nama Sub Bidang <span class="text-rose-500">*</span></label>
-                            <input type="text" name="nama_sub_bidang" x-model="nama_sub_bidang" required placeholder="Masukkan nama sub bidang" class="dark:bg-dark-900 h-10 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
-                        </div>
-                        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
-                            <button @click="open = false" type="button" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">Batal</button>
-                            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Perbarui</button>
-                        </div>
-                    </form>
-                </div>
-            </x-ui.modal>
-
         </x-common.component-card>
+
+        <!-- Modal Create -->
+        <x-ui.modal x-data="{
+                open: false,
+                dinas_id: '', bidang_id: '',
+                bidangs: [],
+                async fetchBidangs() {
+                    this.bidang_id = '';
+                    this.bidangs = [];
+                    if (this.dinas_id) {
+                        let response = await fetch('/api/bidangs/'+this.dinas_id);
+                        this.bidangs = await response.json();
+                    }
+                }
+            }" 
+            x-init="
+                $watch('dinas_id', (value) => {
+                    fetchBidangs();
+                    $nextTick(() => {
+                        let selectBidang = $el.querySelector('select[name=&quot;bidang_id&quot;]');
+                        if (selectBidang && selectBidang.tomselect) {
+                            if (value) {
+                                selectBidang.tomselect.enable();
+                            } else {
+                                selectBidang.tomselect.disable();
+                            }
+                        }
+                    });
+                });
+                $watch('bidangs', (newBidangs) => {
+                    $nextTick(() => {
+                        let selectBidang = $el.querySelector('select[name=&quot;bidang_id&quot;]');
+                        if (selectBidang && selectBidang.tomselect) {
+                            let ts = selectBidang.tomselect;
+                            ts.clearOptions();
+                            ts.clear();
+                            ts.addOption({value: '', text: 'Pilih Bidang'});
+                            newBidangs.forEach(bidang => {
+                                ts.addOption({value: bidang.id.toString(), text: bidang.nama_bidang});
+                            });
+                            ts.sync();
+                        }
+                    });
+                });
+            "
+            @open-sub-bidang-create-modal.window="open = true; dinas_id=''; bidang_id=''; bidangs=[];" 
+            :isOpen="false" class="max-w-[500px]">
+            <div class="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
+                <div class="mb-6">
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">Tambah Sub Bidang</h4>
+                </div>
+                <form method="POST" action="{{ route('sub-bidang.store') }}" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Dinas <span class="text-rose-500">*</span></label>
+                        <select name="dinas_id" x-model="dinas_id" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value="" disabled selected>Pilih Dinas</option>
+                            @foreach($dinas as $d)
+                                <option value="{{ $d->id }}">{{ $d->nama_dinas }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Bidang <span class="text-rose-500">*</span></label>
+                        <select name="bidang_id" x-model="bidang_id" :disabled="!dinas_id" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value="" disabled selected>Pilih Bidang</option>
+                            <template x-for="bidang in bidangs" :key="bidang.id">
+                                <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Nama Sub Bidang <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama_sub_bidang" required placeholder="Masukkan nama sub bidang" class="dark:bg-dark-900 h-10 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
+                    </div>
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <button @click="open = false" type="button" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">Batal</button>
+                        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </x-ui.modal>
+
+        <!-- Modal Edit -->
+        <x-ui.modal x-data="{
+                open: false, id: '', dinas_id: '', bidang_id: '', nama_sub_bidang: '',
+                bidangs: [],
+                async fetchBidangs() {
+                    this.bidang_id = '';
+                    this.bidangs = [];
+                    if (this.dinas_id) {
+                        let response = await fetch('/api/bidangs/'+this.dinas_id);
+                        this.bidangs = await response.json();
+                    }
+                },
+                async loadInitialData() {
+                    if (this.dinas_id) {
+                        let r1 = await fetch('/api/bidangs/'+this.dinas_id);
+                        this.bidangs = await r1.json();
+                    }
+                }
+            }" 
+            x-init="
+                $watch('dinas_id', (value, oldValue) => { 
+                    if (oldValue !== undefined && oldValue !== '') {
+                        fetchBidangs(); 
+                    }
+                    $nextTick(() => {
+                        let selectBidang = $el.querySelector('select[name=&quot;bidang_id&quot;]');
+                        if (selectBidang && selectBidang.tomselect) {
+                            if (value) {
+                                selectBidang.tomselect.enable();
+                            } else {
+                                selectBidang.tomselect.disable();
+                            }
+                        }
+                    });
+                });
+                $watch('bidangs', (newBidangs) => {
+                    $nextTick(() => {
+                        let selectBidang = $el.querySelector('select[name=&quot;bidang_id&quot;]');
+                        if (selectBidang && selectBidang.tomselect) {
+                            let ts = selectBidang.tomselect;
+                            let currentVal = this.bidang_id;
+                            ts.clearOptions();
+                            ts.clear();
+                            ts.addOption({value: '', text: 'Pilih Bidang'});
+                            newBidangs.forEach(bidang => {
+                                ts.addOption({value: bidang.id.toString(), text: bidang.nama_bidang});
+                            });
+                            ts.sync();
+                            if (currentVal) {
+                                ts.setValue(currentVal.toString());
+                            }
+                        }
+                    });
+                });
+            "
+            @open-sub-bidang-edit-modal.window="
+                open = true; id = $event.detail.id; dinas_id = $event.detail.dinas_id; bidang_id = $event.detail.bidang_id; nama_sub_bidang = $event.detail.nama_sub_bidang;
+                loadInitialData();
+            " 
+            :isOpen="false" class="max-w-[500px]">
+            <div class="no-scrollbar relative w-full overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
+                <div class="mb-6">
+                    <h4 class="text-xl font-bold text-gray-900 dark:text-white">Edit Sub Bidang</h4>
+                </div>
+                <form method="POST" :action="`{{ url('sub-bidang') }}/${id}`" class="space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Dinas <span class="text-rose-500">*</span></label>
+                        <select name="dinas_id" x-model="dinas_id" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value="" disabled>Pilih Dinas</option>
+                            @foreach($dinas as $d)
+                                <option value="{{ $d->id }}">{{ $d->nama_dinas }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Bidang <span class="text-rose-500">*</span></label>
+                        <select name="bidang_id" x-model="bidang_id" :disabled="!dinas_id" required class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value="" disabled selected>Pilih Bidang</option>
+                            <template x-for="bidang in bidangs" :key="bidang.id">
+                                <option :value="bidang.id" x-text="bidang.nama_bidang"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">Nama Sub Bidang <span class="text-rose-500">*</span></label>
+                        <input type="text" name="nama_sub_bidang" x-model="nama_sub_bidang" required placeholder="Masukkan nama sub bidang" class="dark:bg-dark-900 h-10 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
+                    </div>
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <button @click="open = false" type="button" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03]">Batal</button>
+                        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Perbarui</button>
+                    </div>
+                </form>
+            </div>
+        </x-ui.modal>
     </div>
 @endsection

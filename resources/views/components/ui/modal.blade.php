@@ -3,7 +3,7 @@
     'showCloseButton' => true,
 ])
 
-<div x-data="{
+<div @if(!isset($attributes['x-data'])) x-data="{
     open: @js($isOpen),
     init() {
         this.$watch('open', value => {
@@ -14,7 +14,7 @@
             }
         });
     }
-}" x-show="open" x-cloak @keydown.escape.window="open = false"
+}" @endif x-show="open" x-cloak @keydown.escape.window="open = false"
     class="modal fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto p-5"
     {{ $attributes->except('class') }}>
 
