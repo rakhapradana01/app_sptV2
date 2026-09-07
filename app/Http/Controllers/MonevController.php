@@ -29,85 +29,88 @@ class MonevController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * Halaman Utama Monitoring Uraian & OK Tujuan Perjalanan Dinas
      */
-    public function pptkRekap($id)
+    public function uraianIndex(Request $request)
     {
         $user = auth()->user();
+        $dinasId = $user?->dinas_id;
 
-        $pptk = Pegawai::findOrFail($id);
-        $pptk->load([
-            'subKegiatans' => function ($query) use ($user) {
-                if ($user) {
-                    if ($user->role->name === 'kepala_sub_bidang') {
-                        $query->where('sub_bidang_id', $user->sub_bidang_id);
-                    } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-                        if ($user->bidang_id) {
-                            $query->where('bidang_id', $user->bidang_id);
-                        }
-                    }
-                }
-            }
-        ]);
+        $subKegiatanQuery = SubKegiatan::with(['owner', 'pegawai', 'uraians'])
+            ->where('dinas_id', $dinasId);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
-                if ($pptk->subKegiatans->isEmpty()) {
-                    abort(403, 'Unauthorized action. Anda tidak memiliki hak akses pada data di sub bidang ini.');
-                }
+                $subKegiatanQuery->where('sub_bidang_id', $user->sub_bidang_id);
             } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-                if ($user->bidang_id && $pptk->subKegiatans->isEmpty()) {
-                    abort(403, 'Unauthorized action. Anda tidak memiliki hak akses pada data di bidang ini.');
+                if ($user->bidang_id) {
+                    $subKegiatanQuery->where('bidang_id', $user->bidang_id);
                 }
             }
         }
 
-        return view('pages.monev.pptk-rekap', compact('pptk'));
+        $allSubKegiatans = $subKegiatanQuery->get();
+
+        $selectedSubId = $request->query('sub_kegiatan_id');
+        if (!$selectedSubId && $request->query('pptk_id')) {
+            $pptkSub = $allSubKegiatans->where('pegawai_kasubid_id', $request->query('pptk_id'))->first();
+            if ($pptkSub) {
+                $selectedSubId = $pptkSub->id;
+            }
+        }
+
+        if (!$selectedSubId && $allSubKegiatans->isNotEmpty()) {
+            $selectedSubId = $allSubKegiatans->first()->id;
+        }
+
+        $selectedSubKegiatan = $allSubKegiatans->firstWhere('id', $selectedSubId);
+
+        return view('pages.monev.uraian', compact('allSubKegiatans', 'selectedSubKegiatan', 'selectedSubId'));
+    }
+
+    public function pptkRekap($id)
+    {
+        return redirect()->route('monev.uraian.index', ['pptk_id' => $id]);
+    }
+
+    public function subKegiatanShow($id)
+    {
+        return redirect()->route('monev.uraian.index', ['sub_kegiatan_id' => $id]);
     }
 
     public function getBySubActivityId($id)
     {
-        
-        $sub = SubKegiatan::findOrFail($id);
+        $sub = SubKegiatan::with(['owner', 'pegawai'])->findOrFail($id);
 
-        // Gunakan try-catch atau sesuaikan response jika ingin mengembalikan JSON kosong saat unauthorized
         $user = auth()->user();
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
                 if (!$user->sub_bidang_id || $sub->sub_bidang_id != $user->sub_bidang_id) {
-                    return response()->json([]);
+                    return response()->json(['sub_kegiatan' => null, 'uraians' => []]);
                 }
             } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
                 if ($user->bidang_id && $sub->bidang_id != $user->bidang_id) {
-                    return response()->json([]);
+                    return response()->json(['sub_kegiatan' => null, 'uraians' => []]);
                 }
             }
         }
 
-        $result = Uraian::with(['spjRincians.pegawai', 'spjRincians.notaDinas.spt'])
+        $uraians = Uraian::with(['spjRincians.pegawai', 'spjRincians.notaDinas.spt'])
             ->where('sub_kegiatan_id', $id)
             ->get();
 
-        return response()->json($result);
-    }
-
-    // Menampilkan Detail satu Sub Kegiatan
-    public function subKegiatanShow($id)
-    {
-        $sub = SubKegiatan::findOrFail($id);
-
-        // Validasi bidang untuk sub kegiatan
-        $this->checkBidangAuthorization($sub->bidang_id, $sub->sub_bidang_id);
-
-        // Sub Kegiatan ini milik Kasubid (User) atau Pegawai (PPTK)
-        // Kita siapkan objek $pptk tiruan agar view pptk-rekap bisa me-render layoutnya
-        $pptk = new \stdClass();
-        $pptk->id = null;
-        $pptk->nama = $sub->owner?->name ?? $sub->pegawai?->nama ?? '-';
-        $pptk->jabatan = 'Monev Sub Kegiatan';
-        $pptk->subKegiatans = collect([$sub]);
-
-        return view('pages.monev.pptk-rekap', compact('pptk'));
+        return response()->json([
+            'sub_kegiatan' => [
+                'id' => $sub->id,
+                'nomor_rekening' => $sub->nomor_rekening,
+                'nama_kegiatan' => $sub->nama_kegiatan,
+                'pagu' => (float)($sub->pagu ?? $uraians->sum('total_anggaran')),
+                'realisasi' => (float)($sub->realisasi ?? $uraians->sum('anggaran_terpakai')),
+                'pptk_nama' => $sub->pegawai?->nama ?? $sub->owner?->name ?? '-',
+                'pptk_jabatan' => $sub->pegawai?->jabatan ?? 'Penanggung Jawab Sub Kegiatan',
+            ],
+            'uraians' => $uraians
+        ]);
     }
 
     public function storeUraian(Request $request)

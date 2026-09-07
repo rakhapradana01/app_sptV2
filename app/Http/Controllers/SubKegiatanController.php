@@ -17,7 +17,9 @@ class SubKegiatanController extends Controller
         // Filter berdasarkan hierarki role
         if ($role === 'kepala_sub_bidang') {
             // Kasubid hanya melihat sub kegiatan di sub bidangnya sendiri
-            $query->where('sub_bidang_id', $user->sub_bidang_id);
+            if ($user->sub_bidang_id) {
+                $query->where('sub_bidang_id', $user->sub_bidang_id);
+            }
         } elseif (in_array($role, ['admin', 'kepala_bidang'])) {
             // Admin & Kabid melihat semua sub kegiatan di bidangnya
             if ($user->bidang_id) {
@@ -25,23 +27,26 @@ class SubKegiatanController extends Controller
             }
         } elseif ($role === 'kepala_badan') {
             // Kaban melihat semua sub kegiatan di dinasnya
-            $query->where('dinas_id', $user->dinas_id);
+            if ($user->dinas_id) {
+                $query->where('dinas_id', $user->dinas_id);
+            }
         }
         // super_admin: tidak ada filter, lihat semua
 
         $subKegiatan = $query->paginate(10);
         $dinas = Dinas::orderBy('nama_dinas')->get();
 
-        return view('pages.master.sub_kegiatan.index', compact('subKegiatan', 'dinas'));
+        $subBidangs = collect();
+        if ($user?->bidang_id) {
+            $subBidangs = \App\Models\SubBidang::where('bidang_id', $user->bidang_id)->orderBy('nama_sub_bidang')->get();
+        }
+
+        return view('pages.master.sub_kegiatan.index', compact('subKegiatan', 'dinas', 'subBidangs'));
     }
 
     public function store(Request $request)
     {
         $user = auth()->user();
-        $role = $user?->role?->name;
-
-        // Admin & super_admin bisa pilih sub bidang tujuan dari form
-        $isAdmin = in_array($role, ['admin', 'super_admin']);
 
         $rules = [
             'nama_kegiatan' => 'required|string|max:255',
@@ -49,13 +54,10 @@ class SubKegiatanController extends Controller
             'harga_satuan' => 'nullable|integer|min:0',
             'koefisien' => 'nullable|integer|min:0',
             'pagu' => 'nullable|integer|min:0',
+            'dinas_id' => 'nullable|exists:dinas,id',
+            'bidang_id' => 'nullable|exists:bidangs,id',
+            'sub_bidang_id' => 'nullable|exists:sub_bidangs,id',
         ];
-
-        if ($isAdmin) {
-            $rules['dinas_id'] = 'required|exists:dinas,id';
-            $rules['bidang_id'] = 'required|exists:bidangs,id';
-            $rules['sub_bidang_id'] = 'required|exists:sub_bidangs,id';
-        }
 
         $validated = $request->validate($rules);
 
@@ -65,12 +67,10 @@ class SubKegiatanController extends Controller
         $validated['pegawai_kasubid_id'] = $user->pegawai?->id;
         $validated['user_id'] = $user->id;
 
-        if (!$isAdmin) {
-            // Kasubid: auto-fill dari profil user yang login
-            $validated['dinas_id'] = $user->dinas_id;
-            $validated['bidang_id'] = $user->bidang_id;
-            $validated['sub_bidang_id'] = $user->sub_bidang_id;
-        }
+        // Auto-fill dinas_id, bidang_id, sub_bidang_id dari user yang login jika tersedia
+        $validated['dinas_id'] = $user->dinas_id ?? ($validated['dinas_id'] ?? null);
+        $validated['bidang_id'] = $user->bidang_id ?? ($validated['bidang_id'] ?? null);
+        $validated['sub_bidang_id'] = $user->sub_bidang_id ?? ($validated['sub_bidang_id'] ?? null);
 
         SubKegiatan::create($validated);
 

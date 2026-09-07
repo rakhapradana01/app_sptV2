@@ -58,8 +58,14 @@ Route::middleware(['auth'])->group(function () {
     // ======================
     Route::middleware('role:super_admin,kepala_sub_bidang,kepala_bidang,admin')->group(function () {
         
+        Route::get('/monev/uraian', [MonevController::class, 'uraianIndex'])->name('monev.uraian.index');
+        Route::get('/monev/rekap-pegawai', [DashboardController::class, 'rekapPegawaiPage'])->name('monev.rekap-pegawai');
         Route::get('/monev/pptk/{id}', [MonevController::class, 'pptkRekap'])->name('monev.pptk.rekap');
         Route::get('/monev/sub-kegiatan/{id}', [MonevController::class, 'subKegiatanShow'])->name('monev.sub-kegiatan.show');
+        Route::get('/monev/{id}', [MonevController::class, 'getBySubActivityId'])->name('monev.detail');
+        Route::post('/monev/uraian', [MonevController::class, 'storeUraian'])->name('uraian.store');
+        Route::put('/monev/uraian/{id}', [MonevController::class, 'updateUraian'])->name('uraian.update');
+        Route::delete('/monev/uraian/{id}', [MonevController::class, 'destroyUraian'])->name('uraian.destroy');
        
 
         Route::resource('nota-dinas', NotaDinasController::class)
@@ -151,8 +157,3 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');
 });
-Route::get('/monev/rekap-pegawai', [DashboardController::class, 'rekapPegawaiPage'])->name('monev.rekap-pegawai');
-Route::get('/monev/{id}', [MonevController::class, 'getBySubActivityId']);
-Route::post('/monev/uraian', [MonevController::class, 'storeUraian'])->name('uraian.store');
-Route::put('/monev/uraian/{id}', [MonevController::class, 'updateUraian'])->name('uraian.update');
-Route::delete('/monev/uraian/{id}', [MonevController::class, 'destroyUraian'])->name('uraian.destroy');

@@ -13,108 +13,6 @@ class MenuHelper
         $user = Auth::user();
         $dinasId = $user?->dinas_id;
 
-        // Ambil data PPTK (Pegawai yang ditunjuk memegang sub_kegiatan ATAU kasubid (User) yang punya sub_kegiatan)
-        $pptks = Pegawai::where('dinas_id', $dinasId)
-            ->whereHas('subKegiatans', function ($query) use ($user) {
-                if ($user && $user->role->name === 'kepala_sub_bidang') {
-                    $query->where('sub_bidang_id', $user->sub_bidang_id);
-                } elseif ($user && in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-                    if ($user->bidang_id) {
-                        $query->where('bidang_id', $user->bidang_id);
-                    }
-                }
-            })
-            ->with(['subKegiatans' => function ($query) use ($user) {
-                if ($user && $user->role->name === 'kepala_sub_bidang') {
-                    $query->where('sub_bidang_id', $user->sub_bidang_id);
-                } elseif ($user && in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-                    if ($user->bidang_id) {
-                        $query->where('bidang_id', $user->bidang_id);
-                    }
-                }
-            }])
-            ->get();
-
-        $monevMenus = [];
-
-        // 1. Loop Pegawai (PPTK) yang memiliki sub kegiatan
-        foreach ($pptks as $pptk) {
-            $subMenus = [];
-
-            $subMenus[] = [
-                'name' => 'Rekap ' . $pptk->nama,
-                'path' => route('monev.pptk.rekap', $pptk->id),
-                'pro'  => false,
-            ];
-
-            foreach ($pptk->subKegiatans as $sub) {
-                $subMenus[] = [
-                    'name' => $sub->nama_kegiatan,
-                    'path' => route('monev.sub-kegiatan.show', $sub->id),
-                    'pro'  => false,
-                ];
-            }
-
-            $monevMenus[] = [
-                'name'     => $pptk->jabatan ?? $pptk->nama,
-                'icon'     => 'person',
-                'path'     => route('monev.pptk.rekap', $pptk->id),
-                'subItems' => $subMenus,
-            ];
-        }
-
-        // 2. Tambah Kasubid (User) yang membuat sub kegiatan langsung (tanpa menunjuk pegawai)
-        $usersWithSubQuery = \App\Models\User::where('dinas_id', $dinasId)
-            ->whereHas('subKegiatans', function ($query) use ($user) {
-                if ($user && $user->role->name === 'kepala_sub_bidang') {
-                    $query->where('sub_bidang_id', $user->sub_bidang_id);
-                } elseif ($user && in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-                    if ($user->bidang_id) {
-                        $query->where('bidang_id', $user->bidang_id);
-                    }
-                }
-            })
-            ->with(['subKegiatans' => function ($query) use ($user) {
-                if ($user && $user->role->name === 'kepala_sub_bidang') {
-                    $query->where('sub_bidang_id', $user->sub_bidang_id);
-                } elseif ($user && in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-                    if ($user->bidang_id) {
-                        $query->where('bidang_id', $user->bidang_id);
-                    }
-                }
-            }]);
-
-        if ($user && $user->role->name === 'kepala_sub_bidang') {
-            $usersWithSubQuery->where('id', $user->id);
-        } elseif ($user && in_array($user->role->name, ['kepala_bidang', 'admin'])) {
-            if ($user->bidang_id) {
-                $usersWithSubQuery->where('bidang_id', $user->bidang_id);
-            }
-        }
-
-        $usersWithSub = $usersWithSubQuery->get();
-
-        foreach ($usersWithSub as $u) {
-            $subMenus = [];
-            foreach ($u->subKegiatans as $sub) {
-                $subMenus[] = [
-                    'name' => $sub->nama_kegiatan,
-                    'path' => route('monev.sub-kegiatan.show', $sub->id),
-                    'pro'  => false,
-                ];
-            }
-
-            // Jika user memiliki sub kegiatan, tampilkan di menu sidebar
-            if (count($subMenus) > 0) {
-                $monevMenus[] = [
-                    'name'     => $u->name,
-                    'icon'     => 'person',
-                    'path'     => route('monev.sub-kegiatan.show', $u->subKegiatans->first()->id),
-                    'subItems' => $subMenus,
-                ];
-            }
-        }
-
         $allMenu = [
             [
                 'icon'   => 'dashboard',
@@ -137,21 +35,23 @@ class MenuHelper
                 'name'     => 'Monitoring dan Evaluasi',
                 'icon'     => 'charts',
                 'path'     => '#',
-                'subItems' => array_merge(
+                'subItems' => [
                     [
-                        [
-                            'name' => 'Sub Kegiatan',
-                            'path' => route('sub-kegiatan.index'),
-                            'pro'  => false,
-                        ],
-                        [
-                            'name' => 'Rekap Perjalanan Pegawai',
-                            'path' => route('monev.rekap-pegawai'),
-                            'pro'  => false,
-                        ],
+                        'name' => 'Sub Kegiatan',
+                        'path' => route('sub-kegiatan.index'),
+                        'pro'  => false,
                     ],
-                    $monevMenus
-                ),
+                    [
+                        'name' => 'Uraian',
+                        'path' => route('monev.uraian.index'),
+                        'pro'  => false,
+                    ],
+                    [
+                        'name' => 'Rekap Perjalanan Pegawai',
+                        'path' => route('monev.rekap-pegawai'),
+                        'pro'  => false,
+                    ],
+                ],
             ],
             [
                 'name' => 'SPJ',

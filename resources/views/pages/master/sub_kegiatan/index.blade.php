@@ -114,8 +114,8 @@
                     <form method="POST" action="{{ route('sub-kegiatan.store') }}" class="space-y-4">
                         @csrf
 
-                        @if(in_array(auth()->user()->role?->name, ['admin', 'super_admin']))
-                        {{-- Admin: pilih Dinas → Bidang → Sub Bidang --}}
+                        @if(!auth()->user()->dinas_id || !auth()->user()->bidang_id)
+                        {{-- Kasus khusus: Super Admin global (belum diset dinas & bidang di profil) --}}
                         <div>
                             <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Dinas <span class="text-red-500">*</span></label>
                             <select name="dinas_id" x-model="dinas_id" @change="fetchBidangs"
@@ -137,13 +137,25 @@
                             </select>
                         </div>
                         <div x-show="subBidangs.length > 0">
-                            <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Sub Bidang <span class="text-red-500">*</span></label>
+                            <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Sub Bidang</label>
                             <select name="sub_bidang_id" x-model="sub_bidang_id"
-                                class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white" :required="subBidangs.length > 0">
+                                class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                                 <option value="">-- Pilih Sub Bidang --</option>
                                 <template x-for="s in subBidangs" :key="s.id">
                                     <option :value="s.id" x-text="s.nama_sub_bidang"></option>
                                 </template>
+                            </select>
+                        </div>
+                        @elseif(!auth()->user()->sub_bidang_id && count($subBidangs) > 0)
+                        {{-- Admin Bidang / Kabid: Dinas & Bidang otomatis dari profil. Pilih Sub Bidang jika ada --}}
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-400">Sub Bidang</label>
+                            <select name="sub_bidang_id"
+                                class="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                <option value="">-- Pilih Sub Bidang (Opsional) --</option>
+                                @foreach($subBidangs as $sb)
+                                    <option value="{{ $sb->id }}">{{ $sb->nama_sub_bidang }}</option>
+                                @endforeach
                             </select>
                         </div>
                         @endif
