@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);
+            Route::delete('/sub-kegiatan/{id}', [SubKegiatanController::class, 'destroy']);
         });
     });
 

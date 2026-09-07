@@ -12,6 +12,7 @@
                         <tr class="border-b border-gray-100 dark:border-gray-800">
                             <th class="px-5 py-3 text-left sm:px-6">No</th>
                             <th class="px-5 py-3 text-left sm:px-6">PPTK</th>
+                            <th class="px-5 py-3 text-left sm:px-6">Nomor Rekening</th>
                             <th class="px-5 py-3 text-left sm:px-6">Nama Program</th>
                             <th class="px-5 py-3 text-left sm:px-6">Koefisien (OK)</th>
                             <th class="px-5 py-3 text-left sm:px-6">Pagu</th>
@@ -26,6 +27,7 @@
                             <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
                                 <td class="px-5 py-4 sm:px-6">{{ $subKegiatan->firstItem() + $loop->index }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->owner?->name ?? $item->pegawai?->nama ?? '-' }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $item->nomor_rekening }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->nama_kegiatan }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->koefisien }}</td>
                                 <td class="px-5 py-4 sm:px-6">Rp{{ number_format($item->pagu, 0, ',', '.') }}</td>
@@ -35,7 +37,7 @@
                                     <x-ui.button size="sm" type="button" onclick="editData({{ $item->id }})">
                                         Edit
                                     </x-ui.button>
-                                    <form action="#" method="POST" onsubmit="return confirm('Yakin hapus?')">
+                                    <form action="{{ Route('sub-kegiatan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin hapus?')">
                                         @csrf
                                         @method('DELETE')
                                         <x-ui.button variant="red" size="sm">Hapus</x-ui.button>

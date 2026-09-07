@@ -107,4 +107,11 @@ class SubKegiatanController extends Controller
     {
         return response()->json(SubKegiatan::findOrFail($id));
     }
+
+    public function destroy($id){
+        $subkeg = SubKegiatan::findOrFail($id);
+        $subkeg->delete();
+
+        return redirect()->route('sub-kegiatan.index')->with('success', 'Sub Kegiatan berhasil dihapus.');
+    }
 }
