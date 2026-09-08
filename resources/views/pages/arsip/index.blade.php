@@ -124,6 +124,7 @@
         </x-common.component-card>
     </div>
     <div x-data="{ open: false, notaId: null, nomor_ur: '' }"
+        x-effect="document.body.style.overflow = open ? 'hidden' : ''"
         @open-modal-spt.window="open = true; notaId = $event.detail.id; nomor_ur = $event.detail.nomor">
 
         <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
@@ -173,6 +174,7 @@
         </div>
     </div>
     <div x-data="{ openSppd: false, notaId: null, nomor_ur: '', nomorSpt: '' }"
+        x-effect="document.body.style.overflow = openSppd ? 'hidden' : ''"
         @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomor_ur = $event.detail.nomor; nomorSpt = $event.detail.spt">
 
         <div x-show="openSppd" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>

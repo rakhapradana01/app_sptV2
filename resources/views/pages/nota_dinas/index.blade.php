@@ -178,6 +178,7 @@
     </div>
 
     <div x-data="{ open: false, notaId: null, nomorUrut: '' }"
+        x-effect="document.body.style.overflow = open ? 'hidden' : ''"
         @open-modal-spt.window="open = true; notaId = $event.detail.id; nomorUrut = $event.detail.nomor">
 
         <div x-show="open" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
@@ -227,6 +228,7 @@
         </div>
     </div>
     <div x-data="{ openSppd: false, notaId: null, nomor_urut: '', nomorSpt: '' }"
+        x-effect="document.body.style.overflow = openSppd ? 'hidden' : ''"
         @open-modal-sppd.window="openSppd = true; notaId = $event.detail.id; nomor_urut = $event.detail.nomor; nomorSpt = $event.detail.spt">
 
         <div x-show="openSppd" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>

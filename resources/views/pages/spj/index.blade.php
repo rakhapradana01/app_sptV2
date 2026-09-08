@@ -30,6 +30,7 @@
 
     {{-- Modal Edit SPT --}}
     <div x-data="{ openEditSpt: false, sptId: null, nomorSpt: '' }"
+        x-effect="document.body.style.overflow = openEditSpt ? 'hidden' : ''"
         @open-edit-spt-modal.window="openEditSpt = true; sptId = $event.detail.id; nomorSpt = $event.detail.nomor">
 
         <div x-show="openEditSpt" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>

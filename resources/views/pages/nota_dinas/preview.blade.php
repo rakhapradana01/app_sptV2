@@ -142,7 +142,7 @@
                 </tbody>
             </table>
             @if (auth()->user()->role->name == 'kepala_bidang')
-                <div x-data="{ open: false }" class="mt-4">
+                <div x-data="{ open: false }" x-effect="document.body.style.overflow = open ? 'hidden' : ''" class="mt-4">
 
                     <button @click="open=true" class="px-4 py-2 bg-green-600 text-white rounded">
                         Tambah Pegawai

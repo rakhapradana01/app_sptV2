@@ -77,6 +77,7 @@
                     }
                 }"
                 @open-profile-create-modal.window="open = true; dinas_id=''; bidang_id=''; sub_bidang_id=''; bidangs=[]; subBidangs=[];"
+                x-effect="document.body.style.overflow = open ? 'hidden' : ''"
                 x-show="open" x-cloak
                 @keydown.escape.window="open = false"
                 class="modal fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto p-5"

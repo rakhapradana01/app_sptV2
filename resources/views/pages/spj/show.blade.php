@@ -561,6 +561,7 @@
 
                 <!-- Modal Rincian -->
                 <div x-show="showRincianModal"
+                    x-effect="document.body.style.overflow = showRincianModal ? 'hidden' : ''"
                     class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm"
                     x-cloak x-transition>
                     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
@@ -662,6 +663,7 @@
 
                 <!-- Modal Edit SPT -->
                 <div x-show="showSptModal"
+                    x-effect="document.body.style.overflow = showSptModal ? 'hidden' : ''"
                     class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm"
                     x-cloak x-transition>
                     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"

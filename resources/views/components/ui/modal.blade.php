@@ -5,16 +5,9 @@
 
 <div @if(!isset($attributes['x-data'])) x-data="{
     open: @js($isOpen),
-    init() {
-        this.$watch('open', value => {
-            if (value) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = 'unset';
-            }
-        });
-    }
-}" @endif x-show="open" x-cloak @keydown.escape.window="open = false"
+}" @endif
+    x-effect="document.body.style.overflow = open ? 'hidden' : ''"
+    x-show="open" x-cloak @keydown.escape.window="open = false"
     class="modal fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto p-5"
     {{ $attributes->except('class') }}>
 

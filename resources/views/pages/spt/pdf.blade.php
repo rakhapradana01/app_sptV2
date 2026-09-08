@@ -5,13 +5,14 @@
     <title>SPT</title>
     <style>
         @page {
-            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
+            size: a4 portrait;
+            margin: 0.5cm 1.5cm 1.0cm 1.5cm;
         }
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 12pt;
-            line-height: 1.4;
+            font-size: 11.5pt;
+            line-height: 1.35;
             margin: 0;
         }
 
@@ -31,7 +32,7 @@
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .logo {
@@ -55,7 +56,7 @@
 
         .content-table {
             width: 100%;
-            margin-top: 10px;
+            margin-top: 8px;
             border-collapse: collapse;
         }
 
@@ -66,16 +67,17 @@
 
         .list-petugas {
             width: 100%;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             border-collapse: collapse;
-            font-size: 12pt;
-            line-height: 1.2;
+            font-size: 11pt;
+            line-height: 1.15;
         }
 
         .ttd-container {
-            margin-top: 20px;
+            margin-top: 15px;
             width: 100%;
             position: relative;
+            page-break-inside: avoid;
         }
 
         .ttd-box {
@@ -90,31 +92,39 @@
             width: 20%;
             position: relative;
             left: 150px;
+            page-break-inside: avoid;
         }
 
         .paraf-box {
             width: 100%;
         }
 
+        .page-break {
+            page-break-before: always;
+        }
+
+        .footer-section {
+            page-break-inside: avoid;
+        }
+
         .paraf-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12pt;
+            font-size: 9.5pt;
         }
 
         .paraf-table td {
             border: 1px solid #000;
-            padding: 6px;
-            height: 15px;
+            padding: 3px 4px;
+            height: 14px;
         }
 
-        .paraf-table td:first-child {
-            width: 40%;
-            font-weight: bold;
+        .paraf-table tr:not(:first-child) td:first-child {
+            width: 50%;
         }
 
-        .paraf-table td:last-child {
-            width: 60%;
+        .paraf-table tr:not(:first-child) td:last-child {
+            width: 50%;
         }
     </style>
 </head>
@@ -126,7 +136,7 @@
 
     <div class="text-center">
         <div class="font-bold underline" style="font-size: 12pt;">SURAT PERINTAH TUGAS</div>
-        <div style="line-height: 1.5;">
+        <div style="line-height: 1.4;">
             @php
                 $parts = explode('/', $nota->spt->nomor_spt);
             @endphp
@@ -148,7 +158,7 @@
                 Daerah Provinsi Kalimantan Selatan Tahun Anggaran {{ $nota->spt->tahun_anggaran ?? date('Y') }}.</td>
         </tr>
         <tr>
-            <td colspan="3" class="text-center font-bold" style="padding: 15px 0;">MEMERINTAHKAN :</td>
+            <td colspan="3" class="text-center font-bold" style="padding: 8px 0;">MEMERINTAHKAN :</td>
         </tr>
         <tr>
             <td>Kepada</td>
@@ -185,9 +195,9 @@
             </td>
         </tr>
         <tr>
-            <td style="padding-top: 10px;">Untuk</td>
-            <td style="padding-top: 10px;">:</td>
-            <td style="padding-top: 10px; text-align: justify;">
+            <td style="padding-top: 6px;">Untuk</td>
+            <td style="padding-top: 6px;">:</td>
+            <td style="padding-top: 6px; text-align: justify;">
                 1. {{ $nota->kegiatan }} di {{ $nota->lokasi }}.<br>
 
                 2. Waktu Pelaksanaan
@@ -204,42 +214,47 @@
         </tr>
     </table>
 
-    <div class="ttd-container">
-        <div class="ttd-box">
-            <div style="margin-bottom: 5px;">Banjarbaru,
-                <span
-                    style="display: inline-block; min-width: 0.8cm; border-bottom: 1px dotted #000; text-align: center;">
-                    &nbsp;
-                </span>
-                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+    @if (count($nota->pegawais) > 4)
+        <div class="page-break"></div>
+    @endif
+
+    <div class="footer-section">
+        <div class="ttd-container">
+            <div class="ttd-box">
+                <div style="margin-bottom: 5px;">Banjarbaru,
+                    {{ $nota->tanggal_mulai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->subDay()->translatedFormat('d F Y') : \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+                </div>
+                <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
+                <div>PROVINSI KALIMANTAN SELATAN,</div>
+                <br><br><br>
+                <div class="font-bold underline">H. FATKHAN, SE, MM</div>
+                <div>Pembina Tingkat I (IV/b)</div>
+                <div>NIP. 19750518 201001 1 001</div>
             </div>
-            <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
-            <div>PROVINSI KALIMANTAN SELATAN,</div>
-            <br><br><br>
-            <div class="font-bold underline">H. FATKHAN, SE, MM</div>
-            <div>Pembina Tingkat I (IV/b)</div>
-            <div>NIP. 19750518 201001 1 001</div>
+        </div>
+
+        <div class="paraf-container">
+            <div class="paraf-box">
+                <table class="paraf-table">
+                    <tr>
+                        <td colspan="2" class="text-center font-bold">Paraf Hirarki</td>
+                    </tr>
+                    <tr>
+                        <td>Sekretaris</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Kabid</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Kasubid</td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
-
-    <!-- <div class="paraf-container">
-        <div class="paraf-box">
-            <table class="paraf-table">
-                <tr>
-                    <td>Sekretaris</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Kabid</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>Kasubid</td>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-    </div> -->
 </body>
 
 </html>

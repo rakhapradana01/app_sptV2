@@ -152,11 +152,7 @@
     <div class="ttd-container">
         <div class="ttd-box">
             <div style="margin-bottom: 5px;">Banjarbaru,
-                <span
-                    style="display: inline-block; min-width: 0.8cm; border-bottom: 1px dotted #000; text-align: center;">
-                    &nbsp;
-                </span>
-                {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}
+                {{ optional($spt->notaDinas)->tanggal_mulai ? \Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->subDay()->translatedFormat('d F Y') : \Carbon\Carbon::now()->translatedFormat('d F Y') }}
             </div>
             <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
             <div>PROVINSI KALIMANTAN SELATAN,</div>
