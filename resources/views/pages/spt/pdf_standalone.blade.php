@@ -41,19 +41,20 @@
 
         .content-table td {
             vertical-align: top;
-            padding: 2px 0;
+            padding: 1px 0;
         }
 
         .list-petugas {
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             border-collapse: collapse;
         }
 
         .ttd-container {
-            margin-top: 40px;
+            margin-top: 15px;
             width: 100%;
             position: relative;
+            page-break-inside: avoid;
         }
 
         .ttd-box {
@@ -129,37 +130,42 @@
                 @endforeach
             </td>
         </tr>
-        <tr>
-            <td style="padding-top: 10px;">Untuk</td>
-            <td style="padding-top: 10px;">:</td>
-            <td style="padding-top: 10px; text-align: justify;">
-                1. {{ $spt->kegiatan }} di {{ $spt->lokasi }}.<br>
-
-                2. Waktu Pelaksanaan
-                @if (is_null($spt->tanggal_selesai) || $spt->tanggal_mulai == $spt->tanggal_selesai)
-                    {{ \Carbon\Carbon::parse($spt->tanggal_mulai)->translatedFormat('d F Y') }}
-                @else
-                    {{ \Carbon\Carbon::parse($spt->tanggal_mulai)->translatedFormat('d F Y') }} s/d
-                    {{ \Carbon\Carbon::parse($spt->tanggal_selesai)->translatedFormat('d F Y') }}
-                @endif
-                .<br>
-
-                3. Melaporkan hasil pelaksanaan tugas kepada yang memberikan tugas.
-            </td>
-        </tr>
     </table>
 
-    <div class="ttd-container">
-        <div class="ttd-box">
-            <div style="margin-bottom: 5px;">Banjarbaru,
-                {{ optional($spt->notaDinas)->tanggal_mulai ? \Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->subDay()->translatedFormat('d F Y') : \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+    <div style="page-break-inside: avoid;">
+        <table class="content-table" style="margin-top: 0;">
+            <tr>
+                <td style="width: 15%; padding-top: 10px;">Untuk</td>
+                <td style="width: 2%; padding-top: 10px;">:</td>
+                <td style="padding-top: 10px; text-align: justify;">
+                    1. {{ $spt->kegiatan }} di {{ $spt->lokasi }}.<br>
+
+                    2. Waktu Pelaksanaan
+                    @if (is_null($spt->tanggal_selesai) || $spt->tanggal_mulai == $spt->tanggal_selesai)
+                        {{ \Carbon\Carbon::parse($spt->tanggal_mulai)->translatedFormat('d F Y') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($spt->tanggal_mulai)->translatedFormat('d F Y') }} s/d
+                        {{ \Carbon\Carbon::parse($spt->tanggal_selesai)->translatedFormat('d F Y') }}
+                    @endif
+                    .<br>
+
+                    3. Melaporkan hasil pelaksanaan tugas kepada yang memberikan tugas.
+                </td>
+            </tr>
+        </table>
+
+        <div class="ttd-container">
+            <div class="ttd-box">
+                <div style="margin-bottom: 5px;">Banjarbaru,
+                    {{ optional($spt->notaDinas)->tanggal_mulai ? \Carbon\Carbon::parse($spt->notaDinas->tanggal_mulai)->subDay()->translatedFormat('d F Y') : \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+                </div>
+                <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
+                <div>PROVINSI KALIMANTAN SELATAN,</div>
+                <br><br><br><br>
+                <div class="font-bold underline">H. FATKHAN, SE, MM</div>
+                <div>Pembina Tingkat I (IV/b)</div>
+                <div>NIP. 19750518 201001 1 001</div>
             </div>
-            <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
-            <div>PROVINSI KALIMANTAN SELATAN,</div>
-            <br><br><br><br>
-            <div class="font-bold underline">H. FATKHAN, SE, MM</div>
-            <div>Pembina Tingkat I (IV/b)</div>
-            <div>NIP. 19750518 201001 1 001</div>
         </div>
     </div>
 </body>

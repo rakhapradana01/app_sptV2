@@ -72,22 +72,22 @@
                         <table class="no-border-table" style="font-size: 9pt;">
                             <tr>
                                 <td style="width: 80px;">Lembar ke</td>
-                                <td>: </td>
+                                <td>: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                             </tr>
                             <tr>
                                 <td>Kode No</td>
-                                <td>: </td>
+                                <td>: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
                             </tr>
+                            @php $partsNo = explode('/', $nota->nomor_sppd ?? ''); @endphp
                             <tr>
                                 <td>Nomor</td>
                                 <td>:</td>
-                                <td
-                                    class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
-                                    000.1.2.3 /
-                                    <span style="display:inline-block; min-width:60px; text-align:center;">
-                                        {{ $nota->nomor_sppd ?: '     ' }}
+                                <td style="font-size: 9pt;">
+                                    {{ $partsNo[0] ?? '000.1.2.3' }} /
+                                    <span style="display:inline-block; min-width:50px; text-align:center;">
+                                        {{ $partsNo[1] ?? '' }}
                                     </span>
-                                    / BPKAD / {{ date('Y') }}
+                                    / {{ $partsNo[2] ?? 'BPKAD' }} / {{ $partsNo[3] ?? date('Y') }}
                                 </td>
                             </tr>
                         </table>
@@ -179,7 +179,7 @@
                 <tr>
                     <td class="text-center">10.</td>
                     <td>Keterangan Lain-lain</td>
-                    <td></td>
+                    <td style="height: 25px;"></td>
                 </tr>
             </table>
 

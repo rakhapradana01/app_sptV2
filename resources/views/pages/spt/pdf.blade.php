@@ -194,31 +194,28 @@
                 @endforeach
             </td>
         </tr>
-        <tr>
-            <td style="padding-top: 6px;">Untuk</td>
-            <td style="padding-top: 6px;">:</td>
-            <td style="padding-top: 6px; text-align: justify;">
-                1. {{ $nota->kegiatan }} di {{ $nota->lokasi }}.<br>
-
-                2. Waktu Pelaksanaan
-                @if (is_null($nota->tanggal_selesai) || $nota->tanggal_mulai == $nota->tanggal_selesai)
-                    {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
-                @else
-                    {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }} s/d
-                    {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
-                @endif
-                .<br>
-
-                3. Melaporkan hasil pelaksanaan tugas kepada yang memberikan tugas.
-            </td>
-        </tr>
-    </table>
-
-    @if (count($nota->pegawais) > 4)
-        <div class="page-break"></div>
-    @endif
-
     <div class="footer-section">
+        <table class="content-table" style="margin-top: 0;">
+            <tr>
+                <td style="width: 15%; padding-top: 6px;">Untuk</td>
+                <td style="width: 2%; padding-top: 6px;">:</td>
+                <td style="padding-top: 6px; text-align: justify;">
+                    1. {{ $nota->kegiatan }} di {{ $nota->lokasi }}.<br>
+
+                    2. Waktu Pelaksanaan
+                    @if (is_null($nota->tanggal_selesai) || $nota->tanggal_mulai == $nota->tanggal_selesai)
+                        {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
+                    @else
+                        {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }} s/d
+                        {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
+                    @endif
+                    .<br>
+
+                    3. Melaporkan hasil pelaksanaan tugas kepada yang memberikan tugas.
+                </td>
+            </tr>
+        </table>
+
         <div class="ttd-container">
             <div class="ttd-box">
                 <div style="margin-bottom: 5px;">Banjarbaru,

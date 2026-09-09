@@ -6,7 +6,7 @@
     <title>SPD Standalone</title>
     <style>
         @page {
-            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
+            margin: 0.5cm 1.5cm 1.0cm 1.5cm;
         }
 
         body {
@@ -24,7 +24,7 @@
 
         .main-table td {
             border: 1px solid black;
-            padding: 5px 10px;
+            padding: 4px 8px;
             vertical-align: top;
         }
 
@@ -50,16 +50,13 @@
         .page-break {
             page-break-after: always;
         }
-
-        .last-page {
-            page-break-after: avoid;
-        }
     </style>
 </head>
 
 <body>
     @foreach ($sppd->pegawais as $p)
-        <div class="{{ $loop->last ? 'last-page' : 'page-break' }}">
+        {{-- SPPD DEPAN (Halaman 1) --}}
+        <div class="page-break">
             {{-- Bagian Kop Surat --}}
             <table>
                 @include('components.kop-surat')
@@ -78,11 +75,16 @@
                                 <td>Kode No</td>
                                 <td>: </td>
                             </tr>
+                            @php $partsNo = explode('/', $sppd->nomor_sppd ?? ''); @endphp
                             <tr>
                                 <td>Nomor</td>
                                 <td>:</td>
-                                <td class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
-                                    {{ $sppd->nomor_sppd }}
+                                <td style="font-size: 9pt;">
+                                    {{ $partsNo[0] ?? '000.1.2.3' }} /
+                                    <span style="display:inline-block; min-width:50px; text-align:center;">
+                                        {{ $partsNo[1] ?? '' }}
+                                    </span>
+                                    / {{ $partsNo[2] ?? 'BPKAD' }} / {{ $partsNo[3] ?? date('Y') }}
                                 </td>
                             </tr>
                         </table>
@@ -154,8 +156,8 @@
                 </tr>
                 <tr>
                     <td class="text-center">8.</td>
-                    <td>Pengikut: Nama</td>
-                    <td>Keterangan</td>
+                    <td>Pengikut:</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="text-center">9.</td>
@@ -177,12 +179,12 @@
                 </tr>
             </table>
 
-            <table style="width: 100%; margin-top: 25px;">
+            <table style="width: 100%; margin-top: 20px;">
                 <tr>
                     <td style="width: 55%;"></td>
                     <td class="text-center">
                         Dikeluarkan di: {{ $sppd->tempat_berangkat }} <br>
-                        Pada Tanggal: {{ \Carbon\Carbon::parse($sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                        Pada Tanggal: {{ \Carbon\Carbon::parse($sppd->tanggal_mulai)->subDay()->translatedFormat('d F Y') }}
                         <br><br>
                         <strong>Kuasa Pengguna Anggaran</strong>
                         <br><br><br><br><br>
@@ -193,166 +195,168 @@
             </table>
         </div>
 
-        <div class="last-page">
-            <table class="main-table">
-                @php
-                    $tglMulai = \Carbon\Carbon::parse($sppd->tanggal_mulai);
-                    $tglSelesai = \Carbon\Carbon::parse($sppd->tanggal_selesai ?: $sppd->tanggal_mulai);
-                @endphp
+        @endforeach
 
-                <tr>
-                    <td style="width:50%; height:130px;"></td>
+    {{-- SPPD BELAKANG (1 Lembar di Akhir) --}}
+    @php
+        $tglMulai = \Carbon\Carbon::parse($sppd->tanggal_mulai);
+        $tglSelesai = \Carbon\Carbon::parse($sppd->tanggal_selesai ?: $sppd->tanggal_mulai);
+    @endphp
+    <div>
+        <table class="main-table">
 
-                    <td style="width:50%; vertical-align:top;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:5px; vertical-align:top;"><b>I.</b></td>
-                                <td>
-                                    Berangkat dari : <br>
-                                    (Tempat Kedudukan)
-                                    <br>
-                                    {{ $sppd->tempat_berangkat }}<br>
+            <tr>
+                <td style="width:50%; height:95px;"></td>
 
-                                    Ke : {{ $sppd->tempat_tujuan }}<br>
+                <td style="width:50%; vertical-align:top;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:5px; vertical-align:top;"><b>I.</b></td>
+                            <td>
+                                Berangkat dari : <br>
+                                (Tempat Kedudukan)
+                                <br>
+                                {{ $sppd->tempat_berangkat }}<br>
 
-                                    Pada Tanggal :
-                                    {{ $tglMulai->translatedFormat('d F Y') }}
+                                Ke : {{ $sppd->tempat_tujuan }}<br>
 
-                                    <br>
-                                    Pejabat Pelaksana Teknis Kegiatan
-                                    <br><br><br><br>
+                                Pada Tanggal :
+                                {{ $tglMulai->translatedFormat('d F Y') }}
 
-                                    <b>{{ auth()->user()->pegawai->nama ?? auth()->user()->name }}</b><br>
-                                    NIP. {{ auth()->user()->pegawai->nip ?? '-' }}
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+                                <br>
+                                Pejabat Pelaksana Teknis Kegiatan
+                                <br><br><br><br>
 
-                <tr>
-                    <td style="vertical-align:top; height:150px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:20px;"><b>II.</b></td>
-                                <td>
-                                    Tiba di : {{ $sppd->tempat_tujuan }}<br>
-                                    Pada Tanggal : {{ $tglMulai->translatedFormat('d F Y') }}
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
+                                <b>{{ auth()->user()->pegawai->nama ?? auth()->user()->name }}</b><br>
+                                NIP. {{ auth()->user()->pegawai->nip ?? '-' }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-                    <td style="vertical-align:top; height:160px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:5px;"></td>
-                                <td>
-                                    Berangkat dari : {{ $sppd->tempat_tujuan }}<br>
-                                    Ke : {{ $sppd->tempat_berangkat }}<br>
-                                    Pada Tanggal : {{ $tglSelesai->translatedFormat('d F Y') }}
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+            <tr>
+                <td style="vertical-align:top; height:110px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:20px;"><b>II.</b></td>
+                            <td>
+                                Tiba di : {{ $sppd->tempat_tujuan }}<br>
+                                Pada Tanggal : {{ $tglMulai->translatedFormat('d F Y') }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
 
-                <tr>
-                    <td style="vertical-align:top; height:160px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:20px;"><b>III.</b></td>
-                                <td>
-                                    Tiba di : {{ $sppd->tempat_tujuan_2 ?? '' }}<br>
-                                    Pada Tanggal :
-                                    {{ $sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDay()->translatedFormat('d F Y') : '' }}
-                                    <br><br><br>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
+                <td style="vertical-align:top; height:110px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:5px;"></td>
+                            <td>
+                                Berangkat dari : {{ $sppd->tempat_tujuan }}<br>
+                                Ke : {{ $sppd->tempat_berangkat }}<br>
+                                Pada Tanggal : {{ $tglSelesai->translatedFormat('d F Y') }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-                    <td style="vertical-align:top; height:160px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:5px;"></td>
-                                <td>
-                                    Berangkat dari : {{ $sppd->tempat_tujuan_2 ?? '' }}<br>
-                                    Ke : {{ $sppd->tempat_berangkat }}<br>
-                                    Pada Tanggal :
-                                    {{ $sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDays(2)->translatedFormat('d F Y') : '' }}
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+            <tr>
+                <td style="vertical-align:top; height:110px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:20px;"><b>III.</b></td>
+                            <td>
+                                Tiba di : {{ $sppd->tempat_tujuan_2 ?? '' }}<br>
+                                Pada Tanggal :
+                                {{ $sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDay()->translatedFormat('d F Y') : '' }}
+                                <br><br><br>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
 
-                <tr>
-                    <td style="vertical-align:top; height:160px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:20px;"><b>IV.</b></td>
-                                <td>
-                                    Tiba di :<br>
-                                    Pada Tanggal :
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
+                <td style="vertical-align:top; height:110px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:5px;"></td>
+                            <td>
+                                Berangkat dari : {{ $sppd->tempat_tujuan_2 ?? '' }}<br>
+                                Ke : {{ $sppd->tempat_berangkat }}<br>
+                                Pada Tanggal :
+                                {{ $sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDays(2)->translatedFormat('d F Y') : '' }}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-                    <td style="vertical-align:top; height:160px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:5px;"></td>
-                                <td style="text-align:justify;">
-                                    Telah diperiksa, dengan keterangan bahwa perjalanan tersebut di atas
-                                    benar dilakukan atas perintahnya dan semata-mata untuk kepentingan
-                                    jabatan dalam waktu yang sesingkat-singkatnya.
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+            <tr>
+                <td style="vertical-align:top; height:110px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:20px;"><b>IV.</b></td>
+                            <td>
+                                Tiba di :<br>
+                                Pada Tanggal :
+                            </td>
+                        </tr>
+                    </table>
+                </td>
 
-                <tr>
-                    <td colspan="2" style="height:20px;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:20px;"><b>V.</b></td>
-                                <td>Catatan Lain-Lain</td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+                <td style="vertical-align:top; height:110px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:5px;"></td>
+                            <td style="text-align:justify;">
+                                Telah diperiksa, dengan keterangan bahwa perjalanan tersebut di atas
+                                benar dilakukan atas perintahnya dan semata-mata untuk kepentingan
+                                jabatan dalam waktu yang sesingkat-singkatnya.
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
+            <tr>
+                <td colspan="2" style="height:20px;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:20px;"><b>V.</b></td>
+                            <td>Catatan Lain-Lain</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-                <tr>
-                    <td colspan="2" style="vertical-align:top;">
-                        <table class="no-border-table">
-                            <tr>
-                                <td style="width:20px;"><b>VI.</b></td>
-                                <td>
-                                    PERHATIAN:<br>
-                                    PPK yang menerbitkan SPD, Pegawai yang melakukann perjalanan dinas, para pejabat
-                                    yang mengesahkan
-                                    tanggal berangkat/tiba, serta bendahara pengeluaran bertanggung jawab berdasarkan
-                                    peraturan-peraturan
-                                    Keuangan Negara apabila negara menderita rugi akibat kesalahan, kelalaian, dan
-                                    kealpaannya
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+            <tr>
+                <td colspan="2" style="vertical-align:top;">
+                    <table class="no-border-table">
+                        <tr>
+                            <td style="width:20px;"><b>VI.</b></td>
+                            <td>
+                                PERHATIAN:<br>
+                                PPK yang menerbitkan SPD, Pegawai yang melakukann perjalanan dinas, para pejabat
+                                yang mengesahkan
+                                tanggal berangkat/tiba, serta bendahara pengeluaran bertanggung jawab berdasarkan
+                                peraturan-peraturan
+                                Keuangan Negara apabila negara menderita rugi akibat kesalahan, kelalaian, dan
+                                kealpaannya
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-            </table>
-        </div>
-        <table style="width: 100%; margin-top: 0px;">
+        </table>
+
+        <table style="width: 100%; margin-top: 15px;">
             <tr>
                 <td style="width: 55%;"></td>
                 <td class="text-center">
                     Dikeluarkan di: {{ $sppd->tempat_berangkat }} <br>
-                    Pada Tanggal: {{ \Carbon\Carbon::parse($sppd->tanggal_sppd)->translatedFormat('d F Y') }}
+                    Pada Tanggal: {{ \Carbon\Carbon::parse($sppd->tanggal_mulai)->subDay()->translatedFormat('d F Y') }}
                     <br><br>
                     <strong>Kuasa Pengguna Anggaran</strong>
                     <br><br><br><br><br>
@@ -361,7 +365,7 @@
                 </td>
             </tr>
         </table>
-    @endforeach
+    </div>
 </body>
 
 </html>
