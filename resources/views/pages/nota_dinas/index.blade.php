@@ -253,7 +253,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor SPPD</label>
                             <input type="text" name="nomor_sppd" required
-                                :value="'000.1.2.3/' + '    ' + '/BPKAD/2026'"
+                                :value="'800.1.11.1/' + '    ' + '/BPKAD/2026'"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
                         </div>
 

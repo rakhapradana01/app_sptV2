@@ -29,7 +29,7 @@
                                 Nomor SPPD <span class="text-rose-500">*</span>
                             </label>
                             <input type="text" name="nomor_sppd" required
-                                value="{{ old('nomor_sppd', '000.1.2.3/      /BPKAD/' . date('Y')) }}"
+                                value="{{ old('nomor_sppd', '800.1.11.1/      /BPKAD/' . date('Y')) }}"
                                 class="w-full rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono">
                         </div>
 

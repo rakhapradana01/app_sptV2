@@ -64,27 +64,51 @@
 
             <table style="width: 100%;">
                 <tr>
-                    <td style="width: 55%;"></td>
+                    <td style="width: 45%;"></td>
                     <td>
                         <table class="no-border-table" style="font-size: 9pt;">
                             <tr>
-                                <td style="width: 80px;">Lembar ke</td>
-                                <td>: </td>
+                                <td style="width: 55px;">Lembar ke</td>
+                                <td style="width: 10px; text-align: center;">:</td>
+                                <td></td>
                             </tr>
                             <tr>
                                 <td>Kode No</td>
-                                <td>: </td>
+                                <td style="text-align: center;">:</td>
+                                <td></td>
                             </tr>
-                            @php $partsNo = explode('/', $sppd->nomor_sppd ?? ''); @endphp
+                            @php
+                                $rawSppd = trim($sppd->nomor_sppd ?? '');
+                                $isiInputan = '';
+                                $tahun = '2026';
+
+                                if (!empty($rawSppd)) {
+                                    if (str_contains($rawSppd, '/')) {
+                                        $parts = explode('/', $rawSppd);
+                                        $isiInputan = trim($parts[1] ?? '');
+                                        if (!empty($parts[3])) {
+                                            $tahun = trim($parts[3]);
+                                        }
+                                    } else {
+                                        if (!in_array($rawSppd, ['900.1.2.3', '800.1.11.1', '000.1.2.3'])) {
+                                            $isiInputan = $rawSppd;
+                                        }
+                                    }
+                                }
+
+                                if ($isiInputan === '-' || $isiInputan === '.') {
+                                    $isiInputan = '';
+                                }
+                            @endphp
                             <tr>
                                 <td>Nomor</td>
-                                <td>:</td>
-                                <td style="font-size: 9pt;">
-                                    {{ $partsNo[0] ?? '000.1.2.3' }} /
-                                    <span style="display:inline-block; min-width:50px; text-align:center;">
-                                        {{ $partsNo[1] ?? '' }}
-                                    </span>
-                                    / {{ $partsNo[2] ?? 'BPKAD' }} / {{ $partsNo[3] ?? date('Y') }}
+                                <td style="text-align: center;">:</td>
+                                <td style="white-space: nowrap;">
+                                    @if (!empty($isiInputan))
+                                        800.1.11.1/{{ $isiInputan }}/BPKAD/{{ $tahun }}
+                                    @else
+                                        900.1.2.3/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BPKAD/{{ $tahun }}
+                                    @endif
                                 </td>
                             </tr>
                         </table>

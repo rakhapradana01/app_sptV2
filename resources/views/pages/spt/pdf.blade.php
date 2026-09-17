@@ -104,6 +104,7 @@
         }
 
         .footer-section {
+            width: 100%;
             page-break-inside: avoid;
         }
 
@@ -194,13 +195,15 @@
                 @endforeach
             </td>
         </tr>
+    </table>
+
     <div class="footer-section">
         <table class="content-table" style="margin-top: 0;">
             <tr>
                 <td style="width: 15%; padding-top: 6px;">Untuk</td>
                 <td style="width: 2%; padding-top: 6px;">:</td>
                 <td style="padding-top: 6px; text-align: justify;">
-                    1. {{ $nota->kegiatan }} di {{ $nota->lokasi }}.<br>
+                    1. {{ $nota->perihal }} di {{ $nota->lokasi }}.<br>
 
                     2. Waktu Pelaksanaan
                     @if (is_null($nota->tanggal_selesai) || $nota->tanggal_mulai == $nota->tanggal_selesai)
