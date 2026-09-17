@@ -36,12 +36,20 @@ class MonevController extends Controller
         $user = auth()->user();
         $dinasId = $user?->dinas_id;
 
-        $subKegiatanQuery = SubKegiatan::with(['owner', 'pegawai', 'uraians'])
-            ->where('dinas_id', $dinasId);
+        $subKegiatanQuery = SubKegiatan::with(['owner', 'pegawai', 'uraians']);
+        if ($dinasId) {
+            $subKegiatanQuery->where(function($q) use ($dinasId) {
+                $q->where('dinas_id', $dinasId)->orWhereNull('dinas_id');
+            });
+        }
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
-                $subKegiatanQuery->where('sub_bidang_id', $user->sub_bidang_id);
+                if ($user->sub_bidang_id) {
+                    $subKegiatanQuery->where('sub_bidang_id', $user->sub_bidang_id);
+                } else {
+                    $subKegiatanQuery->whereRaw('1 = 0');
+                }
             } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
                 if ($user->bidang_id) {
                     $subKegiatanQuery->where('bidang_id', $user->bidang_id);

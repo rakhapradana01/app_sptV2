@@ -207,10 +207,10 @@
                                     required min="0" step="1" placeholder="Misal: 10">
                             </div>
                             <div>
-                                <label class="block mb-1 text-xs font-semibold text-gray-700 dark:text-gray-300">OK Terpakai (Realisasi)</label>
+                                <label class="block mb-1 text-xs font-semibold text-gray-700 dark:text-gray-300" ></label>OK Terpakai (Realisasi)</label>
                                 <input type="number" name="ok_terpakai" id="input-ok-terpakai"
                                     class="w-full px-4 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
-                                    value="0" required min="0" step="1">
+                                    value="0" required min="0" step="1" disabled>
                             </div>
                         </div>
 

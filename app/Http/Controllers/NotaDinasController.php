@@ -74,10 +74,10 @@ class NotaDinasController extends Controller
         $querySub = SubKegiatan::query();
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
-                if (!$user->sub_bidang_id) {
-                    $querySub->whereRaw('1 = 0');
-                } else {
+                if ($user->sub_bidang_id) {
                     $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+                } else {
+                    $querySub->whereRaw('1 = 0');
                 }
             } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
                 if ($user->bidang_id) {
@@ -134,10 +134,10 @@ class NotaDinasController extends Controller
         $user = auth()->user();
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
-                if (!$user->sub_bidang_id) {
-                    $querySub->whereRaw('1 = 0');
-                } else {
+                if ($user->sub_bidang_id) {
                     $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+                } else {
+                    $querySub->whereRaw('1 = 0');
                 }
             } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
                 if ($user->bidang_id) {
@@ -182,6 +182,160 @@ class NotaDinasController extends Controller
         ));
     }
 
+    public function edit(NotaDinas $nota)
+    {
+        $user = auth()->user();
+
+        // Hanya kasubid (pemilik sub_bidang yang sama) atau super_admin yang boleh edit
+        if ($user->role->name === 'kepala_sub_bidang') {
+            if ((int) $nota->sub_bidang_id !== (int) $user->sub_bidang_id) {
+                abort(403, 'Anda tidak berhak mengedit nota dinas ini.');
+            }
+        } elseif (!in_array($user->role->name, ['super_admin', 'admin', 'kepala_bidang'])) {
+            abort(403);
+        }
+
+        // Hanya boleh edit jika belum disetujui kabid
+        if ($nota->status === NotaDinas::DISETUJUI_KABID) {
+            return redirect()->route('nota-dinas.index')
+                ->with('error', 'Nota dinas yang sudah disetujui tidak dapat diedit.');
+        }
+
+        $querySub = SubKegiatan::query();
+        if ($user->role->name === 'kepala_sub_bidang') {
+            if ($user->sub_bidang_id) {
+                $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+            } else {
+                $querySub->whereRaw('1 = 0');
+            }
+        } elseif ($user->role->name !== 'super_admin') {
+            if ($user->bidang_id) {
+                $querySub->where('bidang_id', $user->bidang_id);
+            }
+        }
+        $subKegiatans = $querySub->get();
+
+        $kepalaBadan = Pegawai::where('jabatan', 'like', 'Kepala Badan%')->get();
+
+        $kepalaBidangUserIds = User::whereHas('role', fn($q) => $q->where('name', 'kepala_bidang'))
+            ->where('bidang_id', $user->bidang_id)
+            ->whereNotNull('pegawai_id')
+            ->pluck('pegawai_id');
+        $kepalaBidang = Pegawai::whereIn('id', $kepalaBidangUserIds)->get();
+        if ($kepalaBidang->isEmpty()) {
+            $kepalaBidang = Pegawai::where('jabatan', 'like', 'Kepala Bidang%')->get();
+        }
+
+        $userLogin = $user->load('pegawai');
+
+        $queryStaff = Pegawai::query();
+        if ($user && $user->bidang_id) {
+            $queryStaff->where('bidang_id', $user->bidang_id);
+        }
+        $staff = $queryStaff->get();
+
+        $nota->load('pegawais');
+
+        return view('pages.nota_dinas.edit', compact(
+            'nota',
+            'kepalaBadan',
+            'kepalaBidang',
+            'userLogin',
+            'staff',
+            'subKegiatans'
+        ));
+    }
+
+    public function update(Request $request, NotaDinas $nota)
+    {
+        $user = auth()->user();
+
+        if ($user->role->name === 'kepala_sub_bidang') {
+            if ((int) $nota->sub_bidang_id !== (int) $user->sub_bidang_id) {
+                abort(403, 'Anda tidak berhak mengubah nota dinas ini.');
+            }
+        } elseif (!in_array($user->role->name, ['super_admin', 'admin', 'kepala_bidang'])) {
+            abort(403);
+        }
+
+        if ($nota->status === NotaDinas::DISETUJUI_KABID) {
+            return redirect()->route('nota-dinas.index')
+                ->with('error', 'Nota dinas yang sudah disetujui tidak dapat diedit.');
+        }
+
+        $validated = $request->validate([
+            'sub_kegiatan_id'  => 'required|exists:sub_kegiatans,id',
+            'tanggal'          => 'required|date',
+            'kepada_id'        => 'required|exists:pegawais,id',
+            'dari_id'          => 'required|exists:pegawais,id',
+            'melalui_id'       => 'nullable|exists:pegawais,id',
+            'perihal'          => 'required|string',
+            'lokasi'           => 'required|string',
+            'jenis_perjalanan' => 'required|in:dalam_daerah,luar_daerah',
+            'tanggal_mulai'    => 'required|date',
+            'tanggal_selesai'  => 'nullable|date',
+            'pegawai_ids'      => 'nullable|array',
+            'pegawai_ids.*'    => 'exists:pegawais,id',
+            'kegiatan'         => 'required|string',
+            'asal_undangan'    => 'nullable|string',
+            'sifat'            => 'nullable|string',
+            'lampiran'         => 'nullable|string',
+        ]);
+
+        $nota->update([
+            'sub_kegiatan_id'  => $validated['sub_kegiatan_id'],
+            'tanggal'          => $validated['tanggal'],
+            'kepada_id'        => $validated['kepada_id'],
+            'dari_id'          => $validated['dari_id'],
+            'melalui_id'       => $validated['melalui_id'] ?? null,
+            'perihal'          => $validated['perihal'],
+            'lokasi'           => $validated['lokasi'],
+            'jenis_perjalanan' => $validated['jenis_perjalanan'],
+            'tanggal_mulai'    => $validated['tanggal_mulai'],
+            'tanggal_selesai'  => $validated['tanggal_selesai'] ?? null,
+            'kegiatan'         => $validated['kegiatan'],
+            'asal_undangan'    => $validated['asal_undangan'],
+            'sifat'            => $validated['sifat'] ?? null,
+            'lampiran'         => $validated['lampiran'] ?? null,
+            // Reset ke diajukan_kabid jika sebelumnya revisi/ditolak
+            'status'           => in_array($nota->status, [NotaDinas::REVISI_KABID, 'ditolak'])
+                ? NotaDinas::DIAJUKAN_KABID
+                : $nota->status,
+            'revisi'           => null,
+        ]);
+
+        if (isset($validated['pegawai_ids'])) {
+            $nota->pegawais()->sync($validated['pegawai_ids']);
+        }
+
+        return redirect()->route('nota-dinas.index')
+            ->with('success', 'Nota dinas berhasil diperbarui.');
+    }
+
+    public function destroy(NotaDinas $nota)
+    {
+        $user = auth()->user();
+
+        if ($user->role->name === 'kepala_sub_bidang') {
+            if ((int) $nota->sub_bidang_id !== (int) $user->sub_bidang_id) {
+                abort(403, 'Anda tidak berhak menghapus nota dinas ini.');
+            }
+        } elseif (!in_array($user->role->name, ['super_admin', 'admin', 'kepala_bidang'])) {
+            abort(403);
+        }
+
+        if ($nota->status === NotaDinas::DISETUJUI_KABID) {
+            return redirect()->route('nota-dinas.index')
+                ->with('error', 'Nota dinas yang sudah disetujui tidak dapat dihapus.');
+        }
+
+        $nota->pegawais()->detach();
+        $nota->delete();
+
+        return redirect()->route('nota-dinas.index')
+            ->with('success', 'Nota dinas berhasil dihapus.');
+    }
+
     public function store(Request $request)
     {
 
@@ -199,7 +353,7 @@ class NotaDinasController extends Controller
             'pegawai_ids' => 'nullable|array',
             'pegawai_ids.*' => 'exists:pegawais,id',
             'kegiatan' => 'required|string',
-            'asal_undangan' => 'required|string',
+            'asal_undangan'    => 'nullable|string',
             'sifat' => 'nullable|string',
             'lampiran' => 'nullable|string'
         ]);

@@ -5,6 +5,9 @@ use App\Models\Role;
 use App\Models\SubKegiatan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 uses(RefreshDatabase::class);
 
@@ -244,3 +247,61 @@ test('model SubKegiatan menghitung realisasi dari uraians', function () {
     expect($sub->realisasi)->toBe(0);
     expect($sub->sisa)->toBe(10_000_000);
 });
+
+// ==========================================
+// IMPORT & TEMPLATE - Sub Kegiatan
+// ==========================================
+
+test('super_admin dapat mengunduh template import sub kegiatan', function () {
+    $user = adminUser();
+
+    $response = $this->actingAs($user)->get(route('sub-kegiatan.template'));
+    $response->assertStatus(200);
+    $response->assertHeader('content-disposition', 'attachment; filename="template_import_sub_kegiatan.xlsx"');
+});
+
+test('import sub kegiatan gagal jika file excel tidak diunggah', function () {
+    $user = adminUser();
+
+    $response = $this->actingAs($user)->post(route('sub-kegiatan.import'), []);
+    $response->assertSessionHasErrors(['file_excel']);
+});
+
+test('super_admin dapat mengimport sub kegiatan dari file excel', function () {
+    $user = adminUser();
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setCellValue('A1', 'Nomor Rekening');
+    $sheet->setCellValue('B1', 'Nama Program');
+    $sheet->setCellValue('C1', 'Koefisien');
+    $sheet->setCellValue('D1', 'Pagu');
+
+    $sheet->setCellValue('A2', '5.1.02.01.01.9001');
+    $sheet->setCellValue('B2', 'Sub Kegiatan Uji Coba Import');
+    $sheet->setCellValue('C2', 12);
+    $sheet->setCellValue('D2', 75000000);
+
+    $tempPath = tempnam(sys_get_temp_dir(), 'test_sub_kegiatan_') . '.xlsx';
+    $writer = new Xlsx($spreadsheet);
+    $writer->save($tempPath);
+
+    $file = new UploadedFile($tempPath, 'sub_kegiatan.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+
+    $response = $this->actingAs($user)->post(route('sub-kegiatan.import'), [
+        'file_excel' => $file,
+    ]);
+
+    $response->assertRedirect(route('sub-kegiatan.index'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('sub_kegiatans', [
+        'nomor_rekening' => '5.1.02.01.01.9001',
+        'nama_kegiatan'  => 'Sub Kegiatan Uji Coba Import',
+        'koefisien'      => 12,
+        'pagu'           => 75000000,
+    ]);
+
+    @unlink($tempPath);
+});
+

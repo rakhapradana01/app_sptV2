@@ -44,7 +44,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/api/bidang/{dinas_id}', [App\Http\Controllers\PegawaiController::class, 'getBidangByDinas'])->name('api.bidang');
         });
 
-        Route::middleware('role:super_admin,admin,kepala_sub_bidang')->group(function () {
+        Route::middleware('role:super_admin,admin,kepala_sub_bidang,user')->group(function () {
+            Route::get('/sub-kegiatan/template', [SubKegiatanController::class, 'downloadTemplate'])->name('sub-kegiatan.template');
+            Route::post('/sub-kegiatan/import', [SubKegiatanController::class, 'importExcel'])->name('sub-kegiatan.import');
             Route::resource('sub-kegiatan', SubKegiatanController::class);
             Route::get('/sub-kegiatan/{id}', [SubKegiatanController::class, 'show']);
             Route::put('/sub-kegiatan/{id}', [SubKegiatanController::class, 'update']);

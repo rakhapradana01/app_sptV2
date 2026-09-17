@@ -205,7 +205,15 @@
                 $pegawaiList = [];
                 foreach ($grouped as $jabatan => $jumlah) {
                     $terbilangText = terbilang($jumlah);
-                    $pegawaiList[] = "$jumlah ($terbilangText) orang " . \Illuminate\Support\Str::title($jabatan);
+                    $romanNumerals = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
+                                      'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'];
+                    $titled = implode(' ', array_map(function($word) use ($romanNumerals) {
+                        return in_array(strtoupper($word), $romanNumerals)
+                            ? strtoupper($word)
+                            : ucfirst(strtolower($word));
+                    }, explode(' ', $jabatan)));
+                    $pegawaiList[] = "$jumlah ($terbilangText) orang " . $titled;
+
                 }
 
                 if (count($pegawaiList) > 1) {

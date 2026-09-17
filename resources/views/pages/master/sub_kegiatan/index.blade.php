@@ -4,7 +4,38 @@
     <x-common.page-breadcrumb pageTitle="Sub Kegiatan" />
     <div class="space-y-6">
         <x-common.component-card title="Daftar Sub Kegiatan">
-            <x-ui.button size="sm" @click="$dispatch('open-profile-create-modal')">Tambah</x-ui.button>
+            <div class="flex flex-wrap items-center gap-2">
+                <x-ui.button size="sm" @click="$dispatch('open-profile-create-modal')">Tambah</x-ui.button>
+                <button type="button" @click="$dispatch('open-sub-kegiatan-import-modal')"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    Import Excel
+                </button>
+                <a href="{{ route('sub-kegiatan.template') }}"
+                    class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Unduh Template
+                </a>
+            </div>
+
+            {{-- Flash: Import Result --}}
+            @if(session('import_success'))
+            <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
+                <div class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="font-medium text-emerald-800 dark:text-emerald-300">{{ session('import_success') }}</p>
+                        @if(session('import_errors'))
+                        <ul class="mt-2 space-y-1 text-sm text-red-600 dark:text-red-400">
+                            @foreach(session('import_errors') as $err)
+                                <li>&bull; {{ $err }}</li>
+                            @endforeach
+                        </ul>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <div class="overflow-x-auto mt-4">
                 <table class="w-full min-w-[600px] border-collapse">
@@ -26,7 +57,16 @@
                         @foreach ($subKegiatan as $item)
                             <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
                                 <td class="px-5 py-4 sm:px-6">{{ $subKegiatan->firstItem() + $loop->index }}</td>
-                                <td class="px-5 py-4 sm:px-6">{{ $item->owner?->name ?? $item->pegawai?->nama ?? '-' }}</td>
+                                <td class="px-5 py-4 sm:px-6">
+                                    <div class="font-medium text-gray-900 dark:text-white">
+                                        {{ $item->pptk_nama }}
+                                    </div>
+                                    @if($item->subBidang)
+                                        <span class="inline-block mt-0.5 text-xs text-emerald-600 dark:text-emerald-400 font-normal">
+                                            {{ $item->subBidang->nama_sub_bidang }}
+                                        </span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->nomor_rekening }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->nama_kegiatan }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $item->koefisien }}</td>
@@ -184,6 +224,165 @@
                 </div>
             </div>
 
+            {{-- Modal Import Sub Kegiatan --}}
+            <div
+                x-data="{
+                    open: false,
+                    dinas_id: '', bidang_id: '', sub_bidang_id: '',
+                    bidangs: [], subBidangs: [],
+                    async fetchBidangs() {
+                        this.bidang_id = '';
+                        this.sub_bidang_id = '';
+                        this.bidangs = [];
+                        this.subBidangs = [];
+                        if (!this.dinas_id) return;
+                        try {
+                            const res = await fetch(`${window.location.origin}/api/bidangs/${this.dinas_id}`);
+                            this.bidangs = await res.json();
+                        } catch(e) { console.error('fetch bidang gagal', e); }
+                    },
+                    async fetchSubBidangs() {
+                        this.sub_bidang_id = '';
+                        this.subBidangs = [];
+                        if (!this.bidang_id) return;
+                        try {
+                            const res = await fetch(`${window.location.origin}/api/sub-bidangs/${this.bidang_id}`);
+                            this.subBidangs = await res.json();
+                        } catch(e) { console.error('fetch sub bidang gagal', e); }
+                    }
+                }"
+                @open-sub-kegiatan-import-modal.window="open = true; dinas_id=''; bidang_id=''; sub_bidang_id=''; bidangs=[]; subBidangs=[];"
+                x-effect="document.body.style.overflow = open ? 'hidden' : ''"
+                x-show="open" x-cloak
+                @keydown.escape.window="open = false"
+                class="modal fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto p-5"
+            >
+                {{-- Backdrop --}}
+                <div @click="open = false"
+                    class="fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-[32px]"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                ></div>
+
+                {{-- Modal Content --}}
+                <div @click.stop
+                    class="relative w-full max-w-[520px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform scale-95"
+                    x-transition:enter-end="opacity-100 transform scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 transform scale-100"
+                    x-transition:leave-end="opacity-0 transform scale-95"
+                >
+                    {{-- Tombol Close --}}
+                    <button @click="open = false"
+                        class="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M6.04289 16.5413C5.65237 16.9318 5.65237 17.565 6.04289 17.9555C6.43342 18.346 7.06658 18.346 7.45711 17.9555L11.9987 13.4139L16.5408 17.956C16.9313 18.3466 17.5645 18.3466 17.955 17.956C18.3455 17.5655 18.3455 16.9323 17.955 16.5418L13.4129 11.9997L17.955 7.4576C18.3455 7.06707 18.3455 6.43391 17.955 6.04338C17.5645 5.65286 16.9313 5.65286 16.5408 6.04338L11.9987 10.5855L7.45711 6.0439C7.06658 5.65338 6.43342 5.65338 6.04289 6.0439C5.65237 6.43442 5.65237 7.06759 6.04289 7.45811L10.5845 11.9997L6.04289 16.5413Z"
+                                fill="currentColor" />
+                        </svg>
+                    </button>
+
+                    <div class="mb-5 flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+                            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90">Import Data Sub Kegiatan</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Unggah file Excel (.xlsx / .xls) untuk import banyak Sub Kegiatan sekaligus</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('sub-kegiatan.import') }}" enctype="multipart/form-data" class="space-y-4">
+                        @csrf
+
+                        @if(!auth()->user()->dinas_id || !auth()->user()->bidang_id)
+                        {{-- Kasus khusus: Super Admin global (bisa tentukan target Dinas & Bidang jika seragam) --}}
+                        <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-3.5 space-y-3 dark:border-gray-800 dark:bg-gray-800/40">
+                            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">Target Dinas & Bidang (Opsional):</p>
+                            <div>
+                                <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Dinas</label>
+                                <select name="dinas_id" x-model="dinas_id" @change="fetchBidangs"
+                                    class="h-9.5 w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                    <option value="">-- Pilih Dinas (Opsional) --</option>
+                                    @foreach($dinas as $d)
+                                        <option value="{{ $d->id }}">{{ $d->nama_dinas }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div x-show="bidangs.length > 0">
+                                <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Bidang</label>
+                                <select name="bidang_id" x-model="bidang_id" @change="fetchSubBidangs"
+                                    class="h-9.5 w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                    <option value="">-- Pilih Bidang (Opsional) --</option>
+                                    <template x-for="b in bidangs" :key="b.id">
+                                        <option :value="b.id" x-text="b.nama_bidang"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div x-show="subBidangs.length > 0">
+                                <label class="block mb-1 text-xs font-medium text-gray-600 dark:text-gray-400">Sub Bidang</label>
+                                <select name="sub_bidang_id" x-model="sub_bidang_id"
+                                    class="h-9.5 w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                    <option value="">-- Pilih Sub Bidang (Opsional) --</option>
+                                    <template x-for="s in subBidangs" :key="s.id">
+                                        <option :value="s.id" x-text="s.nama_sub_bidang"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        @elseif(!auth()->user()->sub_bidang_id && count($subBidangs) > 0)
+                        <div>
+                            <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Sub Bidang / PPTK Target (Opsional)</label>
+                            <select name="sub_bidang_id"
+                                class="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white">
+                                <option value="">-- Berdasarkan Kolom di Excel / Pilih Sub Bidang --</option>
+                                @foreach($subBidangs as $sb)
+                                    <option value="{{ $sb->id }}">{{ $sb->nama_sub_bidang }}</option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                Jika file Excel tidak memuat kolom Sub Bidang, semua baris akan otomatis diarahkan ke Sub Bidang ini dan PPTK disesuaikan dengan Kasubid-nya.
+                            </p>
+                        </div>
+                        @endif
+
+                        <div>
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Pilih File Excel <span class="text-red-500">*</span></label>
+                            <input type="file" name="file_excel" accept=".xlsx,.xls" required
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-950/30 dark:file:text-emerald-400 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded-lg p-1 bg-gray-50 dark:bg-gray-900" />
+                            @error('file_excel')
+                                <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                Gunakan template Excel resmi agar format kolom sesuai. <a href="{{ route('sub-kegiatan.template') }}" class="text-emerald-600 font-medium hover:underline dark:text-emerald-400">Unduh Template Excel</a>.
+                            </p>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                            <button type="button" @click="open = false"
+                                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                                Mulai Import
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
 
             <x-ui.modal x-data="{ open: false }" @open-edit-modal.window="open = true" :isOpen="false"
                 class="max-w-[500px]">
@@ -199,6 +398,17 @@
 
                         <input type="hidden" id="edit_id">
 
+
+                        <div>
+                            <label class="block mb-1 text-sm font-medium dark:text-gray-400">Sub Bidang</label>
+                            <select id="edit_sub_bidang_id"
+                                class="h-11 w-full rounded-lg border px-4 text-sm dark:bg-gray-800 dark:text-white">
+                                <option value="">-- Pilih Sub Bidang --</option>
+                                @foreach($subBidangs as $sb)
+                                    <option value="{{ $sb->id }}">{{ $sb->nama_sub_bidang }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <div>
                             <label class="block mb-1 text-sm font-medium dark:text-gray-400">Nomor Rekening</label>
@@ -239,6 +449,9 @@
                     document.getElementById('edit_id').value = data.id;
                     document.getElementById('edit_nomor_rekening').value = data.nomor_rekening ?? '';
                     document.getElementById('edit_nama_kegiatan').value = data.nama_kegiatan;
+                    if (document.getElementById('edit_sub_bidang_id')) {
+                        document.getElementById('edit_sub_bidang_id').value = data.sub_bidang_id ?? '';
+                    }
 
                     window.dispatchEvent(new CustomEvent('open-edit-modal'));
                 });
@@ -258,6 +471,7 @@
                     body: JSON.stringify({
                         nomor_rekening: document.getElementById('edit_nomor_rekening').value,
                         nama_kegiatan:  document.getElementById('edit_nama_kegiatan').value,
+                        sub_bidang_id:  document.getElementById('edit_sub_bidang_id') ? document.getElementById('edit_sub_bidang_id').value : null,
                     })
                 })
                 .then(res => res.json())

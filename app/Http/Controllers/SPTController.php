@@ -101,10 +101,10 @@ class SPTController extends Controller
         $user = auth()->user();
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
-                if (!$user->sub_bidang_id) {
-                    $querySub->whereRaw('1 = 0');
-                } else {
+                if ($user->sub_bidang_id) {
                     $querySub->where('sub_bidang_id', $user->sub_bidang_id);
+                } else {
+                    $querySub->whereRaw('1 = 0');
                 }
             } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
                 if ($user->bidang_id) {

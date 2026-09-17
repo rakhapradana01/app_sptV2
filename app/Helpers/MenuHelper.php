@@ -77,7 +77,7 @@ class MenuHelper
                         $items[] = ['name' => 'Bidang', 'path' => route('bidang.index'), 'pro' => false];
                         $items[] = ['name' => 'Sub Bidang', 'path' => route('sub-bidang.index'), 'pro' => false];
                     }
-                    if (in_array($role, ['super_admin', 'admin'])) {
+                    if (in_array($role, ['super_admin', 'admin', 'kepala_sub_bidang', 'user'])) {
                         $items[] = ['name' => 'Sub Kegiatan', 'path' => route('sub-kegiatan.index'), 'pro' => false];
                     }
                     return $items;
@@ -86,10 +86,10 @@ class MenuHelper
         ];
         $roleMenuMap = [
             'super_admin'       => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
-            'admin'             => ['Dashboard', 'Master', 'Monitoring dan Evaluasi','Perjalanan Dinas','SPJ'],
-            'kepala_sub_bidang' => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
-            'kepala_bidang'     => ['Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
-            'user'              => ['Master']
+            'admin'             => ['Dashboard', 'Master', 'Monitoring dan Evaluasi', 'Perjalanan Dinas', 'SPJ'],
+            'kepala_sub_bidang' => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'kepala_bidang'     => ['Dashboard', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'user'              => ['Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ']
         ];
 
         $user = Auth::user();

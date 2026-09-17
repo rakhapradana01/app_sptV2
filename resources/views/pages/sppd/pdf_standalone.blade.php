@@ -283,7 +283,7 @@
                             <td style="width:5px;"></td>
                             <td>
                                 Berangkat dari : {{ $sppd->tempat_tujuan_2 ?? '' }}<br>
-                                Ke : {{ $sppd->tempat_berangkat }}<br>
+                                Ke : {{ $sppd->tempat_berangkat_2 ??''}}<br>
                                 Pada Tanggal :
                                 {{ $sppd->tempat_tujuan_2 ? $tglMulai->copy()->addDays(2)->translatedFormat('d F Y') : '' }}
                             </td>

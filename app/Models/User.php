@@ -59,6 +59,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(SubKegiatan::class, 'user_id');
     }
+
+    public function getAllSubKegiatansAttribute()
+    {
+        return SubKegiatan::where('user_id', $this->id)
+            ->when($this->sub_bidang_id, fn($q) => $q->orWhere('sub_bidang_id', $this->sub_bidang_id))
+            ->when($this->pegawai_id, fn($q) => $q->orWhere('pegawai_kasubid_id', $this->pegawai_id))
+            ->get();
+    }
     
     protected function casts(): array
     {
