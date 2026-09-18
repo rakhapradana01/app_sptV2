@@ -9,6 +9,7 @@ class Sppd extends Model
 {
     protected $fillable = [
         'nota_dinas_id',
+        'spt_id',
         'nomor_sppd',
         'alat_angkutan',
         'tempat_berangkat',
@@ -38,6 +39,11 @@ class Sppd extends Model
     public function notaDinas(): BelongsTo
     {
         return $this->belongsTo(NotaDinas::class, 'nota_dinas_id');
+    }
+
+    public function spt(): BelongsTo
+    {
+        return $this->belongsTo(Spt::class, 'spt_id');
     }
 
     public function dinas(): BelongsTo

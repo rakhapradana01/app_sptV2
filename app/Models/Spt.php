@@ -68,6 +68,14 @@ class Spt extends Model
         return $this->belongsToMany(Pegawai::class, 'spt_pegawai');
     }
 
+    /**
+     * SPPD yang merujuk ke SPT ini (untuk standalone).
+     */
+    public function sppds()
+    {
+        return $this->hasMany(Sppd::class, 'spt_id');
+    }
+
     public function spjRincians()
     {
         return $this->hasMany(SpjRincian::class, 'spt_id');

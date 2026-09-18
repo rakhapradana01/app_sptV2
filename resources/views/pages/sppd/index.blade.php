@@ -48,7 +48,11 @@
                                         <span class="font-mono text-sm text-blue-700 dark:text-blue-400 font-medium">
                                             {{ $sppd->nomor_sppd }}
                                         </span>
-                                        @if ($sppd->nomor_spt_ref)
+                                        @if ($sppd->spt)
+                                            <div class="text-xs text-indigo-500 dark:text-indigo-400 mt-0.5">
+                                                SPT: {{ $sppd->spt->nomor_spt }}
+                                            </div>
+                                        @elseif ($sppd->nomor_spt_ref)
                                             <div class="text-xs text-gray-400 mt-0.5">SPT: {{ $sppd->nomor_spt_ref }}</div>
                                         @endif
                                     </td>

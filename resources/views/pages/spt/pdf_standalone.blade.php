@@ -46,12 +46,13 @@
 
         .list-petugas {
             width: 100%;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             border-collapse: collapse;
+            page-break-inside: avoid;
         }
 
         .ttd-container {
-            margin-top: 15px;
+            margin-top: 10px;
             width: 100%;
             position: relative;
             page-break-inside: avoid;
@@ -94,7 +95,7 @@
                 Daerah Provinsi Kalimantan Selatan Tahun Anggaran {{ $spt->tahun_anggaran ?? date('Y') }}.</td>
         </tr>
         <tr>
-            <td colspan="3" class="text-center font-bold" style="padding: 15px 0;">MEMERINTAHKAN :</td>
+            <td colspan="3" class="text-center font-bold" style="padding: 8px 0;">MEMERINTAHKAN :</td>
         </tr>
         <tr>
             <td>Kepada</td>
@@ -124,7 +125,7 @@
                             <td></td>
                             <td>Jabatan</td>
                             <td>:</td>
-                            <td>{{ $pegawai->jabatan }}</td>
+                            <td style="padding-bottom: 3px;">{{ $pegawai->jabatan }}</td>
                         </tr>
                     </table>
                 @endforeach
@@ -132,12 +133,12 @@
         </tr>
     </table>
 
-    <div style="page-break-inside: avoid;">
+    <div style="page-break-inside: avoid; page-break-before: avoid;">
         <table class="content-table" style="margin-top: 0;">
             <tr>
-                <td style="width: 15%; padding-top: 10px;">Untuk</td>
-                <td style="width: 2%; padding-top: 10px;">:</td>
-                <td style="padding-top: 10px; text-align: justify;">
+                <td style="width: 15%; padding-top: 8px;">Untuk</td>
+                <td style="width: 2%; padding-top: 8px;">:</td>
+                <td style="padding-top: 8px; text-align: justify;">
                     1. {{ $spt->kegiatan }} di {{ $spt->lokasi }}.<br>
 
                     2. Waktu Pelaksanaan

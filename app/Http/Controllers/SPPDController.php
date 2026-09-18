@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\NotaDinas;
 use App\Models\Pegawai;
 use App\Models\Sppd;
+use App\Models\Spt;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -70,7 +71,7 @@ class SPPDController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = Sppd::with('pegawais')
+        $query = Sppd::with(['pegawais', 'spt'])
             ->whereNull('nota_dinas_id');
 
         if ($user) {
@@ -96,53 +97,75 @@ class SPPDController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $queryPeg = Pegawai::orderBy('nama');
-        if ($user && $user->bidang_id) {
-            $queryPeg->where('bidang_id', $user->bidang_id);
+
+        // Load SPT standalone milik user (sebagai pilihan referensi)
+        $querySpt = Spt::with('pegawais')
+            ->whereNull('nota_dinas_id')
+            ->orderBy('created_at', 'desc');
+
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if ($user->sub_bidang_id) {
+                    $querySpt->where('sub_bidang_id', $user->sub_bidang_id);
+                } else {
+                    $querySpt->whereRaw('1 = 0');
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+                if ($user->bidang_id) {
+                    $querySpt->where('bidang_id', $user->bidang_id);
+                }
+            }
         }
-        $pegawais = $queryPeg->get();
- 
-         return view('pages.sppd.create', compact('pegawais'));
+
+        $spts = $querySpt->get();
+
+        return view('pages.sppd.create', compact('spts'));
     }
 
     public function storeMandiri(Request $request)
     {
         $validated = $request->validate([
+            'spt_id'           => 'required|exists:spts,id',
             'nomor_sppd'       => 'required|string',
-            'nomor_spt_ref'    => 'nullable|string',
             'alat_angkutan'    => 'required|string',
             'tempat_berangkat' => 'required|string',
             'tempat_tujuan'    => 'required|string',
             'tempat_tujuan_2'  => 'nullable|string',
             'tanggal_sppd'     => 'required|date',
-            'tanggal_mulai'    => 'required|date',
+            // Override optional — jika dikosongkan, ambil dari SPT
+            'tanggal_mulai'    => 'nullable|date',
             'tanggal_selesai'  => 'nullable|date|after_or_equal:tanggal_mulai',
-            'kegiatan'         => 'required|string',
-            'pegawai_ids'      => 'required|array|min:1',
-            'pegawai_ids.*'    => 'exists:pegawais,id',
+            'kegiatan'         => 'nullable|string',
         ]);
+
+        // Ambil data dari SPT terpilih
+        $spt = Spt::with('pegawais')->findOrFail($validated['spt_id']);
 
         $user = auth()->user();
         $sppd = Sppd::create([
             'nota_dinas_id'    => null,
+            'spt_id'           => $spt->id,
             'nomor_sppd'       => $validated['nomor_sppd'],
-            'nomor_spt_ref'    => $validated['nomor_spt_ref'] ?? null,
+            'nomor_spt_ref'    => $spt->nomor_spt,
             'alat_angkutan'    => $validated['alat_angkutan'],
             'tempat_berangkat' => $validated['tempat_berangkat'],
             'tempat_tujuan'    => $validated['tempat_tujuan'],
             'tempat_tujuan_2'  => $validated['tempat_tujuan_2'] ?? null,
             'tanggal_sppd'     => $validated['tanggal_sppd'],
-            'tanggal_mulai'    => $validated['tanggal_mulai'],
-            'tanggal_selesai'  => $validated['tanggal_selesai'] ?? null,
-            'kegiatan'         => $validated['kegiatan'],
+            // Jika user override, pakai nilai user; jika tidak, ambil dari SPT
+            'tanggal_mulai'    => $validated['tanggal_mulai'] ?? $spt->tanggal_mulai,
+            'tanggal_selesai'  => $validated['tanggal_selesai'] ?? $spt->tanggal_selesai,
+            'kegiatan'         => !empty($validated['kegiatan']) ? $validated['kegiatan'] : $spt->kegiatan,
             'dinas_id'         => $user->dinas_id ?? null,
             'bidang_id'        => $user->bidang_id ?? null,
             'sub_bidang_id'    => $user->sub_bidang_id ?? null,
         ]);
 
-        $sppd->pegawais()->sync($validated['pegawai_ids']);
+        // Sync pegawai dari SPT (bisa di-override jika user centang manual, tapi default dari SPT)
+        $pegawaiIds = $spt->pegawais->pluck('id')->toArray();
+        $sppd->pegawais()->sync($pegawaiIds);
 
-        return redirect()->route('sppd.index')->with('success', 'SPPD Mandiri berhasil dibuat!');
+        return redirect()->route('sppd.index')->with('success', 'SPPD berhasil dibuat dari SPT!');
     }
 
     public function cetakSPPDMandiri($id)
