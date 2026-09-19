@@ -101,7 +101,10 @@
             <td>Kepada</td>
             <td>:</td>
             <td>
-                @foreach ($spt->pegawais as $index => $pegawai)
+                @php
+                    $listPegawai = $spt->pegawais->count() ? $spt->pegawais : $spt->pegawais_efektif;
+                @endphp
+                @foreach ($listPegawai as $index => $pegawai)
                     <table class="list-petugas">
                         <tr>
                             <td style="width: 25px;">{{ $index + 1 }}.</td>
@@ -139,14 +142,18 @@
                 <td style="width: 15%; padding-top: 8px;">Untuk</td>
                 <td style="width: 2%; padding-top: 8px;">:</td>
                 <td style="padding-top: 8px; text-align: justify;">
-                    1. {{ $spt->kegiatan }} di {{ $spt->lokasi }}.<br>
+                    1. {{ $spt->kegiatan_efektif }} di {{ $spt->lokasi_efektif }}.<br>
 
                     2. Waktu Pelaksanaan
-                    @if (is_null($spt->tanggal_selesai) || $spt->tanggal_mulai == $spt->tanggal_selesai)
-                        {{ \Carbon\Carbon::parse($spt->tanggal_mulai)->translatedFormat('d F Y') }}
+                    @php
+                        $tglMulai = $spt->tanggal_mulai_efektif;
+                        $tglSelesai = $spt->tanggal_selesai_efektif;
+                    @endphp
+                    @if (is_null($tglSelesai) || $tglMulai == $tglSelesai)
+                        {{ \Carbon\Carbon::parse($tglMulai)->translatedFormat('d F Y') }}
                     @else
-                        {{ \Carbon\Carbon::parse($spt->tanggal_mulai)->translatedFormat('d F Y') }} s/d
-                        {{ \Carbon\Carbon::parse($spt->tanggal_selesai)->translatedFormat('d F Y') }}
+                        {{ \Carbon\Carbon::parse($tglMulai)->translatedFormat('d F Y') }} s/d
+                        {{ \Carbon\Carbon::parse($tglSelesai)->translatedFormat('d F Y') }}
                     @endif
                     .<br>
 

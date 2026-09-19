@@ -215,17 +215,25 @@
             <p class="mt-16 font-bold">{{ optional($nota->dari)->nama }}</p>
         </div>
 
-        @if (auth()->user()->role->name == 'kepala_bidang')
-            <div class="mt-10" x-data="{ showRevisiModal: false }">
+        @php
+            $userRole = auth()->user()->role->name;
+            $canApproveKabid = ($userRole === 'kepala_bidang' || $userRole === 'super_admin') && $nota->status === \App\Models\NotaDinas::DIAJUKAN_KABID;
+            $canApproveSekban = ($userRole === 'sekretaris_badan' || $userRole === 'super_admin') && $nota->status === \App\Models\NotaDinas::DIAJUKAN_SEKBAN;
+            $canApproveKaban = ($userRole === 'kepala_badan' || $userRole === 'super_admin') && $nota->status === \App\Models\NotaDinas::DIAJUKAN_KABAN;
+        @endphp
+
+        @if ($canApproveKabid)
+            <div class="mt-10 p-4 border border-blue-200 bg-blue-50/40 rounded-xl" x-data="{ showRevisiModal: false }">
+                <p class="text-sm font-semibold text-blue-800 mb-3">Tindakan Kepala Bidang:</p>
                 <div class="flex gap-2">
                     <form action="{{ route('nota-dinas.approve-kabid', $nota->id) }}" method="POST">
                         @csrf @method('PATCH')
-                        <x-ui.button variant="success" type="submit">Setujui</x-ui.button>
+                        <x-ui.button variant="success" type="submit">Setujui &amp; Teruskan ke Sekretaris Badan</x-ui.button>
                     </form>
 
                     <x-ui.button variant="yellow" @click="showRevisiModal = true">Revisi</x-ui.button>
 
-                    <form action="{{ route('nota-dinas.reject-kabid', $nota->id) }}" method="POST">
+                    <form action="{{ route('nota-dinas.reject-kabid', $nota->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menolak nota dinas ini?')">
                         @csrf @method('PATCH')
                         <x-ui.button variant="red" type="submit">Tolak</x-ui.button>
                     </form>
@@ -234,7 +242,7 @@
                 <div x-show="showRevisiModal" x-cloak
                     class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
                     <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
-                        <h2 class="font-bold text-lg mb-4">Catatan Revisi</h2>
+                        <h2 class="font-bold text-lg mb-4">Catatan Revisi Kabid</h2>
 
                         <form action="{{ route('nota-dinas.revisi-kabid', $nota->id) }}" method="POST">
                             @csrf
@@ -246,8 +254,87 @@
                             <div class="flex justify-end gap-2">
                                 <button type="button" @click="showRevisiModal = false"
                                     class="px-4 py-2 border rounded">Batal</button>
-                                <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Kirim
-                                    Revisi</button>
+                                <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Kirim Revisi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($canApproveSekban)
+            <div class="mt-10 p-4 border border-purple-200 bg-purple-50/40 rounded-xl" x-data="{ showRevisiModalSekban: false }">
+                <p class="text-sm font-semibold text-purple-800 mb-3">Tindakan Sekretaris Badan:</p>
+                <div class="flex gap-2">
+                    <form action="{{ route('nota-dinas.approve-sekban', $nota->id) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <x-ui.button variant="success" type="submit">Setujui &amp; Teruskan ke Kaban</x-ui.button>
+                    </form>
+
+                    <x-ui.button variant="yellow" @click="showRevisiModalSekban = true">Revisi</x-ui.button>
+
+                    <form action="{{ route('nota-dinas.reject-sekban', $nota->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menolak nota dinas ini?')">
+                        @csrf @method('PATCH')
+                        <x-ui.button variant="red" type="submit">Tolak</x-ui.button>
+                    </form>
+                </div>
+
+                <div x-show="showRevisiModalSekban" x-cloak
+                    class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                    <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+                        <h2 class="font-bold text-lg mb-4">Catatan Revisi Sekretaris Badan</h2>
+
+                        <form action="{{ route('nota-dinas.revisi-sekban', $nota->id) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+
+                            <textarea name="revisi" rows="4" class="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-yellow-500"
+                                placeholder="Tuliskan bagian yang perlu diperbaiki..." required></textarea>
+
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="showRevisiModalSekban = false"
+                                    class="px-4 py-2 border rounded">Batal</button>
+                                <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Kirim Revisi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if ($canApproveKaban)
+            <div class="mt-10 p-4 border border-emerald-200 bg-emerald-50/40 rounded-xl" x-data="{ showRevisiModalKaban: false }">
+                <p class="text-sm font-semibold text-emerald-800 mb-3">Persetujuan Kepala Badan (ACC Kaban):</p>
+                <div class="flex gap-2">
+                    <form action="{{ route('nota-dinas.approve-kaban', $nota->id) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <x-ui.button variant="success" type="submit">Setujui (ACC Kaban)</x-ui.button>
+                    </form>
+
+                    <x-ui.button variant="yellow" @click="showRevisiModalKaban = true">Revisi Kaban</x-ui.button>
+
+                    <form action="{{ route('nota-dinas.reject-kaban', $nota->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menolak nota dinas ini?')">
+                        @csrf @method('PATCH')
+                        <x-ui.button variant="red" type="submit">Tolak</x-ui.button>
+                    </form>
+                </div>
+
+                <div x-show="showRevisiModalKaban" x-cloak
+                    class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                    <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+                        <h2 class="font-bold text-lg mb-4">Catatan Revisi Kepala Badan</h2>
+
+                        <form action="{{ route('nota-dinas.revisi-kaban', $nota->id) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+
+                            <textarea name="revisi" rows="4" class="w-full border rounded-lg p-2 mb-4 focus:ring-2 focus:ring-yellow-500"
+                                placeholder="Tuliskan catatan revisi Kaban..." required></textarea>
+
+                            <div class="flex justify-end gap-2">
+                                <button type="button" @click="showRevisiModalKaban = false"
+                                    class="px-4 py-2 border rounded">Batal</button>
+                                <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded">Kirim Revisi</button>
                             </div>
                         </form>
                     </div>

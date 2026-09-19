@@ -19,6 +19,7 @@ class RoleSeeder extends Seeder
             'kepala_bidang',
             'kepala_sub_bidang',
             'kepala_badan',
+            'sekretaris_badan',
         ];
 
         foreach ($roles as  $value) {

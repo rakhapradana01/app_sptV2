@@ -57,9 +57,9 @@ Route::middleware(['auth'])->group(function () {
 
 
     // ======================
-    // NOTA DINAS (SUPER ADMIN + KASUBID + Kabid)
+    // NOTA DINAS (SUPER ADMIN + KASUBID + KABID + KABAN + ADMIN)
     // ======================
-    Route::middleware('role:super_admin,kepala_sub_bidang,kepala_bidang,admin')->group(function () {
+    Route::middleware('role:super_admin,kepala_sub_bidang,kepala_bidang,admin,kepala_badan,sekretaris_badan')->group(function () {
         
         Route::get('/monev/uraian', [MonevController::class, 'uraianIndex'])->name('monev.uraian.index');
         Route::get('/monev/rekap-pegawai', [DashboardController::class, 'rekapPegawaiPage'])->name('monev.rekap-pegawai');
@@ -120,10 +120,46 @@ Route::middleware(['auth'])->group(function () {
             ->name('nota-dinas.approve-kabid');
     });
 
+    Route::middleware('role:super_admin,sekretaris_badan')->group(function () {
+
+        Route::patch(
+            '/nota-dinas/{nota}/approve-sekban',
+            [NotaDinasController::class, 'approveSekban']
+        )->name('nota-dinas.approve-sekban');
+
+        Route::patch(
+            '/nota-dinas/{id}/revisi-sekban',
+            [NotaDinasController::class, 'revisiSekban']
+        )->name('nota-dinas.revisi-sekban');
+
+        Route::patch(
+            '/nota-dinas/{id}/reject-sekban',
+            [NotaDinasController::class, 'rejectSekban']
+        )->name('nota-dinas.reject-sekban');
+    });
+
+    Route::middleware('role:super_admin,kepala_badan')->group(function () {
+
+        Route::patch(
+            '/nota-dinas/{nota}/approve-kaban',
+            [NotaDinasController::class, 'approveKaban']
+        )->name('nota-dinas.approve-kaban');
+
+        Route::patch(
+            '/nota-dinas/{id}/revisi-kaban',
+            [NotaDinasController::class, 'revisiKaban']
+        )->name('nota-dinas.revisi-kaban');
+
+        Route::patch(
+            '/nota-dinas/{id}/reject-kaban',
+            [NotaDinasController::class, 'rejectKaban']
+        )->name('nota-dinas.reject-kaban');
+    });
+
     // ======================
-    // SPT (SUPER ADMIN + KASUBID)
+    // SPT & SPPD
     // ======================
-    Route::middleware('role:super_admin,kepala_sub_bidang')->group(function () {
+    Route::middleware('role:super_admin,admin,kepala_sub_bidang,kepala_bidang,user,kepala_badan,sekretaris_badan')->group(function () {
 
         // SPT via Nota Dinas (existing)
         Route::post('/spt/store/{nota_id}', [SPTController::class, 'store'])->name('spt.store');

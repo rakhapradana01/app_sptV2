@@ -143,9 +143,20 @@ test('dapat menyimpan SPPD mandiri baru', function () {
     $user = standaloneAdminUser();
     $pegawai = makePegawaiForStandalone();
 
+    $spt = Spt::create([
+        'nomor_spt'      => '800.1.11.1/001/BPKAD/2026',
+        'jenis_anggaran' => 'DPA',
+        'tahun_anggaran' => 2026,
+        'kegiatan'       => 'Perjalanan Standalone',
+        'lokasi'         => 'Jakarta',
+        'tanggal_mulai'  => '2026-06-20',
+        'tanggal_selesai'=> '2026-06-22',
+    ]);
+    $spt->pegawais()->attach($pegawai->id);
+
     $response = $this->actingAs($user)->post(route('sppd.storeMandiri'), [
+        'spt_id'           => $spt->id,
         'nomor_sppd'       => '000.1.2.3/001/BPKAD/2026',
-        'nomor_spt_ref'    => '800.1.11.1/001/BPKAD/2026',
         'alat_angkutan'    => 'mobil',
         'tempat_berangkat' => 'Banjarbaru',
         'tempat_tujuan'    => 'Jakarta',

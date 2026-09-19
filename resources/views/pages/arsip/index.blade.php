@@ -68,7 +68,7 @@
 
                                                         {{-- 2. Cetak SPT (Jika ada) --}}
                                                         @if ($nota->spt)
-                                                            <a href="{{ route('nota.cetakSpt', $nota->id) }}" target="_blank"
+                                                            <a href="{{ route('spt.cetakMandiri', $nota->spt->id) }}" target="_blank"
                                                                 class="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50">
                                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
@@ -80,16 +80,19 @@
                                                                 SPT
                                                             </a>
                                                         @else
-                                                            <button
-                                                                @click="openModalSpt({{ $nota->id }}, '{{ $nota->nomor_urut }}')"
-                                                                class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">
+                                                            <a href="{{ route('spt.create', ['nota_id' => $nota->id]) }}"
+                                                                class="flex items-center px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50">
+                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                                                 Buat SPT
-                                                            </button>
+                                                            </a>
                                                         @endif
 
                                                         {{-- 3. Cetak SPPD (Jika ada) --}}
-                                                        @if ($nota->sppd)
-                                                            <a href="{{ route('nota.cetakSPPD', $nota->id) }}" target="_blank"
+                                                        @php
+                                                            $sppdDoc = $nota->sppd ?? $nota->spt?->sppd_efektif;
+                                                        @endphp
+                                                        @if ($sppdDoc)
+                                                            <a href="{{ route('sppd.cetakMandiri', $sppdDoc->id) }}" target="_blank"
                                                                 class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50">
                                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                                                     viewBox="0 0 24 24">
@@ -100,12 +103,12 @@
                                                                 </svg>
                                                                 SPPD
                                                             </a>
-                                                        @else
-                                                            <button
-                                                                @click="openModalSppd({{ $nota->id }}, '{{ $nota->nomor_urut }}', '{{ $nota->spt?->nomor_spt ?? '' }}')"
-                                                                class="flex items-center px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50">
+                                                        @elseif ($nota->spt)
+                                                            <a href="{{ route('sppd.create', ['spt_id' => $nota->spt->id]) }}"
+                                                                class="flex items-center px-4 py-2 text-sm text-amber-600 font-medium hover:bg-amber-50">
+                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                                                 Buat SPPD
-                                                            </button>
+                                                            </a>
                                                         @endif
 
                                                     </div>

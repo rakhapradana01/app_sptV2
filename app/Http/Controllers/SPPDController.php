@@ -71,8 +71,7 @@ class SPPDController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = Sppd::with(['pegawais', 'spt'])
-            ->whereNull('nota_dinas_id');
+        $query = Sppd::with(['pegawais', 'spt', 'notaDinas']);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -81,9 +80,13 @@ class SPPDController extends Controller
                 } else {
                     $query->where('sub_bidang_id', $user->sub_bidang_id);
                 }
-            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
+                }
+            } elseif ($user->role->name === 'kepala_badan') {
+                if ($user->dinas_id) {
+                    $query->where('dinas_id', $user->dinas_id);
                 }
             }
         }
@@ -94,13 +97,12 @@ class SPPDController extends Controller
         return view('pages.sppd.index', compact('sppds'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $user = auth()->user();
 
-        // Load SPT standalone milik user (sebagai pilihan referensi)
+        // Load semua SPT yang bisa diakses user (baik dari Nota Dinas maupun standalone)
         $querySpt = Spt::with('pegawais')
-            ->whereNull('nota_dinas_id')
             ->orderBy('created_at', 'desc');
 
         if ($user) {
@@ -110,16 +112,21 @@ class SPPDController extends Controller
                 } else {
                     $querySpt->whereRaw('1 = 0');
                 }
-            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
                 if ($user->bidang_id) {
                     $querySpt->where('bidang_id', $user->bidang_id);
+                }
+            } elseif ($user->role->name === 'kepala_badan') {
+                if ($user->dinas_id) {
+                    $querySpt->where('dinas_id', $user->dinas_id);
                 }
             }
         }
 
         $spts = $querySpt->get();
+        $selectedSptId = $request->query('spt_id');
 
-        return view('pages.sppd.create', compact('spts'));
+        return view('pages.sppd.create', compact('spts', 'selectedSptId'));
     }
 
     public function storeMandiri(Request $request)
@@ -136,6 +143,8 @@ class SPPDController extends Controller
             'tanggal_mulai'    => 'nullable|date',
             'tanggal_selesai'  => 'nullable|date|after_or_equal:tanggal_mulai',
             'kegiatan'         => 'nullable|string',
+            'pegawai_ids'      => 'nullable|array',
+            'pegawai_ids.*'    => 'exists:pegawais,id',
         ]);
 
         // Ambil data dari SPT terpilih
@@ -143,7 +152,7 @@ class SPPDController extends Controller
 
         $user = auth()->user();
         $sppd = Sppd::create([
-            'nota_dinas_id'    => null,
+            'nota_dinas_id'    => $spt->nota_dinas_id ?? null,
             'spt_id'           => $spt->id,
             'nomor_sppd'       => $validated['nomor_sppd'],
             'nomor_spt_ref'    => $spt->nomor_spt,
@@ -156,13 +165,15 @@ class SPPDController extends Controller
             'tanggal_mulai'    => $validated['tanggal_mulai'] ?? $spt->tanggal_mulai,
             'tanggal_selesai'  => $validated['tanggal_selesai'] ?? $spt->tanggal_selesai,
             'kegiatan'         => !empty($validated['kegiatan']) ? $validated['kegiatan'] : $spt->kegiatan,
-            'dinas_id'         => $user->dinas_id ?? null,
-            'bidang_id'        => $user->bidang_id ?? null,
-            'sub_bidang_id'    => $user->sub_bidang_id ?? null,
+            'dinas_id'         => $user->dinas_id ?? $spt->dinas_id ?? null,
+            'bidang_id'        => $user->bidang_id ?? $spt->bidang_id ?? null,
+            'sub_bidang_id'    => $user->sub_bidang_id ?? $spt->sub_bidang_id ?? null,
         ]);
 
-        // Sync pegawai dari SPT (bisa di-override jika user centang manual, tapi default dari SPT)
-        $pegawaiIds = $spt->pegawais->pluck('id')->toArray();
+        // Sync pegawai dari request jika ada, jika tidak default dari SPT
+        $pegawaiIds = !empty($validated['pegawai_ids'])
+            ? $validated['pegawai_ids']
+            : $spt->pegawais->pluck('id')->toArray();
         $sppd->pegawais()->sync($pegawaiIds);
 
         return redirect()->route('sppd.index')->with('success', 'SPPD berhasil dibuat dari SPT!');
@@ -170,11 +181,7 @@ class SPPDController extends Controller
 
     public function cetakSPPDMandiri($id)
     {
-        $sppd = Sppd::with('pegawais')->findOrFail($id);
-
-        if (!$sppd->isStandalone()) {
-            return back()->with('error', 'Gunakan fitur cetak dari halaman Arsip untuk SPPD yang berasal dari Nota Dinas.');
-        }
+        $sppd = Sppd::with(['pegawais', 'spt', 'notaDinas'])->findOrFail($id);
 
         $lamaHari = $sppd->lama_hari;
 
@@ -189,10 +196,6 @@ class SPPDController extends Controller
     public function destroyMandiri($id)
     {
         $sppd = Sppd::findOrFail($id);
-
-        if (!$sppd->isStandalone()) {
-            return back()->with('error', 'SPPD ini terhubung ke Nota Dinas dan tidak dapat dihapus dari sini.');
-        }
 
         $sppd->pegawais()->detach();
         $sppd->delete();

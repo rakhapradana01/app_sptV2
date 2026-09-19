@@ -37,8 +37,18 @@ class NotaDinas extends Model
     const DIAJUKAN_KABID = 'diajukan_kabid';
     const REVISI_KABID = 'revisi_kabid';
     const DISETUJUI_KABID = 'disetujui_kabid';
+    const DIAJUKAN_SEKBAN = 'diajukan_sekban';
+    const REVISI_SEKBAN = 'revisi_sekban';
+    const DITOLAK_SEKBAN = 'ditolak_sekban';
     const DIAJUKAN_KABAN = 'diajukan_kaban';
     const DISETUJUI_KABAN = 'disetujui_kaban';
+    const REVISI_KABAN = 'revisi_kaban';
+    const DITOLAK_KABAN = 'ditolak_kaban';
+
+    public function scopeApprovedByKaban($query)
+    {
+        return $query->whereIn('status', [self::DISETUJUI_KABAN, self::DISETUJUI_KABID]);
+    }
 
     public function subKegiatan()
     {

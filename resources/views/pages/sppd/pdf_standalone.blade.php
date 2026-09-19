@@ -237,10 +237,7 @@
                         <tr>
                             <td style="width:5px; vertical-align:top;"><b>I.</b></td>
                             <td>
-                                Berangkat dari : <br>
-                                (Tempat Kedudukan)
-                                <br>
-                                {{ $sppd->tempat_berangkat }}<br>
+                                Berangkat dari:                                 {{ $sppd->tempat_berangkat }}<br>
 
                                 Ke : {{ $sppd->tempat_tujuan }}<br>
 

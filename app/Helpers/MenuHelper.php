@@ -89,6 +89,8 @@ class MenuHelper
             'admin'             => ['Dashboard', 'Master', 'Monitoring dan Evaluasi', 'Perjalanan Dinas', 'SPJ'],
             'kepala_sub_bidang' => ['Dashboard', 'Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'kepala_bidang'     => ['Dashboard', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'sekretaris_badan'  => ['Dashboard', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
+            'kepala_badan'      => ['Dashboard', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ'],
             'user'              => ['Master', 'Perjalanan Dinas', 'Monitoring dan Evaluasi', 'SPJ']
         ];
 

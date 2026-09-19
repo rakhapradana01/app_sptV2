@@ -30,7 +30,7 @@
                 ])->values()->toJson();
             @endphp
 
-            <div x-data="sppdForm({{ $sptData }})" class="space-y-6">
+            <div x-data="sppdForm({{ $sptData }}, '{{ old('spt_id', $selectedSptId ?? '') }}')" class="space-y-6">
 
                 <form method="POST" action="{{ route('sppd.storeMandiri') }}" class="space-y-6">
                     @csrf
@@ -223,10 +223,10 @@
     </div>
 
     <script>
-        function sppdForm(sptList) {
+        function sppdForm(sptList, initialSptId) {
             return {
                 sptList: sptList,
-                selectedSptId: '{{ old('spt_id') }}',
+                selectedSptId: initialSptId || '{{ old('spt_id') }}',
                 selectedSpt: null,
                 form: {
                     tempat_tujuan: '{{ old('tempat_tujuan') }}',

@@ -25,7 +25,10 @@ class NotaDinasController extends Controller
     public function arsip()
     {
         $user = auth()->user();
-        $query = NotaDinas::where('status', \App\Models\NotaDinas::DISETUJUI_KABID);
+        $query = NotaDinas::whereIn('status', [
+            \App\Models\NotaDinas::DISETUJUI_KABAN,
+            \App\Models\NotaDinas::DISETUJUI_KABID,
+        ]);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -34,9 +37,13 @@ class NotaDinasController extends Controller
                 } else {
                     $query->where('sub_bidang_id', $user->sub_bidang_id);
                 }
-            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
+                }
+            } elseif ($user->role->name === 'kepala_badan') {
+                if ($user->dinas_id) {
+                    $query->where('dinas_id', $user->dinas_id);
                 }
             }
         }
@@ -62,9 +69,13 @@ class NotaDinasController extends Controller
                 } else {
                     $query->where('sub_bidang_id', $user->sub_bidang_id);
                 }
-            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
+                }
+            } elseif ($user->role->name === 'kepala_badan') {
+                if ($user->dinas_id) {
+                    $query->where('dinas_id', $user->dinas_id);
                 }
             }
         }
@@ -446,11 +457,127 @@ class NotaDinasController extends Controller
         }
 
         $nota->update([
-            'status' => NotaDinas::DISETUJUI_KABID
+            'status' => NotaDinas::DIAJUKAN_SEKBAN
         ]);
 
         return redirect()->route('nota-dinas.index')
-            ->with('success', 'Telah Disetujui');
+            ->with('success', 'Nota dinas disetujui Kabid dan diteruskan ke Sekretaris Badan.');
+    }
+
+    public function approveSekban(NotaDinas $nota)
+    {
+        if (
+            Auth::user()->role->name != 'sekretaris_badan'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        if ($nota->status != NotaDinas::DIAJUKAN_SEKBAN) {
+            return back()->with('error', 'Status tidak valid untuk disetujui Sekretaris Badan');
+        }
+
+        $nota->update([
+            'status' => NotaDinas::DIAJUKAN_KABAN
+        ]);
+
+        return redirect()->route('nota-dinas.index')
+            ->with('success', 'Nota dinas disetujui Sekretaris Badan dan diteruskan ke Kepala Badan.');
+    }
+
+    public function revisiSekban(Request $request, $id)
+    {
+        if (
+            Auth::user()->role->name != 'sekretaris_badan'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        $request->validate([
+            'revisi' => 'required|string|min:5',
+        ]);
+
+        $nota = NotaDinas::findOrFail($id);
+        $nota->update([
+            'status' => NotaDinas::REVISI_SEKBAN,
+            'revisi' => $request->revisi,
+        ]);
+
+        return redirect()->route('nota-dinas.index')->with('warning', 'Nota dinas dikembalikan untuk revisi oleh Sekretaris Badan.');
+    }
+
+    public function rejectSekban($id)
+    {
+        if (
+            Auth::user()->role->name != 'sekretaris_badan'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        $nota = NotaDinas::findOrFail($id);
+        $nota->update(['status' => NotaDinas::DITOLAK_SEKBAN]);
+
+        return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak oleh Sekretaris Badan.');
+    }
+
+    public function approveKaban(NotaDinas $nota)
+    {
+        if (
+            Auth::user()->role->name != 'kepala_badan'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        if ($nota->status != NotaDinas::DIAJUKAN_KABAN) {
+            return back()->with('error', 'Status tidak valid untuk disetujui Kepala Badan');
+        }
+
+        $nota->update([
+            'status' => NotaDinas::DISETUJUI_KABAN
+        ]);
+
+        return redirect()->route('nota-dinas.index')
+            ->with('success', 'Nota dinas berhasil di-ACC Kepala Badan.');
+    }
+
+    public function revisiKaban(Request $request, $id)
+    {
+        if (
+            Auth::user()->role->name != 'kepala_badan'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        $request->validate([
+            'revisi' => 'required|string|min:5',
+        ]);
+
+        $nota = NotaDinas::findOrFail($id);
+        $nota->update([
+            'status' => NotaDinas::REVISI_KABAN,
+            'revisi' => $request->revisi,
+        ]);
+
+        return redirect()->route('nota-dinas.index')->with('warning', 'Nota dinas dikembalikan untuk revisi oleh Kepala Badan.');
+    }
+
+    public function rejectKaban($id)
+    {
+        if (
+            Auth::user()->role->name != 'kepala_badan'
+            && Auth::user()->role->name != 'super_admin'
+        ) {
+            abort(403);
+        }
+
+        $nota = NotaDinas::findOrFail($id);
+        $nota->update(['status' => NotaDinas::DITOLAK_KABAN]);
+
+        return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak oleh Kepala Badan.');
     }
 
     public function preview(NotaDinas $nota)

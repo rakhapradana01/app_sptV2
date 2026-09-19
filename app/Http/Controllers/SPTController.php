@@ -72,8 +72,7 @@ class SPTController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = Spt::with(['pegawais', 'subKegiatan'])
-            ->whereNull('nota_dinas_id');
+        $query = Spt::with(['pegawais', 'subKegiatan', 'notaDinas']);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -82,9 +81,13 @@ class SPTController extends Controller
                 } else {
                     $query->where('sub_bidang_id', $user->sub_bidang_id);
                 }
-            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
+                }
+            } elseif ($user->role->name === 'kepala_badan') {
+                if ($user->dinas_id) {
+                    $query->where('dinas_id', $user->dinas_id);
                 }
             }
         }
@@ -95,10 +98,35 @@ class SPTController extends Controller
         return view('pages.spt.index', compact('spts'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $querySub = SubKegiatan::query();
         $user = auth()->user();
+
+        // Ambil Nota Dinas yang sudah di-ACC Kaban atau Kabid
+        $queryNota = NotaDinas::with(['pegawais', 'subKegiatan'])
+            ->whereIn('status', [NotaDinas::DISETUJUI_KABAN, NotaDinas::DISETUJUI_KABID])
+            ->orderBy('created_at', 'desc');
+
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if ($user->sub_bidang_id) {
+                    $queryNota->where('sub_bidang_id', $user->sub_bidang_id);
+                } else {
+                    $queryNota->whereRaw('1 = 0');
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
+                if ($user->bidang_id) {
+                    $queryNota->where('bidang_id', $user->bidang_id);
+                }
+            } elseif ($user->role->name === 'kepala_badan') {
+                if ($user->dinas_id) {
+                    $queryNota->where('dinas_id', $user->dinas_id);
+                }
+            }
+        }
+        $notaDinasList = $queryNota->get();
+
+        $querySub = SubKegiatan::query();
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
                 if ($user->sub_bidang_id) {
@@ -106,25 +134,29 @@ class SPTController extends Controller
                 } else {
                     $querySub->whereRaw('1 = 0');
                 }
-            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin'])) {
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
                 if ($user->bidang_id) {
                     $querySub->where('bidang_id', $user->bidang_id);
                 }
             }
         }
         $subKegiatans = $querySub->get();
+
         $queryPeg = Pegawai::orderBy('nama');
         if ($user && $user->bidang_id) {
             $queryPeg->where('bidang_id', $user->bidang_id);
         }
         $pegawais = $queryPeg->get();
 
-        return view('pages.spt.create', compact('subKegiatans', 'pegawais'));
+        $selectedNotaId = $request->query('nota_id');
+
+        return view('pages.spt.create', compact('subKegiatans', 'pegawais', 'notaDinasList', 'selectedNotaId'));
     }
 
     public function storeMandiri(Request $request)
     {
         $validated = $request->validate([
+            'nota_dinas_id'   => 'nullable|exists:nota_dinas,id',
             'nomor_spt'       => 'required|string',
             'jenis_anggaran'  => 'required|in:DPA,DPPA',
             'tahun_anggaran'  => 'required|digits:4',
@@ -138,8 +170,12 @@ class SPTController extends Controller
         ]);
 
         $user = auth()->user();
+
+        // Jika ada nota dinas, ambil dinas/bidang/sub bidang dari nota dinas jika user kosong
+        $nota = !empty($validated['nota_dinas_id']) ? NotaDinas::find($validated['nota_dinas_id']) : null;
+
         $spt = Spt::create([
-            'nota_dinas_id'  => null,
+            'nota_dinas_id'  => $validated['nota_dinas_id'] ?? null,
             'nomor_spt'      => $validated['nomor_spt'],
             'jenis_anggaran' => $validated['jenis_anggaran'],
             'tahun_anggaran' => $validated['tahun_anggaran'],
@@ -148,23 +184,19 @@ class SPTController extends Controller
             'lokasi'         => $validated['lokasi'],
             'kegiatan'       => $validated['kegiatan'],
             'sub_kegiatan_id' => $validated['sub_kegiatan_id'] ?? null,
-            'dinas_id'       => $user->dinas_id ?? null,
-            'bidang_id'      => $user->bidang_id ?? null,
-            'sub_bidang_id'  => $user->sub_bidang_id ?? null,
+            'dinas_id'       => $user->dinas_id ?? $nota?->dinas_id ?? null,
+            'bidang_id'      => $user->bidang_id ?? $nota?->bidang_id ?? null,
+            'sub_bidang_id'  => $user->sub_bidang_id ?? $nota?->sub_bidang_id ?? null,
         ]);
 
         $spt->pegawais()->sync($validated['pegawai_ids']);
 
-        return redirect()->route('spt.index')->with('success', 'SPT Mandiri berhasil dibuat!');
+        return redirect()->route('spt.index')->with('success', 'SPT berhasil dibuat dan siap dicetak bertandatangan Kepala Badan!');
     }
 
     public function cetakSptMandiri($id)
     {
-        $spt = Spt::with(['pegawais', 'subKegiatan'])->findOrFail($id);
-
-        if (!$spt->isStandalone()) {
-            return back()->with('error', 'Gunakan fitur cetak dari halaman Arsip untuk SPT yang berasal dari Nota Dinas.');
-        }
+        $spt = Spt::with(['pegawais', 'subKegiatan', 'notaDinas'])->findOrFail($id);
 
         $pdf = Pdf::loadView('pages.spt.pdf_standalone', compact('spt'))
             ->setPaper('a4', 'portrait');
@@ -176,10 +208,6 @@ class SPTController extends Controller
     public function destroyMandiri($id)
     {
         $spt = Spt::findOrFail($id);
-
-        if (!$spt->isStandalone()) {
-            return back()->with('error', 'SPT ini terhubung ke Nota Dinas dan tidak dapat dihapus dari sini.');
-        }
 
         $spt->pegawais()->detach();
         $spt->delete();

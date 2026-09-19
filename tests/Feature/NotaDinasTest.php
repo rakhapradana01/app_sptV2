@@ -205,7 +205,7 @@ test('nota dinas baru memiliki status diajukan_kabid secara default', function (
 // APPROVE Kabid
 // ==========================================
 
-test('kepala_bidang dapat menyetujui nota dinas', function () {
+test('kepala_bidang dapat menyetujui nota dinas dan meneruskan ke kepala badan', function () {
     $roleKabid = Role::create(['name' => 'kepala_bidang']);
     $kabid     = User::create([
         'name'     => 'Kabid',
@@ -221,7 +221,30 @@ test('kepala_bidang dapat menyetujui nota dinas', function () {
 
     $this->assertDatabaseHas('nota_dinas', [
         'id'     => $nota->id,
-        'status' => NotaDinas::DISETUJUI_KABID,
+        'status' => NotaDinas::DIAJUKAN_KABAN,
+    ]);
+});
+
+test('kepala_badan dapat menyetujui nota dinas (ACC Kaban)', function () {
+    $roleKaban = Role::create(['name' => 'kepala_badan']);
+    $kaban     = User::create([
+        'name'     => 'Kaban',
+        'username' => 'kaban_test',
+        'password' => bcrypt('password123'),
+        'role_id'  => $roleKaban->id,
+    ]);
+
+    $nota = makeNotaDinas([
+        'perihal' => 'Nota Menunggu Kaban',
+        'status'  => NotaDinas::DIAJUKAN_KABAN,
+    ]);
+
+    $response = $this->actingAs($kaban)->patch(route('nota-dinas.approve-kaban', $nota));
+    $response->assertRedirect(route('nota-dinas.index'));
+
+    $this->assertDatabaseHas('nota_dinas', [
+        'id'     => $nota->id,
+        'status' => NotaDinas::DISETUJUI_KABAN,
     ]);
 });
 

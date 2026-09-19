@@ -99,5 +99,14 @@ class UserSeeder extends Seeder
             'pegawai_id'=> $pegawaiKaban?->id,
             'dinas_id' => $dinas?->id,
         ]);
+
+        // Sekretaris Badan — terikat Dinas saja
+        $sekban = Role::where('name', 'sekretaris_badan')->first();
+        User::firstOrCreate(['username' => 'sekban1'], [
+            'name'     => 'Sekretaris Badan',
+            'password' => Hash::make('Password123'),
+            'role_id'  => $sekban->id,
+            'dinas_id' => $dinas?->id,
+        ]);
     }
 }
