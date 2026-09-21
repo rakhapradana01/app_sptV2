@@ -5,13 +5,14 @@
     <title>SPT</title>
     <style>
         @page {
-            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
+            size: a4 portrait;
+            margin: 0.5cm 1.5cm 1.0cm 1.5cm;
         }
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 11.5pt;
+            line-height: 1.35;
             margin: 0;
         }
 
@@ -27,15 +28,35 @@
             text-decoration: underline;
         }
 
+        /* Kop Surat */
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+
+        .logo {
+            width: 80px;
+        }
+
+        .header-text h2 {
+            margin: 0;
+            font-size: 13pt;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            font-size: 15pt;
+        }
+
+        .header-text p {
+            margin: 0;
+            font-size: 9pt;
         }
 
         .content-table {
             width: 100%;
-            margin-top: 10px;
+            margin-top: 8px;
             border-collapse: collapse;
         }
 
@@ -46,13 +67,14 @@
 
         .list-petugas {
             width: 100%;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             border-collapse: collapse;
-            page-break-inside: avoid;
+            font-size: 11pt;
+            line-height: 1.15;
         }
 
         .ttd-container {
-            margin-top: 10px;
+            margin-top: 15px;
             width: 100%;
             position: relative;
             page-break-inside: avoid;
@@ -62,6 +84,48 @@
             float: right;
             width: 40%;
             text-align: left;
+        }
+
+        .paraf-container {
+            clear: both;
+            margin-top: 5px;
+            width: 20%;
+            position: relative;
+            left: 150px;
+            page-break-inside: avoid;
+        }
+
+        .paraf-box {
+            width: 100%;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .footer-section {
+            width: 100%;
+            page-break-inside: avoid;
+        }
+
+        .paraf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5pt;
+        }
+
+        .paraf-table td {
+            border: 1px solid #000;
+            padding: 3px 4px;
+            height: 14px;
+        }
+
+        .paraf-table tr:not(:first-child) td:first-child {
+            width: 50%;
+        }
+
+        .paraf-table tr:not(:first-child) td:last-child {
+            width: 50%;
         }
     </style>
 </head>
@@ -73,7 +137,7 @@
 
     <div class="text-center">
         <div class="font-bold underline" style="font-size: 12pt;">SURAT PERINTAH TUGAS</div>
-        <div style="line-height: 1.5;">
+        <div style="line-height: 1.4;">
             @php
                 $parts = explode('/', $spt->nomor_spt);
             @endphp
@@ -110,7 +174,7 @@
                             <td style="width: 25px;">{{ $index + 1 }}.</td>
                             <td style="width: 80px;">Nama</td>
                             <td style="width: 10px;">:</td>
-                            <td class="font-bold">{{ $pegawai->nama }}</td>
+                            <td>{{ $pegawai->nama }}</td>
                         </tr>
                         <tr>
                             <td></td>
@@ -128,7 +192,7 @@
                             <td></td>
                             <td>Jabatan</td>
                             <td>:</td>
-                            <td style="padding-bottom: 3px;">{{ $pegawai->jabatan }}</td>
+                            <td>{{ $pegawai->jabatan }}</td>
                         </tr>
                     </table>
                 @endforeach
@@ -136,12 +200,12 @@
         </tr>
     </table>
 
-    <div style="page-break-inside: avoid; page-break-before: avoid;">
+    <div class="footer-section">
         <table class="content-table" style="margin-top: 0;">
             <tr>
-                <td style="width: 15%; padding-top: 8px;">Untuk</td>
-                <td style="width: 2%; padding-top: 8px;">:</td>
-                <td style="padding-top: 8px; text-align: justify;">
+                <td style="width: 15%; padding-top: 6px;">Untuk</td>
+                <td style="width: 2%; padding-top: 6px;">:</td>
+                <td style="padding-top: 6px; text-align: justify;">
                     1. {{ $spt->kegiatan_efektif }} di {{ $spt->lokasi_efektif }}.<br>
 
                     2. Waktu Pelaksanaan
@@ -169,13 +233,36 @@
                 </div>
                 <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
                 <div>PROVINSI KALIMANTAN SELATAN,</div>
-                <br><br><br><br>
+                <br><br><br>
                 <div class="font-bold underline">H. FATKHAN, SE, MM</div>
                 <div>Pembina Tingkat I (IV/b)</div>
                 <div>NIP. 19750518 201001 1 001</div>
+            </div>
+        </div>
+
+        <div class="paraf-container">
+            <div class="paraf-box">
+                <table class="paraf-table">
+                    <tr>
+                        <td colspan="2" class="text-center font-bold">Paraf Hirarki</td>
+                    </tr>
+                    <tr>
+                        <td>Sekretaris</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Kabid</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Kasubid</td>
+                        <td></td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
 </body>
 
 </html>
+
