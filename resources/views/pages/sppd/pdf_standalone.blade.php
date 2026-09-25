@@ -90,7 +90,7 @@
                                             $tahun = trim($parts[3]);
                                         }
                                     } else {
-                                        if (!in_array($rawSppd, ['900.1.2.3', '800.1.11.1', '000.1.2.3'])) {
+                                        if (!in_array($rawSppd, ['000.1.2.3'])) {
                                             $isiInputan = $rawSppd;
                                         }
                                     }
@@ -107,7 +107,7 @@
                                     @if (!empty($isiInputan))
                                         800.1.11.1/{{ $isiInputan }}/BPKAD/{{ $tahun }}
                                     @else
-                                        900.1.2.3/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BPKAD/{{ $tahun }}
+                                        000.1.2.3/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/BPKAD/{{ $tahun }}
                                     @endif
                                 </td>
                             </tr>
