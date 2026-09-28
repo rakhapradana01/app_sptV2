@@ -120,7 +120,7 @@
                                     ts.clear();
                                     ts.addOption({ value: '', text: 'Pilih Bidang' });
                                     filtered.forEach(b => ts.addOption({ value: b.id, text: b.nama_bidang }));
-                                    ts.sync();
+                                    ts.refreshOptions(false);
                                     if (this.selectedDinas) {
                                         ts.enable();
                                     } else {
@@ -138,7 +138,7 @@
                         open = true;
                         selectedDinas = '{{ auth()->user()->dinas_id ?? '' }}';
                         bidang_id = '';
-                        syncBidangOptions();
+                        setTimeout(() => syncBidangOptions(), 250);
                     " :isOpen="false" class="max-w-[700px]">
 
                 <div
@@ -258,7 +258,7 @@
                         ts.clear();
                         ts.addOption({ value: '', text: 'Pilih Bidang' });
                         filtered.forEach(b => ts.addOption({ value: b.id, text: b.nama_bidang }));
-                        ts.sync();
+                        ts.refreshOptions(false);
                         if (this.dinas_id) {
                             ts.enable();
                         } else {
@@ -287,14 +287,14 @@
             dinas_id = String($event.detail.dinas_id);
             bidang_id = String($event.detail.bidang_id);
             actionUrl = '/pegawai/' + id;
-            $nextTick(() => {
+            setTimeout(() => {
                 let selectDinas = $el.querySelector('select[name=&quot;dinas_id&quot;]');
                 if (selectDinas && selectDinas.tomselect) {
                     selectDinas.tomselect.setValue(dinas_id);
                 }
                 syncBidangOptions(true);
                 $nextTick(() => { initializing = false; });
-            });
+            }, 250);
         " :isOpen="false" class="max-w-[700px]">
 
                 <div

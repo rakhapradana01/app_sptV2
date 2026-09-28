@@ -106,7 +106,7 @@
                             newBidangs.forEach(bidang => {
                                 ts.addOption({value: bidang.id.toString(), text: bidang.nama_bidang});
                             });
-                            ts.sync();
+                            ts.refreshOptions(false);
                         }
                     });
                 });
@@ -196,7 +196,7 @@
                             newBidangs.forEach(bidang => {
                                 ts.addOption({value: bidang.id.toString(), text: bidang.nama_bidang});
                             });
-                            ts.sync();
+                            ts.refreshOptions(false);
                             if (currentVal) {
                                 ts.setValue(currentVal.toString());
                             }

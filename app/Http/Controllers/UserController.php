@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Dinas;
+use App\Models\Bidang;
+use App\Models\SubBidang;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $queryUser = User::with(['role', 'dinas', 'bidang', 'subBidang', 'pegawai'])->latest();
@@ -25,7 +27,34 @@ class UserController extends Controller
             $dinas = Dinas::orderBy('nama_dinas')->get();
         }
 
-        $users = $queryUser->paginate(10);
+        // Search Filter (Nama / Username / Nama Pegawai)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $queryUser->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhereHas('pegawai', function($pq) use ($search) {
+                      $pq->where('nama', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter Dinas
+        if ($request->filled('dinas_id')) {
+            $queryUser->where('dinas_id', $request->dinas_id);
+        }
+
+        // Filter Bidang
+        if ($request->filled('bidang_id')) {
+            $queryUser->where('bidang_id', $request->bidang_id);
+        }
+
+        // Filter Sub Bidang
+        if ($request->filled('sub_bidang_id')) {
+            $queryUser->where('sub_bidang_id', $request->sub_bidang_id);
+        }
+
+        $users = $queryUser->paginate(10)->withQueryString();
         $roles = Role::whereNotIn('name', ['super_admin'])->get();
         $pegawais = $queryPegawai->get();
         
