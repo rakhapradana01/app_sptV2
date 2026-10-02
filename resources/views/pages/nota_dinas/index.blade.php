@@ -95,12 +95,19 @@
                                                     'class' => 'bg-gray-50 text-gray-600 border-gray-200',
                                                 ],
                                             };
-                                        @endphp
+                                         @endphp
 
                                         <span
                                             class="inline-flex items-center px-2.5 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider {{ $statusConfig['class'] }}">
                                             {{ $statusConfig['label'] }}
                                         </span>
+
+                                        @if ($nota->disposisi_kaban || $nota->disposisi_sekban || $nota->disposisi_kabid)
+                                            <div class="mt-1 text-[11px] text-gray-500 italic max-w-[180px] truncate"
+                                                title="Catatan Disposisi: {{ $nota->disposisi_kaban ?: ($nota->disposisi_sekban ?: $nota->disposisi_kabid) }}">
+                                                💬 "{{ Str::limit($nota->disposisi_kaban ?: ($nota->disposisi_sekban ?: $nota->disposisi_kabid), 26) }}"
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-5 py-4 sm:px-6 text-center">
                                         <div x-data="{ open: false }" class="relative inline-block text-left">
@@ -116,7 +123,7 @@
 
                                             <div x-show="open" x-cloak
                                                 x-transition:enter="transition ease-out duration-100"
-                                                class="absolute right-0 mt-2 w-52 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
+                                                class="absolute right-0 mt-2 w-56 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
 
                                                 <div class="py-1 flex flex-col text-left">
                                                     @php

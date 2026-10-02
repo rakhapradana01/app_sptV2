@@ -443,7 +443,7 @@ class NotaDinasController extends Controller
 
         return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak.');
     }
-    public function approveKabid(NotaDinas $nota)
+    public function approveKabid(Request $request, NotaDinas $nota)
     {
         if (
             Auth::user()->role->name != 'kepala_bidang'
@@ -456,15 +456,21 @@ class NotaDinasController extends Controller
             return back()->with('error', 'Status tidak valid');
         }
 
+        $request->validate([
+            'disposisi_kabid' => 'nullable|string',
+        ]);
+
         $nota->update([
-            'status' => NotaDinas::DIAJUKAN_SEKBAN
+            'status' => NotaDinas::DIAJUKAN_SEKBAN,
+            'disposisi_kabid' => $request->input('disposisi_kabid'),
+            'tanggal_disposisi_kabid' => now(),
         ]);
 
         return redirect()->route('nota-dinas.index')
-            ->with('success', 'Nota dinas disetujui Kabid dan diteruskan ke Sekretaris Badan.');
+            ->with('success', 'Nota dinas disetujui Kabid dan diteruskan ke Sekretaris Badan dengan catatan disposisi.');
     }
 
-    public function approveSekban(NotaDinas $nota)
+    public function approveSekban(Request $request, NotaDinas $nota)
     {
         if (
             Auth::user()->role->name != 'sekretaris_badan'
@@ -477,12 +483,18 @@ class NotaDinasController extends Controller
             return back()->with('error', 'Status tidak valid untuk disetujui Sekretaris Badan');
         }
 
+        $request->validate([
+            'disposisi_sekban' => 'nullable|string',
+        ]);
+
         $nota->update([
-            'status' => NotaDinas::DIAJUKAN_KABAN
+            'status' => NotaDinas::DIAJUKAN_KABAN,
+            'disposisi_sekban' => $request->input('disposisi_sekban'),
+            'tanggal_disposisi_sekban' => now(),
         ]);
 
         return redirect()->route('nota-dinas.index')
-            ->with('success', 'Nota dinas disetujui Sekretaris Badan dan diteruskan ke Kepala Badan.');
+            ->with('success', 'Nota dinas disetujui Sekretaris Badan dan diteruskan ke Kepala Badan dengan catatan disposisi.');
     }
 
     public function revisiSekban(Request $request, $id)
@@ -522,7 +534,7 @@ class NotaDinasController extends Controller
         return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak oleh Sekretaris Badan.');
     }
 
-    public function approveKaban(NotaDinas $nota)
+    public function approveKaban(Request $request, NotaDinas $nota)
     {
         if (
             Auth::user()->role->name != 'kepala_badan'
@@ -535,12 +547,18 @@ class NotaDinasController extends Controller
             return back()->with('error', 'Status tidak valid untuk disetujui Kepala Badan');
         }
 
+        $request->validate([
+            'disposisi_kaban' => 'nullable|string',
+        ]);
+
         $nota->update([
-            'status' => NotaDinas::DISETUJUI_KABAN
+            'status' => NotaDinas::DISETUJUI_KABAN,
+            'disposisi_kaban' => $request->input('disposisi_kaban'),
+            'tanggal_disposisi_kaban' => now(),
         ]);
 
         return redirect()->route('nota-dinas.index')
-            ->with('success', 'Nota dinas berhasil di-ACC Kepala Badan.');
+            ->with('success', 'Nota dinas berhasil di-ACC Kepala Badan dengan catatan disposisi.');
     }
 
     public function revisiKaban(Request $request, $id)

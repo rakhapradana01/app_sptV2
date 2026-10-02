@@ -28,7 +28,19 @@ class NotaDinas extends Model
         'sifat',
         'dinas_id',
         'bidang_id',
-        'sub_bidang_id'
+        'sub_bidang_id',
+        'disposisi_kabid',
+        'tanggal_disposisi_kabid',
+        'disposisi_sekban',
+        'tanggal_disposisi_sekban',
+        'disposisi_kaban',
+        'tanggal_disposisi_kaban'
+    ];
+
+    protected $casts = [
+        'tanggal_disposisi_kabid' => 'datetime',
+        'tanggal_disposisi_sekban' => 'datetime',
+        'tanggal_disposisi_kaban' => 'datetime',
     ];
 
     const DRAFT = 'draft';
