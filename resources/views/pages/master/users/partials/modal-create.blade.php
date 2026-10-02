@@ -190,7 +190,7 @@
             </p>
         </div>
 
-        <form method="POST" action="{{ route('users.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('users.store') }}" class="space-y-4" enctype="multipart/form-data">
             @csrf
 
             <div>
@@ -287,6 +287,23 @@
                         </template>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
+                    Tanda Tangan / Paraf <span class="text-gray-400">(Opsional)</span>
+                </label>
+                <input type="file" name="signature" accept="image/jpeg,image/jpg,image/png"
+                    class="block w-full text-sm text-gray-700 dark:text-gray-300
+                           file:mr-3 file:py-1.5 file:px-3
+                           file:rounded-lg file:border-0
+                           file:text-xs file:font-semibold
+                           file:bg-blue-50 file:text-blue-700
+                           hover:file:bg-blue-100
+                           dark:file:bg-blue-900/30 dark:file:text-blue-400
+                           border border-gray-300 dark:border-gray-600 rounded-lg p-1.5
+                           bg-white dark:bg-gray-800">
+                <p class="mt-1 text-xs text-gray-400">Format JPEG/PNG, maks 1 MB. Digunakan untuk paraf pada PDF SPT.</p>
             </div>
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">

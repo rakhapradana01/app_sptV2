@@ -85,7 +85,7 @@ class SPTController extends Controller
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
                 }
-            } elseif ($user->role->name === 'kepala_badan') {
+            } elseif (in_array($user->role->name, ['sekretaris_badan', 'kepala_badan'])) {
                 if ($user->dinas_id) {
                     $query->where('dinas_id', $user->dinas_id);
                 }
@@ -213,5 +213,124 @@ class SPTController extends Controller
         $spt->delete();
 
         return redirect()->route('spt.index')->with('success', 'SPT berhasil dihapus.');
+    }
+
+    public function approveKasubid($id)
+    {
+        $user = auth()->user();
+        if (!in_array($user->role->name ?? '', ['kepala_sub_bidang', 'super_admin'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $spt = Spt::findOrFail($id);
+
+        $parafPath = $user->signature_path
+            ?? $user->pegawai?->signature_path
+            ?? User::whereHas('role', fn($q) => $q->where('name', 'kepala_sub_bidang'))->whereNotNull('signature_path')->value('signature_path')
+            ?? (file_exists(public_path('images/signatures/kasubid-I-pad.jpeg')) ? 'images/signatures/kasubid-I-pad.jpeg' : null);
+
+        $spt->update([
+            'status'              => Spt::STATUS_DIAJUKAN_KABID,
+            'kasubid_id'          => $user->id,
+            'kasubid_approved_at' => now(),
+            'kasubid_paraf'       => $parafPath,
+        ]);
+
+        return back()->with('success', 'SPT berhasil disetujui & diparaf oleh Kasubid.');
+    }
+
+    public function approveKabid($id)
+    {
+        $user = auth()->user();
+        if (!in_array($user->role->name ?? '', ['kepala_bidang', 'super_admin'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $spt = Spt::findOrFail($id);
+
+        $parafPath = $user->signature_path
+            ?? $user->pegawai?->signature_path
+            ?? User::whereHas('role', fn($q) => $q->where('name', 'kepala_bidang'))->whereNotNull('signature_path')->value('signature_path')
+            ?? (file_exists(public_path('images/signatures/kabid-pad.jpeg')) ? 'images/signatures/kabid-pad.jpeg' : null);
+
+        $spt->update([
+            'status'            => Spt::STATUS_DIAJUKAN_SEKBAN,
+            'kabid_id'          => $user->id,
+            'kabid_approved_at' => now(),
+            'kabid_paraf'       => $parafPath,
+        ]);
+
+        return back()->with('success', 'SPT berhasil disetujui & diparaf oleh Kabid.');
+    }
+
+    public function approveSekban($id)
+    {
+        $user = auth()->user();
+        if (!in_array($user->role->name ?? '', ['sekretaris_badan', 'super_admin'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $spt = Spt::findOrFail($id);
+
+        $parafPath = $user->signature_path
+            ?? $user->pegawai?->signature_path
+            ?? User::whereHas('role', fn($q) => $q->where('name', 'sekretaris_badan'))->whereNotNull('signature_path')->value('signature_path')
+            ?? (file_exists(public_path('images/signatures/sekban.jpeg')) ? 'images/signatures/sekban.jpeg' : null);
+
+        $spt->update([
+            'status'             => Spt::STATUS_DIAJUKAN_KABAN,
+            'sekban_id'          => $user->id,
+            'sekban_approved_at' => now(),
+            'sekban_paraf'       => $parafPath,
+        ]);
+
+        return back()->with('success', 'SPT berhasil disetujui & diparaf oleh Sekretaris Badan.');
+    }
+
+    public function approveKaban($id)
+    {
+        $user = auth()->user();
+        if (!in_array($user->role->name ?? '', ['kepala_badan', 'super_admin'])) {
+            abort(403, 'Unauthorized');
+        }
+
+        $spt = Spt::findOrFail($id);
+
+        $parafPath = $user->signature_path
+            ?? $user->pegawai?->signature_path
+            ?? User::whereHas('role', fn($q) => $q->where('name', 'kepala_badan'))->whereNotNull('signature_path')->value('signature_path');
+
+        $sekbanUser = User::whereHas('role', fn($q) => $q->where('name', 'sekretaris_badan'))->first();
+        $sekbanPath = $spt->sekban_paraf
+            ?? $sekbanUser?->signature_path
+            ?? (file_exists(public_path('images/signatures/sekban.jpeg')) ? 'images/signatures/sekban.jpeg' : null);
+
+        $kabidUser = User::whereHas('role', fn($q) => $q->where('name', 'kepala_bidang'))->first();
+        $kabidPath = $spt->kabid_paraf
+            ?? $kabidUser?->signature_path
+            ?? (file_exists(public_path('images/signatures/kabid-pad.jpeg')) ? 'images/signatures/kabid-pad.jpeg' : null);
+
+        $kasubidUser = User::whereHas('role', fn($q) => $q->where('name', 'kepala_sub_bidang'))->first();
+        $kasubidPath = $spt->kasubid_paraf
+            ?? $kasubidUser?->signature_path
+            ?? (file_exists(public_path('images/signatures/kasubid-I-pad.jpeg')) ? 'images/signatures/kasubid-I-pad.jpeg' : null);
+
+        $spt->update([
+            'status'              => Spt::STATUS_DISETUJUI_KABAN,
+            'kaban_id'            => $user->id,
+            'kaban_approved_at'   => now(),
+            'kaban_paraf'         => $parafPath,
+            'sekban_id'           => $spt->sekban_id ?? $sekbanUser?->id ?? $user->id,
+            'sekban_approved_at'  => $spt->sekban_approved_at ?? now(),
+            'sekban_paraf'        => $sekbanPath,
+            'kabid_id'            => $spt->kabid_id ?? $kabidUser?->id ?? $user->id,
+            'kabid_approved_at'   => $spt->kabid_approved_at ?? now(),
+            'kabid_paraf'         => $kabidPath,
+            'kasubid_id'          => $spt->kasubid_id ?? $kasubidUser?->id ?? $user->id,
+            'kasubid_approved_at' => $spt->kasubid_approved_at ?? now(),
+            'kasubid_paraf'       => $kasubidPath,
+        ]);
+
+        return back()->with('success', 'SPT berhasil disetujui oleh Kepala Badan (penandatangan utama).');
     }
 }

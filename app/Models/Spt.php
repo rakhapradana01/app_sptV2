@@ -10,6 +10,12 @@ class Spt extends Model
 {
     use HasFactory;
 
+    const STATUS_DRAFT = 'draft';
+    const STATUS_DIAJUKAN_KABID = 'diajukan_kabid';
+    const STATUS_DIAJUKAN_SEKBAN = 'diajukan_sekban';
+    const STATUS_DIAJUKAN_KABAN = 'diajukan_kaban';
+    const STATUS_DISETUJUI_KABAN = 'disetujui_kaban';
+
     protected $fillable = [
         'nota_dinas_id',
         'nomor_spt',
@@ -24,12 +30,73 @@ class Spt extends Model
         'dinas_id',
         'bidang_id',
         'sub_bidang_id',
+        'status',
+        'kasubid_id',
+        'kasubid_approved_at',
+        'kasubid_paraf',
+        'kabid_id',
+        'kabid_approved_at',
+        'kabid_paraf',
+        'sekban_id',
+        'sekban_approved_at',
+        'sekban_paraf',
+        'kaban_id',
+        'kaban_approved_at',
+        'kaban_paraf',
     ];
 
     protected $casts = [
-        'tanggal_mulai'  => 'date',
-        'tanggal_selesai' => 'date',
+        'tanggal_mulai'        => 'date',
+        'tanggal_selesai'      => 'date',
+        'kasubid_approved_at'  => 'datetime',
+        'kabid_approved_at'    => 'datetime',
+        'sekban_approved_at'   => 'datetime',
+        'kaban_approved_at'    => 'datetime',
     ];
+
+    // =====================
+    // Approval Helpers
+    // =====================
+
+    public function isApprovedByKasubid(): bool
+    {
+        return !is_null($this->kasubid_approved_at);
+    }
+
+    public function isApprovedByKabid(): bool
+    {
+        return !is_null($this->kabid_approved_at);
+    }
+
+    public function isApprovedBySekban(): bool
+    {
+        return !is_null($this->sekban_approved_at);
+    }
+
+    public function isApprovedByKaban(): bool
+    {
+        return !is_null($this->kaban_approved_at);
+    }
+
+    public function kasubid(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'kasubid_id');
+    }
+
+    public function kabid(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'kabid_id');
+    }
+
+    public function sekban(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sekban_id');
+    }
+
+    public function kaban(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'kaban_id');
+    }
 
     // =====================
     // Relations

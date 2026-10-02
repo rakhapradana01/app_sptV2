@@ -10,6 +10,7 @@ use App\Models\SubBidang;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -82,16 +83,25 @@ class UserController extends Controller
 
         $dinasId = auth()->user()->dinas_id ?? $request->dinas_id;
 
-        User::create([
-            'name' => $request->name,
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'role_id' => $request->role_id,
-            'dinas_id' => $dinasId,
-            'bidang_id' => $request->bidang_id,
+        $data = [
+            'name'         => $request->name,
+            'username'     => $request->username,
+            'password'     => Hash::make($request->password),
+            'role_id'      => $request->role_id,
+            'dinas_id'     => $dinasId,
+            'bidang_id'    => $request->bidang_id,
             'sub_bidang_id' => $request->sub_bidang_id,
-            'pegawai_id' => $request->pegawai_id,
-        ]);
+            'pegawai_id'   => $request->pegawai_id,
+        ];
+
+        if ($request->hasFile('signature')) {
+            $file     = $request->file('signature');
+            $filename = 'sig_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images/signatures'), $filename);
+            $data['signature_path'] = 'images/signatures/' . $filename;
+        }
+
+        User::create($data);
 
         return redirect()->route('users.index')
             ->with('success', 'User account successfully created.');
@@ -121,17 +131,28 @@ class UserController extends Controller
         $dinasId = auth()->user()->dinas_id ?? $request->dinas_id;
 
         $data = [
-            'name' => $request->name,
-            'username' => $request->username,
-            'role_id' => $request->role_id,
-            'dinas_id' => $dinasId,
-            'bidang_id' => $request->bidang_id,
+            'name'         => $request->name,
+            'username'     => $request->username,
+            'role_id'      => $request->role_id,
+            'dinas_id'     => $dinasId,
+            'bidang_id'    => $request->bidang_id,
             'sub_bidang_id' => $request->sub_bidang_id,
-            'pegawai_id' => $request->pegawai_id,
+            'pegawai_id'   => $request->pegawai_id,
         ];
 
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
+        }
+
+        if ($request->hasFile('signature')) {
+            // Hapus file lama
+            if ($user->signature_path && file_exists(public_path($user->signature_path))) {
+                @unlink(public_path($user->signature_path));
+            }
+            $file     = $request->file('signature');
+            $filename = 'sig_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images/signatures'), $filename);
+            $data['signature_path'] = 'images/signatures/' . $filename;
         }
 
         $user->update($data);
@@ -154,5 +175,33 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'User account successfully deleted.');
+    }
+
+    public function uploadSignature(Request $request, $id)
+    {
+        $request->validate([
+            'signature' => 'required|image|mimes:jpeg,jpg,png|max:1024',
+        ], [
+            'signature.required' => 'File tanda tangan wajib dipilih.',
+            'signature.image'    => 'File harus berupa gambar.',
+            'signature.mimes'    => 'Format gambar harus jpeg, jpg, atau png.',
+            'signature.max'      => 'Ukuran file maksimal 1 MB.',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        // Hapus file lama jika ada
+        if ($user->signature_path && file_exists(public_path($user->signature_path))) {
+            @unlink(public_path($user->signature_path));
+        }
+
+        $file     = $request->file('signature');
+        $filename = 'sig_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('images/signatures'), $filename);
+
+        $user->update(['signature_path' => 'images/signatures/' . $filename]);
+
+        return redirect()->route('users.index')
+            ->with('success', 'Tanda tangan ' . $user->name . ' berhasil diupload.');
     }
 }

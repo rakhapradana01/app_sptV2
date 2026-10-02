@@ -173,7 +173,7 @@
                                     <td class="px-5 py-4 sm:px-6">
                                         <div class="flex items-center gap-2">
                                             <x-ui.button variant="yellow" size="xs"
-                                                @click="$dispatch('open-user-edit-modal', { id: '{{ $user->id }}', name: '{{ addslashes($user->name) }}', username: '{{ addslashes($user->username) }}', role_id: '{{ $user->role_id }}', dinas_id: '{{ $user->dinas_id }}', bidang_id: '{{ $user->bidang_id }}', sub_bidang_id: '{{ $user->sub_bidang_id }}', pegawai_id: '{{ $user->pegawai_id }}' })">
+                                                @click="$dispatch('open-user-edit-modal', { id: '{{ $user->id }}', name: '{{ addslashes($user->name) }}', username: '{{ addslashes($user->username) }}', role_id: '{{ $user->role_id }}', dinas_id: '{{ $user->dinas_id }}', bidang_id: '{{ $user->bidang_id }}', sub_bidang_id: '{{ $user->sub_bidang_id }}', pegawai_id: '{{ $user->pegawai_id }}', signature_path: '{{ $user->signature_path }}' })">
                                                 Edit
                                             </x-ui.button>
 
@@ -205,6 +205,9 @@
             <div class="mt-4">
                 <x-ui.pagination :paginator="$users" />
             </div>
+
+            {{-- Modal Upload Signature --}}
+            @include('pages.master.users.partials.modal-signature')
 
             {{-- Modal Tambah User --}}
             @include('pages.master.users.partials.modal-create')

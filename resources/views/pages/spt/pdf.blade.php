@@ -235,21 +235,63 @@
 
         <div class="paraf-container">
             <div class="paraf-box">
+                @php
+                    $spt = $nota->spt ?? null;
+                @endphp
                 <table class="paraf-table">
                     <tr>
                         <td colspan="2" class="text-center font-bold">Paraf Hirarki</td>
                     </tr>
                     <tr>
                         <td>Sekretaris</td>
-                        <td></td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if ($spt)
+                                @php
+                                    $sekbanImg = $spt->sekban_paraf;
+                                    if ((!$sekbanImg || !file_exists(public_path($sekbanImg))) && ($spt->isApprovedBySekban() || in_array($spt->status, ['diajukan_kaban', 'disetujui_kaban']))) {
+                                        $sekbanUser = \App\Models\User::whereHas('role', fn($q)=>$q->where('name', 'sekretaris_badan'))->whereNotNull('signature_path')->first();
+                                        $sekbanImg = $sekbanUser?->signature_path ?? (file_exists(public_path('images/signatures/sekban.jpeg')) ? 'images/signatures/sekban.jpeg' : null);
+                                    }
+                                @endphp
+                                @if (($spt->isApprovedBySekban() || in_array($spt->status, ['diajukan_kaban', 'disetujui_kaban'])) && $sekbanImg && file_exists(public_path($sekbanImg)))
+                                    <img src="{{ public_path($sekbanImg) }}" style="max-height: 20px; max-width: 50px; display: block; margin: 0 auto;">
+                                @endif
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <td>Kabid</td>
-                        <td></td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if ($spt)
+                                @php
+                                    $kabidImg = $spt->kabid_paraf;
+                                    if ((!$kabidImg || !file_exists(public_path($kabidImg))) && ($spt->isApprovedByKabid() || in_array($spt->status, ['diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban']))) {
+                                        $kabidUser = \App\Models\User::whereHas('role', fn($q)=>$q->where('name', 'kepala_bidang'))->whereNotNull('signature_path')->first();
+                                        $kabidImg = $kabidUser?->signature_path ?? (file_exists(public_path('images/signatures/kabid-pad.jpeg')) ? 'images/signatures/kabid-pad.jpeg' : null);
+                                    }
+                                @endphp
+                                @if (($spt->isApprovedByKabid() || in_array($spt->status, ['diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban'])) && $kabidImg && file_exists(public_path($kabidImg)))
+                                    <img src="{{ public_path($kabidImg) }}" style="max-height: 20px; max-width: 50px; display: block; margin: 0 auto;">
+                                @endif
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <td>Kasubid</td>
-                        <td></td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            @if ($spt)
+                                @php
+                                    $kasubidImg = $spt->kasubid_paraf;
+                                    if ((!$kasubidImg || !file_exists(public_path($kasubidImg))) && ($spt->isApprovedByKasubid() || in_array($spt->status, ['diajukan_kabid', 'diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban']))) {
+                                        $kasubidUser = \App\Models\User::whereHas('role', fn($q)=>$q->where('name', 'kepala_sub_bidang'))->whereNotNull('signature_path')->first();
+                                        $kasubidImg = $kasubidUser?->signature_path ?? (file_exists(public_path('images/signatures/kasubid-I-pad.jpeg')) ? 'images/signatures/kasubid-I-pad.jpeg' : null);
+                                    }
+                                @endphp
+                                @if (($spt->isApprovedByKasubid() || in_array($spt->status, ['diajukan_kabid', 'diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban'])) && $kasubidImg && file_exists(public_path($kasubidImg)))
+                                    <img src="{{ public_path($kasubidImg) }}" style="max-height: 20px; max-width: 50px; display: block; margin: 0 auto;">
+                                @endif
+                            @endif
+                        </td>
                     </tr>
                 </table>
             </div>

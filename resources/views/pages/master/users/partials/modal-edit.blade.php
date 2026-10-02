@@ -11,6 +11,7 @@
             bidang_id: '', 
             sub_bidang_id: '', 
             pegawai_id: '',
+            signature_path: '',
             bidangs: [], 
             subBidangs: [],
             loadingBidang: false,
@@ -197,6 +198,7 @@
             bidang_id = $event.detail.bidang_id; 
             sub_bidang_id = $event.detail.sub_bidang_id;
             pegawai_id = $event.detail.pegawai_id;
+            signature_path = $event.detail.signature_path || '';
             loadInitialData();
         "
         class="no-scrollbar relative w-full max-w-[600px] overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
@@ -210,7 +212,7 @@
             </p>
         </div>
 
-        <form method="POST" :action="'/users/' + id" class="space-y-4">
+        <form method="POST" :action="'/users/' + id" class="space-y-4" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -308,6 +310,28 @@
                         </template>
                     </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-400">
+                    Tanda Tangan / Paraf <span class="text-gray-400">(Opsional)</span>
+                </label>
+                {{-- Preview signature lama --}}
+                <div x-show="signature_path" class="mb-2 flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <img :src="'/' + signature_path" alt="Paraf saat ini" class="h-10 max-w-[100px] object-contain">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Tanda tangan saat ini. Upload baru untuk mengganti.</p>
+                </div>
+                <input type="file" name="signature" accept="image/jpeg,image/jpg,image/png"
+                    class="block w-full text-sm text-gray-700 dark:text-gray-300
+                           file:mr-3 file:py-1.5 file:px-3
+                           file:rounded-lg file:border-0
+                           file:text-xs file:font-semibold
+                           file:bg-blue-50 file:text-blue-700
+                           hover:file:bg-blue-100
+                           dark:file:bg-blue-900/30 dark:file:text-blue-400
+                           border border-gray-300 dark:border-gray-600 rounded-lg p-1.5
+                           bg-white dark:bg-gray-800">
+                <p class="mt-1 text-xs text-gray-400">Format JPEG/PNG, maks 1 MB. Biarkan kosong jika tidak ingin mengganti.</p>
             </div>
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">

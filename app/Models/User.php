@@ -20,7 +20,8 @@ class User extends Authenticatable
         'pegawai_id',
         'dinas_id',
         'bidang_id',
-        'sub_bidang_id'
+        'sub_bidang_id',
+        'signature_path',
     ];
 
     public function pegawai(): BelongsTo

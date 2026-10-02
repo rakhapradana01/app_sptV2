@@ -33,6 +33,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/pegawai/import', [PegawaiController::class, 'importExcel'])->name('pegawai.import');
             Route::resource('pegawai', PegawaiController::class);
             Route::resource('users', UserController::class);
+            Route::post('/users/{id}/signature', [UserController::class, 'uploadSignature'])->name('users.uploadSignature');
         });
 
         Route::middleware('role:super_admin')->group(function () {
@@ -173,6 +174,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/spt', [SPTController::class, 'storeMandiri'])->name('spt.storeMandiri');
         Route::get('/spt/{id}/cetak-mandiri', [SPTController::class, 'cetakSptMandiri'])->name('spt.cetakMandiri');
         Route::delete('/spt/{id}/hapus-mandiri', [SPTController::class, 'destroyMandiri'])->name('spt.destroyMandiri');
+        Route::post('/spt/{id}/approve-kasubid', [SPTController::class, 'approveKasubid'])->name('spt.approveKasubid');
+        Route::post('/spt/{id}/approve-kabid', [SPTController::class, 'approveKabid'])->name('spt.approveKabid');
+        Route::post('/spt/{id}/approve-sekban', [SPTController::class, 'approveSekban'])->name('spt.approveSekban');
+        Route::post('/spt/{id}/approve-kaban', [SPTController::class, 'approveKaban'])->name('spt.approveKaban');
 
         // SPPD Mandiri (standalone)
         Route::get('/sppd', [SPPDController::class, 'index'])->name('sppd.index');
