@@ -160,41 +160,22 @@
                                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                             ACC Kaban
                                                         </a>
-                                                    @endif
-
-                                                    {{-- Dokumen Cetak / Buat SPT jika sudah di-ACC Kaban atau Kabid --}}
-                                                    @if (in_array($status, [\App\Models\NotaDinas::DISETUJUI_KABAN, \App\Models\NotaDinas::DISETUJUI_KABID]))
+                                                    @endif                                                    {{-- Jika sudah di-ACC Kaban, dokumen resmi terarsip dan dapat dicetak melalui menu Arsip --}}
+                                                    @if ($status === \App\Models\NotaDinas::DISETUJUI_KABAN)
                                                         @php $hasAction = true; @endphp
-                                                        <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}"
-                                                            target="_blank"
-                                                            class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                                            Cetak Notdin
+                                                        <a href="{{ route('arsip') }}"
+                                                            class="flex items-center px-4 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                                                            Buka di Arsip (Cetak)
                                                         </a>
 
-                                                        @if ($nota->spt)
-                                                            <a href="{{ route('spt.cetakMandiri', $nota->spt->id) }}"
-                                                                target="_blank"
-                                                                class="flex items-center px-4 py-2 text-sm text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20">
-                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                                Cetak SPT
-                                                            </a>
-                                                        @else
+                                                        @if (!$nota->spt)
                                                             <a href="{{ route('spt.create', ['nota_id' => $nota->id]) }}"
                                                                 class="flex items-center px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20">
                                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                                                 Buat SPT
                                                             </a>
-                                                        @endif
-
-                                                        @if ($nota->spt && $nota->sppd)
-                                                            <a href="{{ route('sppd.cetakMandiri', $nota->sppd->id) }}"
-                                                                target="_blank"
-                                                                class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                                                                Cetak SPPD
-                                                            </a>
-                                                        @elseif ($nota->spt)
+                                                        @elseif (!$nota->sppd)
                                                             <a href="{{ route('sppd.create', ['spt_id' => $nota->spt->id]) }}"
                                                                 class="flex items-center px-4 py-2 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
                                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>

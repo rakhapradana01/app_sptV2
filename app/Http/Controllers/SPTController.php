@@ -17,12 +17,13 @@ class SPTController extends Controller
 
     public function cetakSpt($id)
     {
-        $nota = NotaDinas::with(['spt', 'pegawais'])->findOrFail($id);
+        $nota = NotaDinas::with(['spt.sekban', 'spt.kabid', 'spt.kasubid', 'spt.kaban', 'pegawais'])->findOrFail($id);
         if (!$nota->spt) {
             return back()->with('error', 'Data SPT belum dibuat untuk Nota Dinas ini.');
         }
         $pdf = Pdf::loadView('pages.spt.pdf', compact('nota'))
-            ->setPaper('a4', 'portrait');
+            ->setPaper('a4', 'portrait')
+            ->setOption(['isRemoteEnabled' => true, 'chroot' => public_path()]);
         $fileName = 'SPT-' . str_replace('/', '-', $nota->spt->nomor_spt) . '.pdf';
 
         return $pdf->stream($fileName);
@@ -196,10 +197,11 @@ class SPTController extends Controller
 
     public function cetakSptMandiri($id)
     {
-        $spt = Spt::with(['pegawais', 'subKegiatan', 'notaDinas'])->findOrFail($id);
+        $spt = Spt::with(['pegawais', 'subKegiatan', 'notaDinas', 'sekban', 'kabid', 'kasubid', 'kaban'])->findOrFail($id);
 
         $pdf = Pdf::loadView('pages.spt.pdf_standalone', compact('spt'))
-            ->setPaper('a4', 'portrait');
+            ->setPaper('a4', 'portrait')
+            ->setOption(['isRemoteEnabled' => true, 'chroot' => public_path()]);
         $fileName = 'SPT-' . str_replace('/', '-', $spt->nomor_spt) . '.pdf';
 
         return $pdf->stream($fileName);

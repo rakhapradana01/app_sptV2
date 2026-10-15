@@ -1,7 +1,7 @@
 <table class="header-table">
     <tr>
         <td style="width: 15%; text-align: left;">
-            <img src="{{ public_path('/images/logo.png') }}" class="logo">
+            <img src="{{ 'file://' . str_replace('\\', '/', public_path('images/logo.png')) }}" class="logo">
         </td>
 
         <td style="width: 70%;" class="kop-text">

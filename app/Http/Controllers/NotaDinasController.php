@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\NotaDinas;
 use App\Models\Pegawai;
 use App\Models\Role;
+use App\Models\Spt;
 use App\Models\SubKegiatan;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,6 +17,10 @@ class NotaDinasController extends Controller
 {
     public function cetakNotaDinas(NotaDinas $nota)
     {
+        if ($nota->status !== NotaDinas::DISETUJUI_KABAN) {
+            return redirect()->route('arsip')->with('error', 'Nota Dinas belum disetujui oleh Kepala Badan (Kaban) sehingga belum dapat dicetak.');
+        }
+
         $pdf = Pdf::loadView('pages.nota_dinas.pdf', compact('nota'))
             ->setPaper('A4', 'portrait');
 
@@ -25,10 +30,7 @@ class NotaDinasController extends Controller
     public function arsip()
     {
         $user = auth()->user();
-        $query = NotaDinas::whereIn('status', [
-            \App\Models\NotaDinas::DISETUJUI_KABAN,
-            \App\Models\NotaDinas::DISETUJUI_KABID,
-        ]);
+        $query = NotaDinas::with(['spt', 'sppd'])->where('status', NotaDinas::DISETUJUI_KABAN);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -41,16 +43,38 @@ class NotaDinasController extends Controller
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
                 }
-            } elseif ($user->role->name === 'kepala_badan') {
+            } elseif (in_array($user->role->name, ['kepala_badan', 'sekretaris_badan'])) {
                 if ($user->dinas_id) {
                     $query->where('dinas_id', $user->dinas_id);
                 }
             }
         }
 
-        $notaDinas = $query->latest()->paginate(10);
+        $notaDinas = $query->latest()->paginate(10, ['*'], 'nota_page')->withQueryString();
 
-        return view('pages.arsip.index', compact('notaDinas'));
+        $sptQuery = Spt::with(['pegawais', 'subKegiatan', 'notaDinas']);
+
+        if ($user) {
+            if ($user->role->name === 'kepala_sub_bidang') {
+                if (!$user->sub_bidang_id) {
+                    $sptQuery->whereRaw('1 = 0');
+                } else {
+                    $sptQuery->where('sub_bidang_id', $user->sub_bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['kepala_bidang', 'admin', 'user'])) {
+                if ($user->bidang_id) {
+                    $sptQuery->where('bidang_id', $user->bidang_id);
+                }
+            } elseif (in_array($user->role->name, ['sekretaris_badan', 'kepala_badan'])) {
+                if ($user->dinas_id) {
+                    $sptQuery->where('dinas_id', $user->dinas_id);
+                }
+            }
+        }
+
+        $spts = $sptQuery->latest()->paginate(10, ['*'], 'spt_page')->withQueryString();
+
+        return view('pages.arsip.index', compact('notaDinas', 'spts'));
     }
 
     public function index()
@@ -60,7 +84,7 @@ class NotaDinasController extends Controller
             'subKegiatan',
             'kepada',
             'melalui'
-        ]);
+        ])->where('status', '!=', NotaDinas::DISETUJUI_KABAN);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -73,7 +97,7 @@ class NotaDinasController extends Controller
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
                 }
-            } elseif ($user->role->name === 'kepala_badan') {
+            } elseif (in_array($user->role->name, ['kepala_badan', 'sekretaris_badan'])) {
                 if ($user->dinas_id) {
                     $query->where('dinas_id', $user->dinas_id);
                 }

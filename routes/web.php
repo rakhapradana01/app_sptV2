@@ -201,3 +201,54 @@ Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::post('/register', [AuthController::class, 'storeRegister'])->name('register.store');
 });
+
+// DEBUG SEMENTARA - hapus setelah selesai debug
+Route::get('/debug-spt/{id}', function ($id) {
+    $spt = \App\Models\Spt::with(['sekban', 'kabid', 'kasubid'])->findOrFail($id);
+    return response()->json([
+        'status'         => $spt->status,
+        'sekban_paraf'   => $spt->sekban_paraf,
+        'kabid_paraf'    => $spt->kabid_paraf,
+        'kasubid_paraf'  => $spt->kasubid_paraf,
+        'sekban_id'      => $spt->sekban_id,
+        'kabid_id'       => $spt->kabid_id,
+        'kasubid_id'     => $spt->kasubid_id,
+        'sekban_sig'     => $spt->sekban?->signature_path,
+        'kabid_sig'      => $spt->kabid?->signature_path,
+        'kasubid_sig'    => $spt->kasubid?->signature_path,
+        'sekban_file_exists'  => $spt->sekban_paraf ? file_exists(public_path($spt->sekban_paraf)) : false,
+        'kabid_file_exists'   => $spt->kabid_paraf  ? file_exists(public_path($spt->kabid_paraf))  : false,
+        'kasubid_file_exists' => $spt->kasubid_paraf ? file_exists(public_path($spt->kasubid_paraf)) : false,
+        'public_path'    => public_path(),
+    ]);
+})->middleware('auth');
+
+// Reset paraf path yang invalid (file tidak ada di disk)
+Route::get('/debug-reset-paraf/{id}', function ($id) {
+    $spt = \App\Models\Spt::findOrFail($id);
+    $updated = [];
+
+    if ($spt->kabid_paraf && !file_exists(public_path($spt->kabid_paraf))) {
+        $spt->kabid_paraf = null;
+        $updated[] = 'kabid_paraf → null (file tidak ada)';
+    }
+    if ($spt->kasubid_paraf && !file_exists(public_path($spt->kasubid_paraf))) {
+        $spt->kasubid_paraf = null;
+        $updated[] = 'kasubid_paraf → null (file tidak ada)';
+    }
+    if ($spt->sekban_paraf && !file_exists(public_path($spt->sekban_paraf))) {
+        $spt->sekban_paraf = null;
+        $updated[] = 'sekban_paraf → null (file tidak ada)';
+    }
+    if ($spt->kaban_paraf && !file_exists(public_path($spt->kaban_paraf))) {
+        $spt->kaban_paraf = null;
+        $updated[] = 'kaban_paraf → null (file tidak ada)';
+    }
+
+    $spt->save();
+
+    return response()->json([
+        'spt_id'  => $id,
+        'updated' => $updated ?: ['tidak ada yang perlu direset'],
+    ]);
+})->middleware('auth');
