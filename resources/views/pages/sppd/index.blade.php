@@ -93,25 +93,49 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
-                                        <div class="flex items-center gap-2">
-                                            <a href="{{ route('sppd.cetakMandiri', $sppd->id) }}" target="_blank"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    <td class="px-5 py-4 sm:px-6 text-center">
+                                        <div x-data="{ open: false }" class="relative inline-block text-left">
+                                            <button @click="open = !open" @click.away="open = false"
+                                                class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                <span class="text-xs font-semibold">Aksi</span>
+                                                <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                                 </svg>
-                                                Cetak
-                                            </a>
-                                            @if (in_array(auth()->user()->role->name, ['super_admin', 'kepala_sub_bidang']))
-                                                <form action="{{ route('sppd.destroyMandiri', $sppd->id) }}" method="POST"
-                                                    onsubmit="return confirm('Hapus SPPD ini?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-rose-500 hover:bg-rose-600 rounded-lg transition">
-                                                        Hapus
-                                                    </button>
-                                                </form>
-                                            @endif
+                                            </button>
+
+                                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100"
+                                                class="absolute right-0 mt-2 w-48 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
+                                                <div class="py-1 flex flex-col text-left">
+
+                                                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase border-b border-gray-100 dark:border-gray-700">
+                                                        Pilih Aksi
+                                                    </div>
+
+                                                    {{-- Cetak --}}
+                                                    <a href="{{ route('sppd.cetakMandiri', $sppd->id) }}" target="_blank"
+                                                        class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                                        </svg>
+                                                        Cetak SPPD
+                                                    </a>
+
+                                                    {{-- Hapus --}}
+                                                    @if (in_array(auth()->user()->role->name, ['super_admin', 'kepala_sub_bidang']))
+                                                        <form action="{{ route('sppd.destroyMandiri', $sppd->id) }}" method="POST"
+                                                            onsubmit="return confirm('Hapus SPPD ini?')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit"
+                                                                class="flex items-center w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20">
+                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                                Hapus
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

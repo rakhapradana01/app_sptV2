@@ -157,7 +157,7 @@
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kegiatan</th>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pegawai</th>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status Paraf</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -217,63 +217,82 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-4">
-                                            <div class="flex items-center gap-2 flex-wrap">
-
-                                                {{-- Approval Kasubid --}}
-                                                @if (($st === 'draft' || empty($st)) && in_array($uRole, ['super_admin', 'kepala_sub_bidang']))
-                                                    <form action="{{ route('spt.approveKasubid', $spt->id) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition">
-                                                            Paraf Kasubid
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                {{-- Approval Kabid --}}
-                                                @if ($st === 'diajukan_kabid' && in_array($uRole, ['super_admin', 'kepala_bidang']))
-                                                    <form action="{{ route('spt.approveKabid', $spt->id) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition">
-                                                            Paraf Kabid
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                {{-- Approval Sekban --}}
-                                                @if ($st === 'diajukan_sekban' && in_array($uRole, ['super_admin', 'sekretaris_badan']))
-                                                    <form action="{{ route('spt.approveSekban', $spt->id) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition">
-                                                            Paraf Sekban
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                {{-- Approval Kaban --}}
-                                                @if ($st === 'diajukan_kaban' && in_array($uRole, ['super_admin', 'kepala_badan']))
-                                                    <form action="{{ route('spt.approveKaban', $spt->id) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition">
-                                                            ACC Kaban
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                {{-- Cetak PDF --}}
-                                                <a href="{{ route('spt.cetakMandiri', $spt->id) }}" target="_blank"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gray-700 hover:bg-gray-800 rounded-lg transition">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                        <td class="px-5 py-4 text-center">
+                                            <div x-data="{ open: false }" class="relative inline-block text-left">
+                                                <button @click="open = !open" @click.away="open = false"
+                                                    class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                                    <span class="text-xs font-semibold">Aksi</span>
+                                                    <svg class="w-4 h-4 transition-transform" :class="open ? 'rotate-180' : ''"
+                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                                     </svg>
-                                                    Cetak SPT
-                                                </a>
+                                                </button>
 
+                                                <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100"
+                                                    class="absolute right-0 mt-2 w-52 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
+                                                    <div class="py-1 flex flex-col text-left">
+
+                                                        <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase border-b border-gray-100 dark:border-gray-700">
+                                                            Persetujuan Paraf
+                                                        </div>
+
+                                                        {{-- Paraf Kasubid --}}
+                                                        @if (($st === 'draft' || empty($st)) && in_array($uRole, ['super_admin', 'kepala_sub_bidang']))
+                                                            <form action="{{ route('spt.approveKasubid', $spt->id) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                    Paraf Kasubid
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        {{-- Paraf Kabid --}}
+                                                        @if ($st === 'diajukan_kabid' && in_array($uRole, ['super_admin', 'kepala_bidang']))
+                                                            <form action="{{ route('spt.approveKabid', $spt->id) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                    Paraf Kabid
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        {{-- Paraf Sekban --}}
+                                                        @if ($st === 'diajukan_sekban' && in_array($uRole, ['super_admin', 'sekretaris_badan']))
+                                                            <form action="{{ route('spt.approveSekban', $spt->id) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                    Paraf Sekban
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        {{-- ACC Kaban --}}
+                                                        @if ($st === 'diajukan_kaban' && in_array($uRole, ['super_admin', 'kepala_badan']))
+                                                            <form action="{{ route('spt.approveKaban', $spt->id) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="flex items-center w-full px-4 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                                    ACC Kaban
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
+                                                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+
+                                                        {{-- Cetak SPT --}}
+                                                        <a href="{{ route('spt.cetakMandiri', $spt->id) }}" target="_blank"
+                                                            class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                                            </svg>
+                                                            Cetak SPT
+                                                        </a>
+
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
