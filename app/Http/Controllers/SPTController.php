@@ -6,6 +6,7 @@ use App\Models\NotaDinas;
 use App\Models\Pegawai;
 use App\Models\Spt;
 use App\Models\SubKegiatan;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 

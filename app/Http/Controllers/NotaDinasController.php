@@ -17,7 +17,7 @@ class NotaDinasController extends Controller
 {
     public function cetakNotaDinas(NotaDinas $nota)
     {
-        if ($nota->status !== NotaDinas::DISETUJUI_KABAN) {
+        if (!in_array($nota->status, [NotaDinas::DISETUJUI_KABAN, NotaDinas::DISETUJUI_KABID])) {
             return redirect()->route('arsip')->with('error', 'Nota Dinas belum disetujui oleh Kepala Badan (Kaban) sehingga belum dapat dicetak.');
         }
 
@@ -27,10 +27,10 @@ class NotaDinasController extends Controller
         return $pdf->stream('nota_dinas.pdf');
     }
 
-    public function arsip()
+    public function arsip(Request $request)
     {
         $user = auth()->user();
-        $query = NotaDinas::with(['spt', 'sppd'])->where('status', NotaDinas::DISETUJUI_KABAN);
+        $query = NotaDinas::with(['spt', 'sppd'])->approvedByKaban();
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -43,11 +43,9 @@ class NotaDinasController extends Controller
                 if ($user->bidang_id) {
                     $query->where('bidang_id', $user->bidang_id);
                 }
-            } elseif (in_array($user->role->name, ['kepala_badan', 'sekretaris_badan'])) {
-                if ($user->dinas_id) {
-                    $query->where('dinas_id', $user->dinas_id);
-                }
             }
+            // kepala_badan & sekretaris_badan: lihat semua tanpa filter unit
+            // karena dinas_id bisa null di user maupun di nota_dinas
         }
 
         $notaDinas = $query->latest()->paginate(10, ['*'], 'nota_page')->withQueryString();
@@ -65,17 +63,15 @@ class NotaDinasController extends Controller
                 if ($user->bidang_id) {
                     $sptQuery->where('bidang_id', $user->bidang_id);
                 }
-            } elseif (in_array($user->role->name, ['sekretaris_badan', 'kepala_badan'])) {
-                if ($user->dinas_id) {
-                    $sptQuery->where('dinas_id', $user->dinas_id);
-                }
             }
+            // kepala_badan & sekretaris_badan: lihat semua tanpa filter unit
         }
 
         $spts = $sptQuery->latest()->paginate(10, ['*'], 'spt_page')->withQueryString();
 
         return view('pages.arsip.index', compact('notaDinas', 'spts'));
     }
+
 
     public function index()
     {
@@ -84,7 +80,7 @@ class NotaDinasController extends Controller
             'subKegiatan',
             'kepada',
             'melalui'
-        ])->where('status', '!=', NotaDinas::DISETUJUI_KABAN);
+        ])->whereNotIn('status', [NotaDinas::DISETUJUI_KABAN, NotaDinas::DISETUJUI_KABID]);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {

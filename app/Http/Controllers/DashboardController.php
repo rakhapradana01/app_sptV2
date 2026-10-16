@@ -170,6 +170,74 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // 11. Notifikasi Pending — dokumen menunggu aksi user saat ini
+        $pendingNotaDinas = collect();
+        $pendingSptsNotif = collect();
+        $myPendingNotaDinas = collect(); // dokumen milik user yang masih dalam proses
+
+        if ($user) {
+            $role = $user->role->name ?? '';
+
+            // ── Dokumen yang MENUNGGU AKSI user ini ──────────────────────────
+            if (in_array($role, ['kepala_sub_bidang', 'super_admin'])) {
+                // Kasubid: Nota draft yang masuk ke bidangnya
+                $pendingNotaDinas = NotaDinas::where('status', NotaDinas::DRAFT)
+                    ->when($user->sub_bidang_id, fn($q) => $q->where('sub_bidang_id', $user->sub_bidang_id))
+                    ->latest()->take(5)->get();
+
+                // Kasubid: SPT draft
+                $pendingSptsNotif = Spt::where('status', Spt::STATUS_DRAFT)
+                    ->when($user->sub_bidang_id, fn($q) => $q->where('sub_bidang_id', $user->sub_bidang_id))
+                    ->latest()->take(5)->get();
+            }
+
+            if (in_array($role, ['kepala_bidang', 'super_admin'])) {
+                // Kabid: Nota yang sudah diparaf Kasubid, menunggu Kabid
+                $q = NotaDinas::where('status', NotaDinas::DIAJUKAN_KABID)
+                    ->when($user->bidang_id, fn($q) => $q->where('bidang_id', $user->bidang_id));
+                $pendingNotaDinas = $pendingNotaDinas->merge($q->latest()->take(5)->get());
+
+                // Kabid: SPT yang menunggu Kabid
+                $q2 = Spt::where('status', Spt::STATUS_DIAJUKAN_KABID)
+                    ->when($user->bidang_id, fn($q) => $q->where('bidang_id', $user->bidang_id));
+                $pendingSptsNotif = $pendingSptsNotif->merge($q2->latest()->take(5)->get());
+            }
+
+            if (in_array($role, ['sekretaris_badan', 'super_admin'])) {
+                // Sekban: Nota yang sudah diparaf Kabid, menunggu Sekban
+                $q = NotaDinas::where('status', NotaDinas::DIAJUKAN_SEKBAN);
+                $pendingNotaDinas = $pendingNotaDinas->merge($q->latest()->take(5)->get());
+
+                // Sekban: SPT yang menunggu Sekban
+                $q2 = Spt::where('status', Spt::STATUS_DIAJUKAN_SEKBAN);
+                $pendingSptsNotif = $pendingSptsNotif->merge($q2->latest()->take(5)->get());
+            }
+
+            if (in_array($role, ['kepala_badan', 'super_admin'])) {
+                // Kaban: Nota yang sudah diparaf Sekban, menunggu Kaban
+                $q = NotaDinas::where('status', NotaDinas::DIAJUKAN_KABAN);
+                $pendingNotaDinas = $pendingNotaDinas->merge($q->latest()->take(5)->get());
+
+                // Kaban: SPT yang menunggu Kaban
+                $q2 = Spt::where('status', Spt::STATUS_DIAJUKAN_KABAN);
+                $pendingSptsNotif = $pendingSptsNotif->merge($q2->latest()->take(5)->get());
+            }
+
+            // ── Dokumen MILIK user yang masih dalam proses (semua role) ──────
+            if (in_array($role, ['admin', 'user', 'kepala_sub_bidang'])) {
+                $myPendingNotaDinas = NotaDinas::whereNotIn('status', [
+                        NotaDinas::DISETUJUI_KABAN,
+                        NotaDinas::DISETUJUI_KABID,
+                        NotaDinas::DRAFT,
+                    ])
+                    ->when($user->sub_bidang_id, fn($q) => $q->where('sub_bidang_id', $user->sub_bidang_id))
+                    ->when(!$user->sub_bidang_id && $user->bidang_id, fn($q) => $q->where('bidang_id', $user->bidang_id))
+                    ->latest()->take(5)->get();
+            }
+        }
+
+        $totalPendingNotif = $pendingNotaDinas->count() + $pendingSptsNotif->count();
+
         return view('pages.dashboard.index', compact(
             'totalSubKegiatan',
             'totalPptk',
@@ -182,7 +250,11 @@ class DashboardController extends Controller
             'persenOk',
             'totalSpt',
             'subKegiatans',
-            'recentActivities'
+            'recentActivities',
+            'pendingNotaDinas',
+            'pendingSptsNotif',
+            'myPendingNotaDinas',
+            'totalPendingNotif'
         ));
     }
 

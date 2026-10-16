@@ -26,8 +26,8 @@ class MenuHelper
                 'path'     => '#',
                 'subItems' => [
                     ['name' => 'Nota Dinas', 'path' => route('nota-dinas.index'), 'pro' => false],
-                    ['name' => 'Arsip', 'path' => route('arsip'), 'pro' => false],
                     ['name' => 'SPT', 'path' => route('spt.index'), 'pro' => false],
+                    ['name' => 'Arsip', 'path' => route('arsip'), 'pro' => false],
                     ['name' => 'SPPD', 'path' => route('sppd.index'), 'pro' => false],
                 ]
             ],

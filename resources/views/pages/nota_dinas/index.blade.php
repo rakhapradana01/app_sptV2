@@ -160,7 +160,8 @@
                                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                             ACC Kaban
                                                         </a>
-                                                    @endif                                                    {{-- Jika sudah di-ACC Kaban, dokumen resmi terarsip dan dapat dicetak melalui menu Arsip --}}
+                                                    @endif
+                                                    {{-- Jika sudah di-ACC Kaban, dokumen resmi terarsip dan dapat dicetak melalui menu Arsip --}}
                                                     @if ($status === \App\Models\NotaDinas::DISETUJUI_KABAN)
                                                         @php $hasAction = true; @endphp
                                                         <a href="{{ route('arsip') }}"
