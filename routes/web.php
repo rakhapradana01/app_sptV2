@@ -14,8 +14,16 @@ use App\Http\Controllers\BidangController;
 use App\Http\Controllers\SubBidangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 
 Route::middleware(['auth'])->group(function () {
+
+    // ======================
+    // PROFIL USER (SEMUA ROLE)
+    // ======================
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/signature', [ProfileController::class, 'deleteSignature'])->name('profile.deleteSignature');
 
     // ======================
     // SUPER ADMIN (FULL)

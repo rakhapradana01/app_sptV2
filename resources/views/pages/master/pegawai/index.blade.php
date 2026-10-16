@@ -34,53 +34,53 @@
                 <div class="max-w-full overflow-x-auto custom-scrollbar">
                     <table class="w-full min-w-[1102px]">
                         <thead>
-                            <tr class="border-b border-gray-100 dark:border-gray-800">
-                                <th class="px-5 py-3 text-left sm:px-6">No</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Nama</th>
-                                <th class="px-5 py-3 text-left sm:px-6">NIP</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Pangkat</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Jabatan</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Dinas</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Bidang</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Aksi</th>
+                            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">No</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">NIP</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pangkat</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Jabatan</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dinas</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bidang</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($pegawais as $pegawai)
-                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
-                                    <td class="px-5 py-4 sm:px-6">
+                            @forelse ($pegawais as $pegawai)
+                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-500">
                                         {{ $pegawais->firstItem() + $loop->index }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 font-medium text-gray-900 dark:text-white">
                                         {{ $pegawai->nama }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 font-mono text-sm text-gray-600 dark:text-gray-300">
                                         {{ $pegawai->nip }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-600 dark:text-gray-300">
                                         {{ $pegawai->pangkat }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-600 dark:text-gray-300">
                                         {{ $pegawai->jabatan ?? '-' }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-600 dark:text-gray-300">
                                         {{ $pegawai->dinas->nama_dinas ?? '-' }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-600 dark:text-gray-300">
                                         {{ $pegawai->bidang->nama_bidang ?? '-' }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6">
                                         <div class="flex items-center gap-2">
-                                            <x-ui.button variant="yellow"
+                                            <x-ui.button variant="yellow" size="xs"
                                                 @click="$dispatch('open-profile-edit-modal', {
-                                                                                                                                                    id: '{{ $pegawai->id }}',
-                                                                                                                                                    nama: '{{ addslashes($pegawai->nama) }}',
-                                                                                                                                                    nip: '{{ $pegawai->nip }}',
-                                                                                                                                                    pangkat: '{{ addslashes($pegawai->pangkat) }}',
-                                                                                                                                                    jabatan: '{{ addslashes($pegawai->jabatan) }}',
-                                                                                                                                                    dinas_id: '{{ $pegawai->dinas_id }}',
-                                                                                                                                                    bidang_id: '{{ $pegawai->bidang_id }}'
-                                                                                                                                                })">
+                                                    id: '{{ $pegawai->id }}',
+                                                    nama: '{{ addslashes($pegawai->nama) }}',
+                                                    nip: '{{ $pegawai->nip }}',
+                                                    pangkat: '{{ addslashes($pegawai->pangkat) }}',
+                                                    jabatan: '{{ addslashes($pegawai->jabatan) }}',
+                                                    dinas_id: '{{ $pegawai->dinas_id }}',
+                                                    bidang_id: '{{ $pegawai->bidang_id }}'
+                                                })">
                                                 Edit
                                             </x-ui.button>
 
@@ -89,17 +89,27 @@
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <x-ui.button variant="red" type="submit">
+                                                <x-ui.button variant="red" size="xs" type="submit">
                                                     Hapus
                                                 </x-ui.button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                                        Belum ada data pegawai.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div class="mt-4">
+                <x-ui.pagination :paginator="$pegawais" />
             </div>
 
             {{-- Modal Tambah Pegawai --}}

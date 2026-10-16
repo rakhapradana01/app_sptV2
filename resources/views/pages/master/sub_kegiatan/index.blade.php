@@ -37,56 +37,70 @@
             </div>
             @endif
 
-            <div class="overflow-x-auto mt-4">
-                <table class="w-full min-w-[600px] border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-100 dark:border-gray-800">
-                            <th class="px-5 py-3 text-left sm:px-6">No</th>
-                            <th class="px-5 py-3 text-left sm:px-6">PPTK</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Nomor Rekening</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Nama Program</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Koefisien (OK)</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Pagu</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Realisasi</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Sisa</th>
-                            <th class="px-5 py-3 text-left sm:px-6">Aksi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach ($subKegiatan as $item)
-                            <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
-                                <td class="px-5 py-4 sm:px-6">{{ $subKegiatan->firstItem() + $loop->index }}</td>
-                                <td class="px-5 py-4 sm:px-6">
-                                    <div class="font-medium text-gray-900 dark:text-white">
-                                        {{ $item->pptk_nama }}
-                                    </div>
-                                    @if($item->subBidang)
-                                        <span class="inline-block mt-0.5 text-xs text-emerald-600 dark:text-emerald-400 font-normal">
-                                            {{ $item->subBidang->nama_sub_bidang }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-4 sm:px-6">{{ $item->nomor_rekening }}</td>
-                                <td class="px-5 py-4 sm:px-6">{{ $item->nama_kegiatan }}</td>
-                                <td class="px-5 py-4 sm:px-6">{{ $item->koefisien }}</td>
-                                <td class="px-5 py-4 sm:px-6">Rp{{ number_format($item->pagu, 0, ',', '.') }}</td>
-                                <td class="px-5 py-4 sm:px-6 text-green-600 dark:text-green-400 font-semibold">Rp{{ number_format($item->realisasi ?? 0, 0, ',', '.') }}</td>
-                                <td class="px-5 py-4 sm:px-6 text-red-600 dark:text-red-400 font-semibold">Rp{{ number_format($item->pagu - ($item->realisasi ?? 0), 0, ',', '.') }}</td>
-                                <td class="px-5 py-4 sm:px-6 flex gap-2">
-                                    <x-ui.button size="sm" type="button" onclick="editData({{ $item->id }})">
-                                        Edit
-                                    </x-ui.button>
-                                    <form action="{{ Route('sub-kegiatan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin hapus?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <x-ui.button variant="red" size="sm">Hapus</x-ui.button>
-                                    </form>
-                                </td>
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="max-w-full overflow-x-auto custom-scrollbar">
+                    <table class="w-full min-w-[900px]">
+                        <thead>
+                            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">No</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">PPTK</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nomor Rekening</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Program</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-28">Koefisien (OK)</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pagu</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Realisasi</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sisa</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+
+                        <tbody>
+                            @forelse ($subKegiatan as $item)
+                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-500">{{ $subKegiatan->firstItem() + $loop->index }}</td>
+                                    <td class="px-5 py-4 sm:px-6">
+                                        <div class="font-medium text-gray-900 dark:text-white">
+                                            {{ $item->pptk_nama }}
+                                        </div>
+                                        @if($item->subBidang)
+                                            <span class="inline-block mt-0.5 text-xs text-emerald-600 dark:text-emerald-400 font-normal">
+                                                {{ $item->subBidang->nama_sub_bidang }}
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-4 sm:px-6 font-mono text-sm text-gray-600 dark:text-gray-300">{{ $item->nomor_rekening }}</td>
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-gray-700 dark:text-gray-300">{{ $item->nama_kegiatan }}</td>
+                                    <td class="px-5 py-4 sm:px-6 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $item->koefisien }}</td>
+                                    <td class="px-5 py-4 sm:px-6 text-sm">Rp{{ number_format($item->pagu, 0, ',', '.') }}</td>
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-green-600 dark:text-green-400 font-semibold">Rp{{ number_format($item->realisasi ?? 0, 0, ',', '.') }}</td>
+                                    <td class="px-5 py-4 sm:px-6 text-sm text-red-600 dark:text-red-400 font-semibold">Rp{{ number_format($item->pagu - ($item->realisasi ?? 0), 0, ',', '.') }}</td>
+                                    <td class="px-5 py-4 sm:px-6">
+                                        <div class="flex items-center gap-2">
+                                            <x-ui.button size="xs" type="button" onclick="editData({{ $item->id }})">
+                                                Edit
+                                            </x-ui.button>
+                                            <form action="{{ Route('sub-kegiatan.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin hapus?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <x-ui.button variant="red" size="xs">Hapus</x-ui.button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                                        Belum ada data sub kegiatan.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <x-ui.pagination :paginator="$subKegiatan" />
             </div>
 
             {{-- Modal Tambah Sub Kegiatan (plain div, bukan x-ui.modal supaya x-data tidak bentrok) --}}

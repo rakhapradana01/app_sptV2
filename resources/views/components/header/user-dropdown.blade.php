@@ -33,20 +33,57 @@
         class="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark z-50"
         style="display: none;">
         <!-- User Info -->
-        <div class="px-2">
-            <span
-                class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">{{ auth()->user()->name ?? '-' }}</span>
-            <span
-                class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">{{ auth()->user()->username ?? '-' }}</span>
+        <div class="px-2 py-1">
+            <span class="block font-semibold text-gray-800 text-theme-sm dark:text-white truncate">
+                {{ auth()->user()->name ?? '-' }}
+            </span>
+            <span class="block text-theme-xs text-gray-500 dark:text-gray-400 truncate">
+                {{ '@' . (auth()->user()->username ?? '-') }}
+            </span>
+            <div class="mt-1.5">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400">
+                    {{ ucwords(str_replace('_', ' ', auth()->user()->role->name ?? 'User')) }}
+                </span>
+            </div>
         </div>
 
+        <div class="my-2 border-t border-gray-100 dark:border-gray-800"></div>
+
+        <!-- Menu Links -->
+        <a href="{{ route('profile.edit') }}"
+            class="flex items-center w-full gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white transition"
+            @click="closeDropdown()">
+            <span class="text-gray-500 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+            </span>
+            <span>Edit Profil</span>
+        </a>
+
+        @if(auth()->user()?->role?->name === 'super_admin')
+            <a href="{{ route('users.index') }}"
+                class="flex items-center w-full gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white transition"
+                @click="closeDropdown()">
+                <span class="text-gray-500 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </span>
+                <span>Kelola Akun (Master)</span>
+            </a>
+        @endif
+
+        <div class="my-1.5 border-t border-gray-100 dark:border-gray-800"></div>
 
         <form action="{{ route('logout') }}" method="POST">
             @csrf
             <button type="submit"
-                class="flex items-center w-full gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                class="flex items-center w-full gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-rose-50 hover:text-rose-600 dark:text-gray-400 dark:hover:bg-rose-950/30 dark:hover:text-rose-400 transition"
                 @click="closeDropdown()">
-                <span class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
+                <span class="text-gray-500 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">

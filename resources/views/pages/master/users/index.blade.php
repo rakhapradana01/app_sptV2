@@ -130,28 +130,28 @@
                 <div class="max-w-full overflow-x-auto custom-scrollbar">
                     <table class="w-full min-w-[800px]">
                         <thead>
-                            <tr class="border-b border-gray-100 dark:border-gray-800 text-left">
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">No</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">Nama Lengkap</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">Username</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">Unit Kerja</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">Role</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">Aksi</th>
+                            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16 text-left">No</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Nama Lengkap</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Username</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Unit Kerja</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left">Role</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider text-left w-36">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($users as $user)
-                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white text-sm">
-                                    <td class="px-5 py-4 sm:px-6">
+                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white text-sm hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
+                                    <td class="px-5 py-4 sm:px-6 text-gray-500">
                                         {{ $users->firstItem() + $loop->index }}
                                     </td>
                                     <td class="px-5 py-4 sm:px-6 font-medium text-gray-900 dark:text-white">
                                         {{ $user->name }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6 text-gray-500 dark:text-gray-400">
+                                    <td class="px-5 py-4 sm:px-6 font-mono text-gray-600 dark:text-gray-300">
                                         {{ $user->username }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6 text-gray-500 dark:text-gray-400 text-xs">
+                                    <td class="px-5 py-4 sm:px-6 text-gray-600 dark:text-gray-300 text-xs">
                                         @if($user->dinas)
                                             <div><strong>Dinas:</strong> {{ $user->dinas->nama_dinas ?? '-' }}</div>
                                             <div><strong>Bidang:</strong> {{ $user->bidang->nama_bidang ?? '-' }}</div>
@@ -192,7 +192,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-5 py-10 text-center text-gray-400 dark:text-gray-500 italic">
+                                    <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
                                         Belum ada data user.
                                     </td>
                                 </tr>

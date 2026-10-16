@@ -48,20 +48,20 @@
         @endif
 
         <x-common.component-card>
-            <div class="overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-left align-middle">
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="max-w-full overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left align-middle min-w-[600px]">
                         <thead>
-                            <tr class="border-b border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-800/50">
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400 w-16">No</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400">Nama Dinas</th>
-                                <th class="px-5 py-3 sm:px-6 font-semibold text-sm text-gray-500 dark:text-gray-400 w-32">Aksi</th>
+                            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">No</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nama Dinas</th>
+                                <th class="px-5 py-3.5 sm:px-6 font-semibold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($dinas as $d)
-                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white text-sm">
-                                    <td class="px-5 py-4 sm:px-6">{{ $dinas->firstItem() + $loop->index }}</td>
+                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white text-sm hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
+                                    <td class="px-5 py-4 sm:px-6 text-gray-500">{{ $dinas->firstItem() + $loop->index }}</td>
                                     <td class="px-5 py-4 sm:px-6 font-medium text-gray-900 dark:text-white">{{ $d->nama_dinas }}</td>
                                     <td class="px-5 py-4 sm:px-6">
                                         <div class="flex items-center gap-2">
@@ -79,7 +79,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-5 py-8 text-center text-sm text-gray-500 dark:text-gray-400">Belum ada data dinas.</td>
+                                    <td colspan="3" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">Belum ada data dinas.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -87,11 +87,9 @@
                 </div>
             </div>
 
-            @if($dinas->hasPages())
-                <div class="px-5 py-4 border-t border-gray-100 dark:border-gray-800">
-                    {{ $dinas->links() }}
-                </div>
-            @endif
+            <div class="mt-4">
+                <x-ui.pagination :paginator="$dinas" />
+            </div>
 
             <!-- Modal Create -->
             <x-ui.modal x-data="{ open: false }" @open-dinas-create-modal.window="open = true" :isOpen="false" class="max-w-[500px]">

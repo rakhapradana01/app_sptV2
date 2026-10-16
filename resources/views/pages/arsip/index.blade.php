@@ -10,16 +10,16 @@
                     <div class="max-w-full overflow-x-auto custom-scrollbar flex-1">
                         <table class="w-full min-w-[1102px]">
                             <thead>
-                                <tr class="border-b border-gray-100 dark:border-gray-800">
-                                    <th class="px-5 py-3 text-left">No</th>
-                                    <th class="px-5 py-3 text-left">Nomor</th>
-                                    <th class="px-5 py-3 text-left">Perihal</th>
-                                    <th class="px-5 py-3 text-center">Aksi</th>
+                                <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">No</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nomor</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="h-full">
                                 @forelse ($notaDinas as $nota)
-                                    <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
+                                    <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
                                         <td class="px-5 py-4">{{ $notaDinas->firstItem() + $loop->index }}</td>
                                         <td
                                             class="px-5 py-4 sm:px-6 whitespace-nowrap font-mono text-sm text-gray-600 dark:text-gray-400">
@@ -127,16 +127,17 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="4" class="px-5 py-10 text-center text-sm text-gray-400">
-                                            Belum ada dokumen Nota Dinas yang disetujui Kepala Badan (ACC Kaban).
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                <tr>
+                                    <td colspan="4" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                                        Belum ada dokumen Nota Dinas yang disetujui Kepala Badan (ACC Kaban).
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+            <div class="mt-4">
                 <x-ui.pagination :paginator="$notaDinas" />
             </div>
         </x-common.component-card>
@@ -161,25 +162,13 @@
                     <div class="max-w-full overflow-x-auto custom-scrollbar">
                         <table class="w-full min-w-[860px]">
                             <thead>
-                                <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
-                                    <th
-                                        class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        No</th>
-                                    <th
-                                        class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Nomor SPT</th>
-                                    <th
-                                        class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Kegiatan</th>
-                                    <th
-                                        class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Pegawai</th>
-                                    <th
-                                        class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Status Paraf</th>
-                                    <th
-                                        class="px-5 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                        Aksi</th>
+                                <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">No</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nomor SPT</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kegiatan</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pegawai</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status Paraf</th>
+                                    <th class="px-5 py-3.5 sm:px-6 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -368,7 +357,9 @@
                         </table>
                     </div>
                 </div>
-                <x-ui.pagination :paginator="$spts" />
+                <div class="mt-4">
+                    <x-ui.pagination :paginator="$spts" />
+                </div>
             </div>
         </x-common.component-card>
 

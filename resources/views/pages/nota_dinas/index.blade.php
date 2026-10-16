@@ -17,18 +17,18 @@
                 <div class="max-w-full overflow-x-auto custom-scrollbar">
                     <table class="w-full min-w-[1102px]">
                         <thead>
-                            <tr class="border-b border-gray-100 dark:border-gray-800">
-                                <th class="px-5 py-3 text-left sm:px-6">No</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Nomor</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Perihal</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Tujuan</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Status</th>
-                                <th class="px-5 py-3 text-left sm:px-6">Aksi</th>
+                            <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50/75 dark:bg-gray-900/50">
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16">No</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nomor</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tujuan</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($notaDinas as $nota)
-                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white">
+                            @forelse ($notaDinas as $nota)
+                                <tr class="border-b border-gray-100 dark:border-gray-800 dark:text-white hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
                                     <td class="px-5 py-4 sm:px-6 ">
                                         {{ $notaDinas->firstItem() + $loop->index }}
                                     </td>
@@ -213,13 +213,20 @@
                                             </div>
                                         </div>
                                     </td>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                                        Belum ada data nota dinas.
+                                    </td>
                                 </tr>
-                            @endforeach
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-            <x-ui.pagination :paginator="$notaDinas" />
+            <div class="mt-4">
+                <x-ui.pagination :paginator="$notaDinas" />
+            </div>
         </x-common.component-card>
     </div>
 

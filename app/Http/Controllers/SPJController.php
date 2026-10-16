@@ -31,7 +31,7 @@ class SPJController extends Controller
             }
         }
 
-        $spt = $query->get();
+        $spt = $query->latest()->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return response()->json($spt);
