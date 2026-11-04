@@ -12,7 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE nota_dinas MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'draft'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE nota_dinas MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'draft'");
+        }
     }
 
     /**
@@ -20,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE nota_dinas MODIFY COLUMN status ENUM('draft', 'diajukan_kasubid', 'ditolak_kasubid', 'diajukan_kabid', 'ditolak_kabid', 'disetujui_kabid', 'diajukan_sekban', 'revisi_sekban', 'ditolak_sekban', 'diajukan_kaban', 'ditolak_kaban', 'disetujui_kaban') NOT NULL DEFAULT 'draft'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE nota_dinas MODIFY COLUMN status ENUM('draft', 'diajukan_kasubid', 'ditolak_kasubid', 'diajukan_kabid', 'ditolak_kabid', 'disetujui_kabid', 'diajukan_sekban', 'revisi_sekban', 'ditolak_sekban', 'diajukan_kaban', 'ditolak_kaban', 'disetujui_kaban') NOT NULL DEFAULT 'draft'");
+        }
     }
 };

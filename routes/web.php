@@ -15,6 +15,7 @@ use App\Http\Controllers\SubBidangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MasterShsController;
 
 Route::middleware(['auth'])->group(function () {
 
@@ -42,6 +43,26 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('pegawai', PegawaiController::class);
             Route::resource('users', UserController::class);
             Route::post('/users/{id}/signature', [UserController::class, 'uploadSignature'])->name('users.uploadSignature');
+
+            // ======================
+            // MASTER SHS (Standar Harga Satuan)
+            // ======================
+            Route::get('/master-shs', [MasterShsController::class, 'index'])->name('master-shs.index');
+            Route::post('/master-shs', [MasterShsController::class, 'store'])->name('master-shs.store');
+            Route::get('/master-shs/{id}', [MasterShsController::class, 'show'])->name('master-shs.show');
+            Route::put('/master-shs/{id}', [MasterShsController::class, 'update'])->name('master-shs.update');
+            Route::delete('/master-shs/{id}', [MasterShsController::class, 'destroy'])->name('master-shs.destroy');
+            Route::patch('/master-shs/{id}/toggle-status', [MasterShsController::class, 'toggleStatus'])->name('master-shs.toggle-status');
+
+            // Detail Penginapan
+            Route::post('/master-shs/{shsId}/penginapan', [MasterShsController::class, 'storePenginapan'])->name('master-shs.penginapan.store');
+            Route::put('/master-shs/{shsId}/penginapan/{penginapanId}', [MasterShsController::class, 'updatePenginapan'])->name('master-shs.penginapan.update');
+            Route::delete('/master-shs/{shsId}/penginapan/{penginapanId}', [MasterShsController::class, 'destroyPenginapan'])->name('master-shs.penginapan.destroy');
+
+            // Detail Transportasi
+            Route::post('/master-shs/{shsId}/transportasi', [MasterShsController::class, 'storeTransportasi'])->name('master-shs.transportasi.store');
+            Route::put('/master-shs/{shsId}/transportasi/{transportasiId}', [MasterShsController::class, 'updateTransportasi'])->name('master-shs.transportasi.update');
+            Route::delete('/master-shs/{shsId}/transportasi/{transportasiId}', [MasterShsController::class, 'destroyTransportasi'])->name('master-shs.transportasi.destroy');
         });
 
         Route::middleware('role:super_admin')->group(function () {

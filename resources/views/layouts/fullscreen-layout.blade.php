@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Dashboard' }} | E-SPT Login</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logo.png') }}">
+    <title>@hasSection('title')@yield('title') &mdash; @endif{{ $title ?? 'Sistem Informasi Perjalanan Dinas' }} | BPKAD Provinsi Kalimantan Selatan</title>
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

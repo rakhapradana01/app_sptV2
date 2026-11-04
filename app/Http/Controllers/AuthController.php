@@ -11,16 +11,11 @@ class AuthController extends Controller
 {
     public function index()
     {
-        $dinas = Dinas::orderBy('nama_dinas')->get();
-
-        return view('pages.auth.signin', compact('dinas'));
+        return view('pages.auth.signin');
     }
 
     public function authenticated(Request $request)
     {
-        // 1. Validasi awal: Jika bukan superadmin00, dinas wajib diisi
-        $isSuperAdmin = $request->input('username') === 'superadmin00';
-        
         $rules = [
             'username' => 'required|min:2',
             'password' => 'required|min:6',
@@ -33,54 +28,33 @@ class AuthController extends Controller
             'password.min'      => 'Password minimal 6 karakter.',
         ];
 
-        if (!$isSuperAdmin) {
-            $rules['dinas'] = 'required|exists:dinas,id';
-            $messages['dinas.required'] = 'Silakan pilih Dinas terlebih dahulu.';
-            $messages['dinas.exists'] = 'Dinas tidak valid.';
-        }
-
         $data = $request->validate($rules, $messages);
 
-        // 2. Cari user
-        if ($isSuperAdmin) {
-            $user = User::where('username', 'superadmin00')->first();
-        } else {
-            $user = User::where('username', $data['username'])
-                        ->where('dinas_id', $data['dinas'])
-                        ->first();
-        }
-
-        // Jika kombinasi tidak cocok di database
-        if (!$user) {
-            return redirect()->route('login')
-                ->withInput($request->only('username', 'dinas'))
-                ->with(['error' => $isSuperAdmin ? 'Akun Super Admin tidak terdaftar.' : 'Username tidak terdaftar di Dinas yang dipilih.']);
-        }
-
-        // 3. Jika user ditemukan di dinas tersebut, baru kita lakukan verifikasi password
         $credentials = [
             'username' => $data['username'],
-            'password' => $data['password']
+            'password' => $data['password'],
         ];
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
             // Pengalihan halaman berdasarkan role
-            if ($user->role->name === 'super_admin') {
+            if ($user->role?->name === 'super_admin') {
                 return redirect()->route('dashboard');
             }
 
-            if ($user->role->name === 'admin') {
+            if ($user->role?->name === 'admin') {
                 return redirect()->route('sub-kegiatan.index');
             }
 
             return redirect()->route('nota-dinas.index');
         }
 
-        // Jika password salah
+        // Jika username atau password salah
         return redirect()->route('login')
-            ->withInput($request->only('username', 'dinas'))
+            ->withInput($request->only('username'))
             ->with(['error' => 'Username atau password salah.']);
     }
 

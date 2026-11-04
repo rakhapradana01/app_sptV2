@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap') layer(base);
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@300;400;500;600;700&display=swap') layer(base);
 @import 'prismjs/themes/prism.min.css';
 @import 'tailwindcss';
 
@@ -14,6 +14,16 @@
 @theme {
   --font-*: initial;
   --font-outfit: Outfit, sans-serif;
+  --font-inter: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --color-gov-primary: #142B4A;
+  --color-gov-deep: #0D1B2A;
+  --color-gov-gold: #C8A45D;
+  --color-gov-gold-light: #DFC282;
+  --color-gov-offwhite: #F7F8FA;
+  --color-gov-text: #1F2937;
+  --color-gov-muted: #6B7280;
+  --color-gov-border: #E5E7EB;
 
   --breakpoint-*: initial;
   --breakpoint-2xsm: 375px;

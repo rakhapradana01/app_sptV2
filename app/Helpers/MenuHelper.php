@@ -72,6 +72,9 @@ class MenuHelper
                     if (in_array($role, ['super_admin', 'admin'])) {
                         $items[] = ['name' => 'Akun', 'path' => route('users.index'), 'pro' => false];
                     }
+                    if (in_array($role, ['super_admin', 'admin'])) {
+                        $items[] = ['name' => 'Standar Harga Satuan', 'path' => route('master-shs.index'), 'pro' => false];
+                    }
                     if ($role === 'super_admin') {
                         $items[] = ['name' => 'Dinas', 'path' => route('dinas.index'), 'pro' => false];
                         $items[] = ['name' => 'Bidang', 'path' => route('bidang.index'), 'pro' => false];

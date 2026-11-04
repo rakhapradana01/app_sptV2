@@ -106,8 +106,23 @@
                                     penginapan: 0,
                                     kode_rekening: '{{ $subKegiatan->nomor_rekening ?? '' }}' 
                                 },
+                                showTransportBreakdown: false,
+                                transportBreakdown: {
+                                    bjb_pergi: 0,
+                                    bjb_pulang: 0,
+                                    tuj_pergi: 0,
+                                    tuj_pulang: 0,
+                                },
+                                syncTransportFromBreakdown() {
+                                    this.rincianForm.transport = (parseFloat(this.transportBreakdown.bjb_pergi) || 0) +
+                                                                 (parseFloat(this.transportBreakdown.bjb_pulang) || 0) +
+                                                                 (parseFloat(this.transportBreakdown.tuj_pergi) || 0) +
+                                                                 (parseFloat(this.transportBreakdown.tuj_pulang) || 0);
+                                },
                                 openAddRincian(item = null) {
                                     this.isEditRincian = false;
+                                    this.showTransportBreakdown = false;
+                                    this.transportBreakdown = { bjb_pergi: 0, bjb_pulang: 0, tuj_pergi: 0, tuj_pulang: 0 };
                                     this.rincianForm = item ? { ...item } : { 
                                         pegawai_id: '', 
                                         uraian_id: '',
@@ -124,6 +139,8 @@
                                 },
                                 openEditRincian(item) {
                                     this.isEditRincian = true;
+                                    this.showTransportBreakdown = false;
+                                    this.transportBreakdown = { bjb_pergi: 0, bjb_pulang: 0, tuj_pergi: 0, tuj_pulang: 0 };
                                     this.rincianForm = { ...item };
                                     this.showRincianModal = true;
                                 }
@@ -637,17 +654,65 @@
                                         x-model="rincianForm.tiket_pesawat_pulang" class="form-control w-full"
                                         placeholder="0">
                                 </div>
-                                <div class="col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transport</label>
+                                {{-- Transport dengan Rincian Rute --}}
+                                <div class="col-span-2 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Transport (Rp)
+                                        </label>
+                                        <button type="button" @click="showTransportBreakdown = !showTransportBreakdown"
+                                                class="text-xs font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 inline-flex items-center gap-1">
+                                            <span x-text="showTransportBreakdown ? 'Tutup Rincian Rute' : '+ Rincikan Rute (Banjarbaru & Tujuan)'"></span>
+                                        </button>
+                                    </div>
                                     <input type="number" name="transport" x-model="rincianForm.transport"
-                                        class="form-control w-full" placeholder="0">
+                                        class="form-control w-full font-semibold" placeholder="0">
+
+                                    {{-- Sub-form Rincian Transport --}}
+                                    <div x-show="showTransportBreakdown" x-cloak class="p-3 bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl space-y-3 text-xs">
+                                        <div>
+                                            <span class="font-bold text-amber-900 dark:text-amber-300">1. Kota Banjarbaru (Tempat Kedudukan)</span>
+                                            <div class="grid grid-cols-2 gap-2 mt-1.5">
+                                                <div>
+                                                    <label class="text-[11px] text-gray-600 dark:text-gray-400 block mb-0.5">Rumah &rarr; Bandara</label>
+                                                    <input type="number" x-model.number="transportBreakdown.bjb_pergi" @input="syncTransportFromBreakdown()"
+                                                           placeholder="0" class="form-control w-full text-xs py-1 px-2">
+                                                </div>
+                                                <div>
+                                                    <label class="text-[11px] text-gray-600 dark:text-gray-400 block mb-0.5">Bandara &rarr; Rumah</label>
+                                                    <input type="number" x-model.number="transportBreakdown.bjb_pulang" @input="syncTransportFromBreakdown()"
+                                                           placeholder="0" class="form-control w-full text-xs py-1 px-2">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="font-bold text-amber-900 dark:text-amber-300">2. Kota Tujuan</span>
+                                            <div class="grid grid-cols-2 gap-2 mt-1.5">
+                                                <div>
+                                                    <label class="text-[11px] text-gray-600 dark:text-gray-400 block mb-0.5">Bandara &rarr; Hotel &rarr; Acara</label>
+                                                    <input type="number" x-model.number="transportBreakdown.tuj_pergi" @input="syncTransportFromBreakdown()"
+                                                           placeholder="0" class="form-control w-full text-xs py-1 px-2">
+                                                </div>
+                                                <div>
+                                                    <label class="text-[11px] text-gray-600 dark:text-gray-400 block mb-0.5">Hotel &rarr; Bandara</label>
+                                                    <input type="number" x-model.number="transportBreakdown.tuj_pulang" @input="syncTransportFromBreakdown()"
+                                                           placeholder="0" class="form-control w-full text-xs py-1 px-2">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                {{-- Penginapan (Pagu Maksimal) --}}
                                 <div class="col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Penginapan</label>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            Penginapan (Pagu Maksimal)
+                                        </label>
+                                        <span class="text-[11px] text-gray-400 dark:text-gray-500">Pagu riil per hotel</span>
+                                    </div>
                                     <input type="number" name="penginapan" x-model="rincianForm.penginapan"
-                                        class="form-control w-full" placeholder="0">
+                                        class="form-control w-full font-semibold" placeholder="0">
                                 </div>
                             </div>
 
