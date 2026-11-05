@@ -8,9 +8,9 @@ Dokumen ini menyajikan analisis menyeluruh terhadap alur bisnis (*business flow*
 1. [Gambaran Umum Sistem & Arsitektur](#1-gambaran-umum-sistem--arsitektur)
 2. [Hierarki Organisasi & Matriks Peran (Role-Based Access Control)](#2-hierarki-organisasi--matriks-peran-role-based-access-control)
 3. [Manajemen Master Data](#3-manajemen-master-data)
-4. [Alur Bisnis Nota Dinas & Disposisi Berjenjang](#4-alur-bisnis-nota-dinas--disposisi-berjenjang)
+4. [Alur Bisnis Nota Dinas (Tanpa Persetujuan Digital)](#4-alur-bisnis-nota-dinas-tanpa-persetujuan-digital)
 5. [Alur Pengarsipan Dokumen (Arsip)](#5-alur-pengarsipan-dokumen-arsip)
-6. [Alur Bisnis Surat Perintah Tugas (SPT)](#6-alur-bisnis-surat-perintah-tugas-spt)
+6. [Alur Bisnis Surat Perintah Tugas (SPT) Tanpa Paraf Digital](#6-alur-bisnis-surat-perintah-tugas-spt-tanpa-paraf-digital)
 7. [Alur Bisnis Surat Perintah Perjalanan Dinas (SPPD)](#7-alur-bisnis-surat-perintah-perjalanan-dinas-sppd)
 8. [Alur Bisnis SPJ & Rekapitulasi Biaya Riil](#8-alur-bisnis-spj--rekapitulasi-biaya-riil)
 9. [Alur Monitoring dan Evaluasi (Monev) Anggaran](#9-alur-monitoring-dan-evaluasi-monev-anggaran)
@@ -22,8 +22,8 @@ Dokumen ini menyajikan analisis menyeluruh terhadap alur bisnis (*business flow*
 ## 1. Gambaran Umum Sistem & Arsitektur
 
 Aplikasi dirancang untuk mengotomatisasi siklus hidup administrasi perjalanan dinas pada instansi pemerintah daerah (khususnya Bidang Anggaran / BPKAD), mulai dari:
-1. Pengajuan Nota Dinas Perjalanan Dinas beserta personil dan disposisi berjenjang.
-2. Penerbitan Surat Perintah Tugas (SPT) dan Surat Perintah Perjalanan Dinas (SPPD).
+1. Pembuatan Nota Dinas Perjalanan Dinas beserta personil, tanpa alur persetujuan/disposisi digital.
+2. Penerbitan Surat Perintah Tugas (SPT) dan Surat Perintah Perjalanan Dinas (SPPD) yang dicetak untuk ditandatangani secara manual.
 3. Pengelolaan Surat Pertanggungjawaban (SPJ) pengeluaran riil (tiket, transport, uang harian, dan penginapan).
 4. Monitoring dan evaluasi realisasi pagu anggaran per sub-kegiatan dan target Orang-Kegiatan (OK).
 5. Pencetakan dokumen resmi berbasis PDF berstandar dan ekspor berkas kuitansi SPJ format Excel multi-sheet.
@@ -46,10 +46,10 @@ $$\text{Dinas (Instansi)} \longrightarrow \text{Bidang} \longrightarrow \text{Su
 Terdapat 7 peran pengguna yang terdaftar di dalam sistem (`roles` table):
 1. **`super_admin`**: Administrator sistem level tertinggi dengan akses tak terbatas lintas dinas, bidang, dan konfigurasi master data.
 2. **`admin`**: Administrator level dinas/bidang yang mengelola master pegawai, akun pengguna di dinasnya, dan sub kegiatan.
-3. **`kepala_badan`** (Kaban): Pimpinan dinas/instansi tertinggi yang memberikan disposisi akhir dan tanda tangan utama dokumen dinas.
-4. **`sekretaris_badan`** (Sekban): Pejabat vertikal yang memverifikasi pengajuan dan memberikan catatan disposisi sebelum ke Kepala Badan.
-5. **`kepala_bidang`** (Kabid): Pimpinan tingkat bidang yang memverifikasi nota dinas staf dan sub-kegiatan di bawah bidangnya.
-6. **`kepala_sub_bidang`** (Kasubid): Pemimpin operasional sub-bidang / PPTK yang menginisiasi pengajuan nota dinas, mengelola uraian pagu, dan paraf awal.
+3. **`kepala_badan`** (Kaban): Pimpinan dinas/instansi tertinggi yang menandatangani dokumen dinas secara manual.
+4. **`sekretaris_badan`** (Sekban): Pejabat vertikal yang membubuhkan paraf basah pada dokumen cetak.
+5. **`kepala_bidang`** (Kabid): Pimpinan tingkat bidang yang membubuhkan paraf basah dan mengawasi sub-kegiatan di bawah bidangnya.
+6. **`kepala_sub_bidang`** (Kasubid): Pemimpin operasional sub-bidang / PPTK yang membuat nota dinas, mengelola uraian pagu, dan membubuhkan paraf basah.
 7. **`user`**: Staf umum pelaksana perjalanan dinas.
 
 ### 2.2. Row-Level Data Scoping Rules
@@ -67,14 +67,13 @@ Setiap query data operasional disaring secara dinamis berdasarkan atribut penggu
 | **Master Dinas & Bidang** | ✓ | - | - | - | - | - | - |
 | **Master Pegawai & Akun** | ✓ | ✓ | - | - | - | - | - |
 | **Master Sub-Kegiatan** | ✓ | ✓ | ✓ | - | - | - | ✓ |
-| **Nota Dinas (Buat/Edit)** | ✓ | ✓ | ✓ | ✓ | - | - | - |
-| **Approve Nota Kasubid** | ✓ | - | ✓ | - | - | - | - |
-| **Disposisi / Approve Kabid** | ✓ | - | - | ✓ | - | - | - |
-| **Disposisi / Approve Sekban** | ✓ | - | - | - | ✓ | - | - |
-| **Disposisi / Approve Kaban** | ✓ | - | - | - | - | ✓ | - |
-| **Arsip Dokumen** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
-| **SPT via Nota & Standalone** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| **Paraf Digital Berjenjang SPT** | ✓ | - | ✓ | ✓ | ✓ | ✓ | - |
+| **Nota Dinas (Buat)** | ✓ | - | ✓ | - | - | - | - |
+| **Nota Dinas (Edit/Hapus)** | ✓ | ✓ | ✓ | ✓ | - | - | - |
+| **Cetak PDF Nota Dinas (TTD basah)** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
+| **Arsip Dokumen & Cetak PDF** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
+| **SPT: Lihat & Cetak PDF** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **SPT: Buat (via Nota / Mandiri)** | ✓ | - | ✓ | - | - | - | - |
+| **Paraf & Tanda Tangan SPT** | manual | manual | manual | manual | manual | manual | manual |
 | **SPPD (Buat & Cetak PDF)** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **SPJ (Input Biaya & Export XLS)** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Monev & Uraian Anggaran** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | - |
@@ -104,9 +103,9 @@ Setiap query data operasional disaring secara dinamis berdasarkan atribut penggu
 - **Autentikasi Bertingkat**:
   - Pengguna umum wajib memilih `dinas` saat login agar akun terisolasi sesuai instansi kerjanya.
   - Khusus pengguna khusus `superadmin00`, seleksi dinas dilewati untuk kemudahan administrasi global.
-- **Tanda Tangan & Paraf Digital**:
-  - Admin/User dapat mengunggah file tanda tangan/paraf (`signature_path`) berupa berkas gambar (PNG/JPG maks 1 MB).
-  - Tanda tangan ini disimpan di `public/images/signatures/` dan digunakan secara otomatis pada paraf approval SPT digital dan cetak PDF.
+- **Tanda Tangan & Paraf**:
+  - Admin/User masih dapat mengunggah file tanda tangan/paraf (`signature_path`) sebagai data profil pada menu akun/pengguna.
+  - Berkas tanda tangan **tidak lagi dipakai** untuk persetujuan atau paraf digital pada Nota Dinas dan SPT. Seluruh tanda tangan dan paraf dilakukan secara manual (basah) pada dokumen PDF yang telah dicetak.
 
 ### 3.4. Master Sub-Kegiatan & PPTK
 - **Controller**: [SubKegiatanController](file:///d:/Rakha/app-spt/app/Http/Controllers/SubKegiatanController.php)
@@ -117,139 +116,131 @@ Setiap query data operasional disaring secara dinamis berdasarkan atribut penggu
 
 ---
 
-## 4. Alur Bisnis Nota Dinas & Disposisi Berjenjang
+## 4. Alur Bisnis Nota Dinas (Tanpa Persetujuan Digital)
 
-Nota Dinas merupakan pintu masuk utama pengajuan perjalanan dinas dalam alur reguler. Modul ini memiliki workflow persetujuan multi-level dengan catatan disposisi dinamis.
+Nota Dinas merupakan pintu masuk utama pengajuan perjalanan dinas dalam alur reguler. Sejak perubahan alur bisnis, **tidak ada lagi proses persetujuan, ACC, penolakan, revisi, atau disposisi digital** pada modul ini. Nota Dinas hanya mendukung pembuatan, penyimpanan/pengelolaan, pencetakan PDF, dan pengarsipan.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> DRAFT : Input Pengajuan
-    DRAFT --> DIAJUKAN_KASUBID : Kasubid Inisiasi
-    DIAJUKAN_KASUBID --> DIAJUKAN_KABID : Kasubid Approve
-    DIAJUKAN_KABID --> DIAJUKAN_SEKBAN : Kabid Approve + Disposisi
-    DIAJUKAN_KABID --> REVISI_KABID : Kabid Minta Revisi
-    DIAJUKAN_KABID --> DITOLAK : Kabid Tolak
-
-    REVISI_KABID --> DIAJUKAN_KABID : Kasubid Edit & Resubmit
-
-    DIAJUKAN_SEKBAN --> DIAJUKAN_KABAN : Sekban Approve + Disposisi
-    DIAJUKAN_SEKBAN --> REVISI_SEKBAN : Sekban Minta Revisi
-    DIAJUKAN_SEKBAN --> DITOLAK_SEKBAN : Sekban Tolak
-
-    REVISI_SEKBAN --> DIAJUKAN_SEKBAN : Perbaikan & Resubmit
-
-    DIAJUKAN_KABAN --> DISETUJUI_KABAN : Kaban Final Approve + Disposisi
-    DIAJUKAN_KABAN --> REVISI_KABAN : Kaban Minta Revisi
-    DIAJUKAN_KABAN --> DITOLAK_KABAN : Kaban Tolak
-
-    REVISI_KABAN --> DIAJUKAN_KABAN : Perbaikan & Resubmit
-    DISETUJUI_KABAN --> ARSIP : Masuk Daftar Terarsip
+    [*] --> TERSIMPAN : Buat & Simpan Nota Dinas
+    TERSIMPAN --> TERSIMPAN : Edit / Perbarui Data
+    TERSIMPAN --> TERSIMPAN : Cetak PDF (tanda tangan basah)
+    TERSIMPAN --> TERSIMPAN : Terbitkan SPT / SPPD Terhubung
+    TERSIMPAN --> ARSIP : Dokumen Masuk Daftar Arsip
+    TERSIMPAN --> [*] : Hapus oleh Role Berwenang
 ```
 
-### 4.1. Tahap Inisiasi (Store & Create)
-1. **Pembuat Nota** (Kasubid/Admin) memilih:
+### 4.1. Tahap Pembuatan (Create & Store)
+1. **Pembuat Nota** (Kasubid/Super Admin melalui menu) memilih:
    - Sub-Kegiatan (hanya yang dalam lingkup sub-bidang/bidang user).
    - Pejabat Penerima (`kepada_id`), Pengirim (`dari_id`), dan Perantara (`melalui_id`).
    - Perihal, Lokasi Tujuan, Jenis Perjalanan (`dalam_daerah` atau `luar_daerah`).
    - Rentang Tanggal (`tanggal_mulai` s.d. `tanggal_selesai`).
    - Personil yang ditugaskan (`pegawai_ids[]` disimpan ke tabel pivot `nota_dinas_pegawai`).
    - Lampiran, Sifat Surat, Asal Undangan, dan Uraian Kegiatan.
-2. Nota tersimpan langsung dengan status awal `diajukan_kabid` (atau `draft` jika diinisiasi oleh staf).
+2. Nota langsung tersimpan dengan status netral `tersimpan` (`NotaDinas::STATUS_TERSIMPAN`). Tidak ada status antrean persetujuan.
+3. Personil dapat ditambah/dikelola melalui halaman pratinjau selama nota masih dalam pengelolaan pembuatnya.
 
-### 4.2. Tahap Verifikasi & Disposisi Kabid
-- **Aksi Persetujuan (`approveKabid`)**: Kabid memeriksa substansi perjalanan dinas, menambahkan Catatan Disposisi Kabid (`disposisi_kabid`), sistem mencatat `tanggal_disposisi_kabid = now()` dan memindahkan status ke `diajukan_sekban`.
-- **Aksi Revisi (`revisiKabid`)**: Kabid mengisi catatan perbaikan minimal 5 karakter (`revisi`). Status berubah menjadi `revisi_kabid`. Pembuat nota dapat memperbarui data nota dinas yang otomatis mereset status kembali ke `diajukan_kabid`.
-- **Aksi Penolakan (`rejectKabid`)**: Status nota dinas berubah menjadi `ditolak`.
+### 4.2. Tahap Pengelolaan (Edit & Hapus)
+- **Edit (`update`)**: Nota dapat diperbarui oleh pembuat dan role berwenang (`super_admin`, `admin`, `kepala_bidang`, serta `kepala_sub_bidang` pada sub-bidangnya). Setiap penyimpanan mengembalikan status ke `tersimpan` dan mengosongkan kolom `revisi` lama.
+- **Hapus (`destroy`)**: Hanya tersedia untuk role yang sama dengan hak edit di atas. Relasi personil dilepas sebelum data nota dihapus.
+- Tidak ada pembatasan “hanya boleh diedit saat status tertentu”; nota yang sudah tercetak maupun sudah memiliki SPT/SPPD tetap dapat dikelola sesuai hak akses.
 
-### 4.3. Tahap Verifikasi & Disposisi Sekretaris Badan (Sekban)
-- **Aksi Persetujuan (`approveSekban`)**: Sekban memberikan Catatan Disposisi Sekban (`disposisi_sekban`), sistem mencatat `tanggal_disposisi_sekban = now()` dan memindahkan status ke `diajukan_kaban`.
-- **Aksi Revisi (`revisiSekban`)**: Status menjadi `revisi_sekban` disertai pesan perbaikan.
-- **Aksi Penolakan (`rejectSekban`)**: Status menjadi `ditolak_sekban`.
+### 4.3. Tahap Cetak PDF & Tanda Tangan Manual
+- **Preview Halaman** (`/nota-dinas/{nota}/preview`): Menampilkan ringkasan nota, grouping daftar personil berdasarkan jabatan, serta tombol **Cetak PDF**. Tidak ada panel persetujuan atau riwayat disposisi.
+- **Cetak PDF Resmi** (`/nota-dinas/{nota}/cetak`): Menghasilkan lembar PDF format A4 Portrait berisi format surat dinas resmi dan daftar personil.
+- Di bagian bawah PDF terdapat **tiga kotak disposisi kosong** yang disediakan untuk tanda tangan/paraf basah:
+  1. `KEPALA BIDANG PAD.`
+  2. `SEKRETARIS BPKAD.`
+  3. `KEPALA BPKAD.`
+- Kotak tersebut **tidak diisi otomatis** dari database. Teks disposisi, status persetujuan, maupun tanda tangan digital tidak dicetak.
 
-### 4.4. Tahap Persetujuan Akhir Kepala Badan (Kaban)
-- **Aksi Persetujuan Final (`approveKaban`)**: Kaban memberikan instruksi disposisi final (`disposisi_kaban`), mencatat `tanggal_disposisi_kaban = now()`, dan mengubah status menjadi `disetujui_kaban`.
-- Dokumen dengan status ini terkunci dari edit/hapus dan secara otomatis memenuhi syarat untuk penerbitan SPT, SPPD, serta masuk ke modul **Arsip**.
+### 4.4. Hubungan dengan SPT, SPPD, dan Arsip
+- Nota Dinas dapat langsung dijadikan dasar pembuatan **SPT terhubung** tanpa menunggu persetujuan siapa pun.
+- Nota Dinas juga dapat dijadikan dasar pembuatan **SPPD terhubung**.
+- Semua Nota Dinas yang tersimpan otomatis tampil pada modul **Arsip** sesuai cakupan data pengguna.
 
-### 4.5. Cetak & Pratinjau Nota Dinas
-- **Preview Halaman** (`/nota-dinas/{nota}/preview`): Menampilkan ringkasan nota, grouping daftar personil berdasarkan jabatan, serta timeline lengkap disposisi Kabid, Sekban, dan Kaban.
-- **Cetak PDF Resmi** (`/nota-dinas/{nota}/cetak`): Menghasilkan lembar fisik PDF format A4 Portrait berisi format surat dinas resmi, daftar personil, dan kolom disposisi bertingkat.
+### 4.5. Kompatibilitas Data Historis
+- Konstanta status lama (mis. `diajukan_kabid`, `disetujui_kaban`) dan kolom disposisi lama **tetap dipertahankan** di database agar data historis tidak rusak.
+- Nilai lama tersebut hanya dibaca sebagai arsip; aplikasi tidak lagi menampilkan tombol maupun alur approval untuknya.
 
 ---
 
 ## 5. Alur Pengarsipan Dokumen (Arsip)
 
-Modul Arsip (`/arsip`) bertindak sebagai pusat repositori dan *action hub* untuk dokumen nota dinas yang telah disetujui.
+Modul Arsip (`/arsip`) bertindak sebagai pusat repositori dan *action hub* untuk dokumen Nota Dinas dan SPT.
 
-### 5.1. Kriteria Dokumen Masuk Arsip
-Query filter arsip hanya mengambil Nota Dinas dengan status:
-- `disetujui_kaban` (Persetujuan penuh level dinas)
-- `disetujui_kabid` (Untuk instansi/bidang tertentu yang otoritas akhirnya di tingkat bidang)
+### 5.1. Cakupan Dokumen pada Arsip
+Arsip **tidak lagi memfilter berdasarkan status persetujuan**. Seluruh Nota Dinas dan SPT yang tersimpan ditampilkan, dengan pembatasan cakupan data sesuai peran pengguna:
+- `kepala_sub_bidang`: hanya data pada `sub_bidang_id` miliknya (jika belum dipetakan, hasil kosong).
+- `kepala_bidang`, `admin`, `user`: hanya data pada `bidang_id` miliknya.
+- `kepala_badan`, `sekretaris_badan`, `super_admin`: dapat melihat data lintas unit sesuai aturan masing-masing.
 
 ### 5.2. Aksi Cepat (Quick Actions) dari Arsip
-Dari satu baris nota dinas terarsip, pengguna berwenang dapat langsung:
-1. **Mencetak Nota Dinas PDF** yang telah disetujui.
+Dari satu baris dokumen terarsip, pengguna berwenang dapat langsung:
+1. **Mencetak Nota Dinas PDF** untuk ditandatangani manual.
 2. **Membuat SPT Terhubung**: Membuka modal input Nomor SPT dan Jenis Anggaran (DPA/DPPA) yang langsung terikat dengan nota dinas tersebut.
-3. **Mencetak SPT PDF**: Mengunduh PDF SPT yang telah terisi data personil dan jadwal.
+3. **Mencetak SPT PDF**: Mengunduh PDF SPT yang telah terisi data personil dan jadwal, dengan kolom paraf kosong untuk diisi manual.
 4. **Membuat SPPD Terhubung**: Membuka form SPPD yang otomatis mewarisi parameter nota dinas.
 5. **Mencetak SPPD PDF**: Mengunduh berkas fisik SPPD resmi.
+6. **Mencetak SPT Mandiri**: Mengunduh PDF SPT standalone beserta kolom paraf manual.
+7. **Menghapus SPT Mandiri** sesuai hak akses.
 
 ---
 
-## 6. Alur Bisnis Surat Perintah Tugas (SPT)
+## 6. Alur Bisnis Surat Perintah Tugas (SPT) Tanpa Paraf Digital
 
-Aplikasi menyediakan **Dua Jalur Independen** dalam pengelolaan SPT:
+Aplikasi menyediakan **dua jalur independen** dalam pengelolaan SPT. Keduanya berakhir pada dokumen berstatus `tersimpan` yang siap dicetak dan ditandatangani secara manual.
 
 ```mermaid
 flowchart TD
     subgraph Jalur_1["Jalur 1: Integrasi via Nota Dinas"]
-        A[Nota Dinas Di-ACC] --> B[Input Nomor SPT & Jenis Anggaran di Arsip]
-        B --> C[SPT Terbit Terhubung dengan Nota Dinas]
-        C --> D[Cetak PDF SPT via Nota Dinas]
+        A[Nota Dinas Dibuat & Tersimpan] --> B[Input Nomor SPT & Jenis Anggaran di Arsip]
+        B --> C[SPT Tersimpan Terhubung dengan Nota Dinas]
+        C --> D[Cetak PDF SPT]
     end
 
     subgraph Jalur_2["Jalur 2: Standalone / SPT Mandiri"]
-        E[Form Buat SPT Mandiri] --> F[Pilih Pegawai & Sub Kegiatan Mandiri]
-        F --> G[Status: Draft / Diajukan Kabid]
-        G --> H[Kasubid Approve & Paraf Digital]
-        H --> I[Kabid Approve & Paraf Digital]
-        I --> J[Sekban Approve & Paraf Digital]
-        J --> K[Kaban Approve & Tanda Tangan Utama]
-        K --> L[Status: Disetujui Kaban]
-        L --> M[Cetak PDF Standalone dengan 4 Kolom Paraf/TTD]
+        E[Form Buat SPT Mandiri] --> F[Pilih Pegawai & Sub Kegiatan]
+        F --> G[SPT Tersimpan]
+        G --> H[Cetak PDF Standalone]
     end
 
-    C --> N[Lanjut ke Pembuatan SPJ]
-    L --> N
+    D --> I[Paraf & Tanda Tangan Manual]
+    H --> I
+    I --> J[Lanjut ke Pembuatan SPPD / SPJ]
 ```
 
 ### 6.1. Jalur 1: SPT via Nota Dinas (Alur Standar)
 - **Controller**: [SPTController@store](file:///d:/Rakha/app-spt/app/Http/Controllers/SPTController.php#L32)
 - **Mekanisme**:
   - Menggunakan metode `Spt::updateOrCreate(['nota_dinas_id' => $nota_id])`.
+  - Nota Dinas yang dapat dipilih adalah **semua nota yang tersimpan** sesuai cakupan data pengguna — tidak ada filter status persetujuan.
   - Data penugasan (lokasi, tanggal mulai/selesai, uraian tugas, personil) mengacu langsung secara dinamis ke relasi `notaDinas`.
+  - SPT disimpan dengan `status = tersimpan` (`Spt::STATUS_TERSIMPAN`).
   - Dokumen dicetak melalui rute `/spt/cetak/{id}`.
 
-### 6.2. Jalur 2: SPT Mandiri (Standalone) dengan Paraf Digital Berjenjang
-Fitur ini disediakan jika instansi membutuhkan penerbitan SPT cepat tanpa membuat nota dinas lengkap terlebih dahulu.
+### 6.2. Jalur 2: SPT Mandiri (Standalone)
+Fitur ini disediakan untuk penerbitan SPT cepat tanpa membuat nota dinas lengkap terlebih dahulu.
 
 - **Pembuatan SPT Mandiri (`storeMandiri`)**:
   - Input: Nomor SPT, Jenis Anggaran (DPA/DPPA), Tahun Anggaran, Tanggal Mulai & Selesai, Lokasi, Kegiatan, Sub-Kegiatan, dan daftar `pegawai_ids[]`.
-  - Disimpan ke tabel `spts` dengan `nota_dinas_id = null`, dan pegawai disimpan ke tabel pivot `spt_pegawai`.
-- **Workflow Paraf Digital Bertingkat**:
-  1. **Kasubid Approval (`approveKasubid`)**:
-     - Memvalidasi role pengguna.
-     - Mengambil tanda tangan digital user (`signature_path`).
-     - Menyimpan `kasubid_id`, `kasubid_approved_at = now()`, dan `kasubid_paraf`. Status beralih ke `diajukan_kabid`.
-  2. **Kabid Approval (`approveKabid`)**:
-     - Menyimpan `kabid_id`, `kabid_approved_at = now()`, dan `kabid_paraf`. Status beralih ke `diajukan_sekban`.
-  3. **Sekban Approval (`approveSekban`)**:
-     - Menyimpan `sekban_id`, `sekban_approved_at = now()`, dan `sekban_paraf`. Status beralih ke `diajukan_kaban`.
-  4. **Kaban Approval (`approveKaban`)**:
-     - Sebagai penandatangan utama, Kaban menyetujui dokumen.
-     - Menyimpan `kaban_id`, `kaban_approved_at = now()`, `kaban_paraf`, sekaligus memastikan seluruh jejak paraf di bawahnya terkunci.
-     - Status berubah menjadi `disetujui_kaban`.
-- **Cetak PDF Standalone (`cetakSptMandiri`)**:
-  - Menghasilkan PDF format resmi yang memuat matriks paraf pengesahan lengkap (Kasubid, Kabid, Sekban) di sisi kiri/tengah dan tanda tangan utama Kepala Badan di sisi kanan.
+  - Disimpan ke tabel `spts` dengan `nota_dinas_id = null` (kecuali memilih nota referensi), `status = tersimpan`, dan pegawai disimpan ke tabel pivot `spt_pegawai`.
+- **Tidak ada workflow paraf digital**:
+  - Tidak ada lagi aksi Paraf Kasubid, Paraf Kabid, Paraf Sekban, maupun ACC Kaban.
+  - Tidak ada perubahan status berjenjang (`diajukan_kabid` → `diajukan_sekban` → `diajukan_kaban` → `disetujui_kaban`) pada alur baru.
+  - Kolom `_approved_at`, `_paraf`, dan relasi pejabat lama tetap ada di database untuk kompatibilitas data historis, tetapi tidak diisi maupun ditampilkan pada alur baru.
+
+### 6.3. Cetak PDF SPT & Paraf Manual
+- **SPT via Nota (`cetakSpt`)** dan **SPT Mandiri (`cetakSptMandiri`)** menghasilkan PDF resmi A4.
+- Pada bagian **Paraf Hirarki** tetap ditampilkan baris **Sekretaris**, **Kabid**, dan **Kasubid**, namun seluruh kolom paraf **dibiarkan kosong** dengan tinggi yang cukup untuk paraf basah.
+- Tanda tangan utama Kepala Badan pada bagian bawah dokumen juga dilakukan secara manual setelah PDF dicetak.
+- Tidak ada gambar tanda tangan digital yang disisipkan ke dalam PDF.
+
+### 6.4. Pengelolaan SPT
+- **Daftar SPT** (`/spt`) menampilkan seluruh SPT sesuai cakupan data pengguna tanpa kolom “Status Paraf”.
+- Aksi yang tersedia: **Cetak SPT** dan **Hapus** (sesuai hak akses).
+- **Nomor SPT** masih dapat diperbarui melalui `updateNomor`, dan nomor riil tetap menjadi syarat akses modul SPJ.
 
 ---
 
@@ -374,39 +365,20 @@ Diagram berikut merangkum perjalanan data secara menyeluruh dari login hingga pe
 sequenceDiagram
     autonumber
     actor Staf as Pembuat / Kasubid
-    actor Kabid as Kepala Bidang
-    actor Sekban as Sekretaris Badan
-    actor Kaban as Kepala Badan
+    actor Pejabat as Pejabat (Kabid/Sekban/Kaban)
     actor Keuangan as Staf Keuangan / SPJ
 
-    Note over Staf, Kaban: 1. Alur Pengajuan & Disposisi Nota Dinas
+    Note over Staf, Pejabat: 1. Pembuatan Nota Dinas (tanpa persetujuan digital)
     Staf->>Staf: Buat Nota Dinas (Pilih Personil, Lokasi, Kegiatan)
-    Staf->>Kabid: Ajukan Nota Dinas (status: diajukan_kabid)
-    alt Kabid Minta Revisi
-        Kabid-->>Staf: revisiKabid (catatan perbaikan)
-        Staf->>Kabid: Update Nota & Submit ulang
-    else Kabid Setuju
-        Kabid->>Sekban: approveKabid + Disposisi Kabid
-    end
+    Staf->>Staf: Simpan Nota (status: tersimpan)
+    Staf->>Staf: Cetak PDF Nota Dinas
+    Staf->>Pejabat: Tanda tangan / paraf basah pada dokumen cetak
 
-    alt Sekban Minta Revisi
-        Sekban-->>Staf: revisiSekban
-        Staf->>Sekban: Submit ulang
-    else Sekban Setuju
-        Sekban->>Kaban: approveSekban + Disposisi Sekban
-    end
-
-    alt Kaban Tolak
-        Kaban-->>Staf: rejectKaban (Ditolak)
-    else Kaban Setuju
-        Kaban->>Kaban: approveKaban + Disposisi Kaban Final (status: disetujui_kaban)
-    end
-
-    Note over Staf, Keuangan: 2. Alur Penerbitan Dokumen (SPT & SPPD)
-    Kaban-->>Staf: Dokumen Masuk Arsip
+    Note over Staf, Keuangan: 2. Penerbitan Dokumen (SPT & SPPD)
     Staf->>Staf: Terbitkan SPT (Input No. SPT, DPA/DPPA)
     Staf->>Staf: Terbitkan SPPD (Alat Angkut, Rute)
-    Staf->>Staf: Cetak PDF Nota Dinas, SPT, dan SPPD
+    Staf->>Staf: Cetak PDF SPT & SPPD
+    Staf->>Pejabat: Paraf Hirarki (Sekretaris, Kabid, Kasubid) & TTD Kaban secara manual
 
     Note over Keuangan: 3. Pertanggungjawaban (SPJ) & Evaluasi (Monev)
     Keuangan->>Keuangan: Akses SPJ berdasarkan Nomor SPT

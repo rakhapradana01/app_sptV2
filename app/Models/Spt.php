@@ -10,6 +10,17 @@ class Spt extends Model
 {
     use HasFactory;
 
+    /**
+     * Status netral untuk SPT yang sudah disimpan.
+     * Tidak ada lagi proses persetujuan/paraf digital pada modul SPT.
+     */
+    const STATUS_TERSIMPAN = 'tersimpan';
+
+    /*
+     * Konstanta status lama tetap dipertahankan agar data historis
+     * (SPT yang dibuat sebelum penghapusan alur approval) tetap terbaca.
+     * Nilai-nilai ini tidak dipakai lagi pada alur baru.
+     */
     const STATUS_DRAFT = 'draft';
     const STATUS_DIAJUKAN_KABID = 'diajukan_kabid';
     const STATUS_DIAJUKAN_SEKBAN = 'diajukan_sekban';
@@ -54,30 +65,7 @@ class Spt extends Model
         'kaban_approved_at'    => 'datetime',
     ];
 
-    // =====================
-    // Approval Helpers
-    // =====================
-
-    public function isApprovedByKasubid(): bool
-    {
-        return !is_null($this->kasubid_approved_at);
-    }
-
-    public function isApprovedByKabid(): bool
-    {
-        return !is_null($this->kabid_approved_at);
-    }
-
-    public function isApprovedBySekban(): bool
-    {
-        return !is_null($this->sekban_approved_at);
-    }
-
-    public function isApprovedByKaban(): bool
-    {
-        return !is_null($this->kaban_approved_at);
-    }
-
+    // Relasi pejabat historis (tidak dipakai lagi pada alur baru).
     public function kasubid(): BelongsTo
     {
         return $this->belongsTo(User::class, 'kasubid_id');

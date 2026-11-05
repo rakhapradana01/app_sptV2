@@ -21,31 +21,21 @@
                 <div x-data="notaDinasForm()" class="space-y-6">
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        {{-- Yth --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Kepada (kepala badan) </label>
+                            <label class="block mb-2 text-sm font-medium">Yth (Kepala Badan)</label>
                             <select name="kepada_id" class="w-full border rounded-lg p-2">
                                 @foreach ($kepalaBadan as $pegawai)
-                                    <option value="{{ $pegawai->id }}">
+                                    <option value="{{ $pegawai->id }}" {{ old('kepada_id') == $pegawai->id ? 'selected' : '' }}>
                                         {{ $pegawai->nama }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
+                        {{-- Dari --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Melalui (kepala bidang)</label>
-                            <select name="melalui_id" class="w-full border rounded-lg p-2">
-                                @foreach ($kepalaBidang as $pegawai)
-                                    <option value="{{ $pegawai->id }}"
-                                        {{ $kepalaBidang->count() === 1 ? 'selected' : '' }}>
-                                        {{ $pegawai->nama }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-medium">Dari (kepala sub bidang)</label>
+                            <label class="block mb-2 text-sm font-medium">Dari</label>
                             @if ($userLogin->pegawai_id)
                                 {{-- User login sudah terhubung ke data pegawai --}}
                                 <input type="hidden" name="dari_id" value="{{ $userLogin->pegawai_id }}">
@@ -59,28 +49,39 @@
                                         ⚠️ Akun <strong>{{ $userLogin->name }}</strong> belum terhubung ke data pegawai.
                                     </p>
                                     <p class="text-yellow-600 text-xs mt-1">
-                                        Hubungi admin untuk menghubungkan akun Anda ke data pegawai agar bisa membuat Nota Dinas.
+                                        Hubungi admin untuk menghubungkan akun Anda ke data pegawai agar bisa membuat Nota
+                                        Dinas.
                                     </p>
                                 </div>
                             @endif
                         </div>
 
+                        {{-- Tembusan --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Sub Kegiatan</label>
-                            <select name="sub_kegiatan_id" :disabled="!selectedKasubid"
-                                class="w-full border rounded-lg p-2">
-                                <option value="">-- Pilih --</option>
-
-                                <template x-for="sub in subKegiatans" :key="sub.id">
-                                    <option :value="sub.id" x-text="sub.nomor_rekening + ' - ' + sub.nama_kegiatan">
+                            <label class="block mb-2 text-sm font-medium">Tembusan (Kepala Bidang)</label>
+                            <select name="melalui_id" class="w-full border rounded-lg p-2">
+                                @forelse ($kepalaBidang as $pegawai)
+                                    <option value="{{ $pegawai->id }}" {{ old('melalui_id', $kepalaBidang->first()->id ?? '') == $pegawai->id ? 'selected' : '' }}>
+                                        {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
                                     </option>
-                                </template>
+                                @empty
+                                    <option value="">-- Belum ada data kepala bidang --</option>
+                                @endforelse
                             </select>
                         </div>
 
+                        {{-- Tanggal --}}
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Tanggal</label>
+                            <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}"
+                                onclick="this.showPicker()"
+                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+
+                        {{-- Nomor --}}
                         <div class="lg:col-span-2">
                             <label class="block mb-2 text-sm font-medium">
-                                Nomor Nota Dinas
+                                Nomor
                             </label>
 
                             <div class="flex items-center border rounded-lg overflow-hidden bg-gray-50">
@@ -103,98 +104,119 @@
                                 Nomor urut akan diisi otomatis oleh sistem.
                             </p>
                         </div>
+
+                        {{-- Sifat --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Tanggal Nota</label>
-                            <input type="date" name="tanggal" onclick="this.showPicker()"
+                            <label class="block mb-2 text-sm font-medium">Sifat</label>
+                            <select name="sifat"
                                 class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                @foreach (['Biasa', 'Penting', 'Segera', 'Sangat Segera'] as $sifat)
+                                    <option value="{{ $sifat }}" {{ old('sifat') == $sifat ? 'selected' : '' }}>
+                                        {{ $sifat }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:col-span-2">
-                            {{-- Input Sifat --}}
-                            <div>
-                                <label class="block mb-2 text-sm font-medium">Sifat</label>
-                                <select name="sifat"
-                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    <option value="Biasa">Biasa</option>
-                                    <option value="Penting">Penting</option>
-                                    <option value="Segera">Segera</option>
-                                    <option value="Sangat Segera">Sangat Segera</option>
-                                </select>
-                            </div>
 
-                            {{-- Input Lampiran --}}
-                            <div>
-                                <label class="block mb-2 text-sm font-medium">Lampiran</label>
-                                <input type="text" name="lampiran" value="1 (satu) Berkas"
-                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="Contoh: 1 (satu) Berkas">
-                            </div>
+                        {{-- Lampiran --}}
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Lampiran</label>
+                            <input type="text" name="lampiran" value="{{ old('lampiran', '1 (satu) Berkas') }}"
+                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Contoh: 1 (satu) Berkas">
                         </div>
+
+                        {{-- Hal --}}
                         <div class="lg:col-span-2">
-                            <label class="block mb-2 text-sm font-medium">Perihal</label>
-                            <input type="text" name="perihal" value="Mohon persetujuan Pejalanan Dinas Dalam Rangka "
+                            <label class="block mb-2 text-sm font-medium">Hal</label>
+                            <input type="text" name="perihal"
+                                value="{{ old('perihal', 'Mohon persetujuan Perjalanan Dinas Dalam Rangka ') }}"
                                 class="w-full border rounded-lg p-2">
                         </div>
 
-                        <div class="lg:col-span-2">
+                        {{-- Sub Kegiatan --}}
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Sub Kegiatan</label>
+                            <select name="sub_kegiatan_id" :disabled="!selectedKasubid"
+                                class="w-full border rounded-lg p-2">
+                                <option value="">-- Pilih --</option>
+
+                                <template x-for="sub in subKegiatans" :key="sub.id">
+                                    <option :value="sub.id" x-text="sub.nomor_rekening + ' - ' + sub.nama_kegiatan">
+                                    </option>
+                                </template>
+                            </select>
+                        </div>
+
+                        {{-- Kegiatan --}}
+                        <div>
                             <label class="block mb-2 text-sm font-medium">Kegiatan</label>
-                            <input type="text" name="kegiatan" value="Dalam rangka melaksanakan  "
+                            <input type="text" name="kegiatan" value="{{ old('kegiatan', 'Dalam rangka melaksanakan ') }}"
                                 class="w-full border rounded-lg p-2">
                         </div>
 
+                        {{-- Undangan --}}
                         <div class="lg:col-span-2">
-                            <label class="block mb-2 text-sm font-medium">Undangan</label>
+                            <label class="block mb-2 text-sm font-medium">
+                                Konteks / Undangan
+                            </label>
 
-                            {{-- Toggle dengan/tanpa undangan --}}
                             <div class="flex items-center gap-4 mb-3">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="pakai_undangan" value="1"
-                                        x-model="pakaiUndangan"
+                                    <input type="radio" name="pakai_undangan" value="1" x-model="pakaiUndangan"
                                         class="accent-blue-600">
                                     <span class="text-sm font-medium">Dengan Undangan</span>
                                 </label>
+
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="pakai_undangan" value="0"
-                                        x-model="pakaiUndangan"
+                                    <input type="radio" name="pakai_undangan" value="0" x-model="pakaiUndangan"
                                         class="accent-blue-600">
                                     <span class="text-sm font-medium">Tanpa Undangan</span>
                                 </label>
                             </div>
 
-                            <div x-show="pakaiUndangan == '1'" x-transition>
-                                <input type="text" name="asal_undangan"
-                                    :value="pakaiUndangan == '1' ? undefined : ''"
-                                    value="Sehubungan dengan undangan dari "
-                                    class="w-full border rounded-lg p-2">
-                            </div>
-                            <input x-show="pakaiUndangan == '0'" type="hidden" name="asal_undangan" value="">
+                            <input type="text" name="asal_undangan" x-model="asalUndangan" :disabled="pakaiUndangan != '1'"
+                                placeholder="Sehubungan dengan undangan dari ..."
+                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+
+                            <p class="text-xs text-gray-500 mt-1" x-show="pakaiUndangan == '1'">
+                                Awali dengan kalimat "Sehubungan dengan".
+                            </p>
                         </div>
 
+                        {{-- Lokasi --}}
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tujuan / Lokasi</label>
-                            <input type="text" name="lokasi" class="w-full border rounded-lg p-2"
-                                placeholder="D.K.I Jakarta">
+                            <input type="text" name="lokasi" value="{{ old('lokasi') }}"
+                                class="w-full border rounded-lg p-2" placeholder="D.K.I Jakarta">
                         </div>
 
+                        {{-- Jenis Perjalanan --}}
                         <div>
                             <label class="block mb-2 text-sm font-medium">Jenis Perjalanan</label>
                             <select name="jenis_perjalanan" class="w-full border rounded-lg p-2">
-                                <option value="dalam_daerah">Dalam Daerah / Dalam Provinsi</option>
-                                <option value="luar_daerah">Luar Daerah / Luar Provinsi</option>
+                                <option value="dalam_daerah" {{ old('jenis_perjalanan') == 'dalam_daerah' ? 'selected' : '' }}>
+                                    Dalam Daerah / Dalam Provinsi
+                                </option>
+                                <option value="luar_daerah" {{ old('jenis_perjalanan') == 'luar_daerah' ? 'selected' : '' }}>
+                                    Luar Daerah / Luar Provinsi
+                                </option>
                             </select>
                         </div>
 
+                        {{-- Pegawai yang Dilibatkan --}}
                         <div class="lg:col-span-2" x-data="{
-                            pegawais: [],
-                            addPegawai(select) {
-                                let id = select.value;
-                                let nama = select.options[select.selectedIndex].text;
-                        
-                                if (id && !this.pegawais.find(p => p.id === id)) {
-                                    this.pegawais.push({ id: id, nama: nama });
-                                    select.value = '';
-                                }
-                            }
-                        }">
+                                            pegawais: [],
+                                            addPegawai(select) {
+                                                let id = select.value;
+                                                let nama = select.options[select.selectedIndex].text;
+
+                                                if (id && !this.pegawais.find(p => p.id === id)) {
+                                                    this.pegawais.push({ id: id, nama: nama });
+                                                    select.value = '';
+                                                }
+                                            }
+                                        }">
 
                             <label class="block mb-3 text-sm font-medium">
                                 Pegawai yang Dilibatkan
@@ -238,16 +260,17 @@
 
                         </div>
 
+                        {{-- Tanggal Mulai / Selesai --}}
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Mulai</label>
-                            <input type="date" name="tanggal_mulai" onclick="this.showPicker()"
-                                class="w-full border rounded-lg p-2">
+                            <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}"
+                                onclick="this.showPicker()" class="w-full border rounded-lg p-2">
                         </div>
 
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Selesai</label>
-                            <input type="date" name="tanggal_selesai" onclick="this.showPicker()"
-                                class="w-full border rounded-lg p-2">
+                            <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}"
+                                onclick="this.showPicker()" class="w-full border rounded-lg p-2">
                         </div>
                     </div>
 
@@ -260,6 +283,7 @@
                             Simpan
                         </button>
                     </div>
+                </div>
             </form>
 
         </x-common.component-card>
@@ -270,16 +294,25 @@
             return {
                 selectedKasubid: '{{ $userLogin->id }}',
                 subKegiatans: @json($subKegiatans),
-                pakaiUndangan: '1',
+
+                pakaiUndangan: '{{ old('asal_undangan') ? '1' : '0' }}',
+
+                asalUndangan: @json(
+                    old('asal_undangan', 'Sehubungan dengan ')
+                ),
+
                 pegawais: [],
+
                 addPegawai(select) {
                     let id = select.value;
                     let nama = select.options[select.selectedIndex].text;
+
                     if (id && !this.pegawais.find(p => p.id === id)) {
                         this.pegawais.push({ id: id, nama: nama });
                         select.value = '';
                     }
                 },
+
                 removePegawai(index) {
                     this.pegawais.splice(index, 1);
                 }

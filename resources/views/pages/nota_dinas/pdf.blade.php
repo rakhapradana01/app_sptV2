@@ -6,7 +6,7 @@
     <title>Nota Dinas</title>
     <style>
         @page {
-            margin: 0.5cm 1.5cm 1.5cm 1.5cm;
+            margin: 0.5cm 1.5cm 1cm 1.5cm;
         }
 
         .page-break {
@@ -15,8 +15,8 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10pt;
+            line-height: 1.2;
             margin: 0;
         }
 
@@ -25,7 +25,7 @@
         .header {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
         }
 
         .logo {
@@ -34,14 +34,14 @@
 
         .kop-text {
             text-align: center;
-            line-height: 1.4;
+            line-height: 1.25;
         }
 
         .garis {
             border-top: 3px solid black;
             border-bottom: 1px solid black;
-            margin-top: 8px;
-            margin-bottom: 20px;
+            margin-top: 4px;
+            margin-bottom: 8px;
         }
 
         /* JUDUL */
@@ -49,19 +49,20 @@
         .judul {
             text-align: center;
             font-weight: bold;
-            margin-top: 10px;
-            margin-bottom: 20px;
+            margin-top: 2px;
+            margin-bottom: 6px;
         }
 
         /* INFO SURAT */
 
         .table-info {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 4px;
         }
 
         .table-info td {
-            padding: 3px;
+            padding: 0 2px;
+            line-height: 1.05;
             vertical-align: top;
         }
 
@@ -69,44 +70,75 @@
 
         .isi p {
             text-align: justify;
-            line-height: 1.6;
-            text-indent: 40px;
+            line-height: 1.2;
+            text-indent: 30px;
+            margin: 2px 0;
+        }
+
+        .pegawai-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2px 0 5px;
+            font-size: 9.5pt;
+        }
+
+        .pegawai-table th,
+        .pegawai-table td {
+            border: 1px solid black;
+            padding: 2px 5px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .pegawai-table th {
+            background: #f2f2f2;
+            text-align: center;
+            font-weight: bold;
         }
 
         /* TTD */
 
         .ttd {
             width: 100%;
-            margin-top: 40px;
+            margin-top: 6px;
+            page-break-inside: avoid;
         }
 
-        /* DISPOSISI */
+        /* DISPOSISI (kotak kosong untuk tanda tangan basah) */
 
-        .disposisi {
-            margin-top: 40px;
+        .disposisi-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-top: 6px;
+            margin-bottom: 4px;
         }
 
         .disposisi-table {
             width: 100%;
             border-collapse: collapse;
+            page-break-inside: avoid;
         }
 
         .disposisi-table td {
             border: 1px solid black;
-            padding: 6px;
+            padding: 4px;
         }
 
-        .disposisi-table tr td {
-            padding: 1px;
+        .disposisi-header {
+            background: #f2f2f2;
+            text-align: center;
+            vertical-align: middle;
         }
 
-        .space-half {
-            height: 10px;
+        .disposisi-box {
+            height: 140px;
+            vertical-align: top;
         }
 
         .garis-tipis {
             border-top: 1px solid #555;
-            margin: 6px 0;
+            margin: 4px 0;
         }
     </style>
 
@@ -129,20 +161,34 @@
 
     <!-- INFO SURAT -->
 
+    @php
+        $konteks = trim((string) $nota->asal_undangan);
+        $konteks = preg_replace('/^sehubungan\s+dengan\s*/i', '', $konteks);
+        $konteks = rtrim($konteks, " .,");
+        if ($konteks === '') {
+            $konteks = $nota->perihal ?: 'pelaksanaan tugas';
+        }
+
+        $kegiatan = rtrim((string) $nota->kegiatan, " .");
+        $tanggalMulai = $nota->tanggal_mulai
+            ? \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y')
+            : '-';
+        $tanggalSelesai = $nota->tanggal_selesai
+            ? \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y')
+            : null;
+        $tanggalText = $tanggalSelesai ? "{$tanggalMulai} s.d. {$tanggalSelesai}" : $tanggalMulai;
+        $tahunAnggaran = \Carbon\Carbon::parse($nota->tanggal)->format('Y');
+        $tembusan = $nota->tembusan ?: ($nota->melalui->jabatan ?? '-');
+        $lokasiText = $nota->lokasi ? " di {$nota->lokasi}" : '';
+        $kegiatanText = $kegiatan !== '' ? ", yaitu {$kegiatan}" : '';
+    @endphp
+
     <table class="table-info">
 
         <tr>
-            <td width="120">Kepada</td>
+            <td width="100">Yth</td>
             <td width="10">:</td>
-            <td>
-
-                Yth. {{ $nota->kepada->jabatan ?? '-' }}
-
-                @if ($nota->melalui)
-                    <br>Melalui {{ $nota->melalui->jabatan }}
-                @endif
-
-            </td>
+            <td>{{ $nota->kepada->jabatan ?? '-' }}</td>
         </tr>
 
         <tr>
@@ -151,6 +197,11 @@
             <td>{{ $nota->dari->jabatan ?? '-' }}</td>
         </tr>
 
+        <tr>
+            <td>Tembusan</td>
+            <td>:</td>
+            <td>{{ $tembusan }}</td>
+        </tr>
 
         <tr>
             <td>Tanggal</td>
@@ -166,7 +217,7 @@
                 <span style="display:inline-block; min-width:80px;">
                     {{ $nota->nomor_urut }}
                 </span>
-                / BPKAD / {{ date('Y') }}
+                / BPKAD / {{ $tahunAnggaran }}
             </td>
         </tr>
 
@@ -196,60 +247,44 @@
     <div class="isi">
 
         <p>
-            {{ rtrim($nota->asal_undangan, '.') }}.
+            Sehubungan dengan {{ $konteks }}, bersama ini disampaikan hal-hal sebagai berikut.
         </p>
 
         <p>
-            @php
-                $grouped = $nota->pegawais->groupBy('jabatan')->map->count();
-                $pegawaiList = [];
-                foreach ($grouped as $jabatan => $jumlah) {
-                    $terbilangText = terbilang($jumlah);
-                    $romanNumerals = [
-                        'I',
-                        'II',
-                        'III',
-                        'IV',
-                        'V',
-                        'VI',
-                        'VII',
-                        'VIII',
-                        'IX',
-                        'X',
-                        'XI',
-                        'XII',
-                        'XIII',
-                        'XIV',
-                        'XV',
-                        'XVI',
-                        'XVII',
-                        'XVIII',
-                        'XIX',
-                        'XX'
-                    ];
-                    $titled = implode(' ', array_map(function ($word) use ($romanNumerals) {
-                        return in_array(strtoupper($word), $romanNumerals)
-                            ? strtoupper($word)
-                            : ucfirst(strtolower($word));
-                    }, explode(' ', $jabatan)));
-                    $pegawaiList[] = "$jumlah ($terbilangText) orang " . $titled;
+            Kegiatan dilaksanakan pada tanggal <b>{{ $tanggalText }}</b>{{ $lokasiText }}{{ $kegiatanText }}.
+        </p>
 
-                }
+        @if ($nota->pegawais->count())
+            <p>
+                Adapun pegawai yang ditugaskan adalah sebagai berikut:
+            </p>
 
-                if (count($pegawaiList) > 1) {
-                    $last = array_pop($pegawaiList);
-                    $pegawaiString = implode(', ', $pegawaiList) . ' dan ' . $last;
-                } else {
-                    $pegawaiString = reset($pegawaiList);
-                }
-            @endphp
-            Berkenaan hal tersebut, dengan hormat diusulkan <b>{{ $pegawaiString }}</b> untuk melaksanakan perjalanan
-            dinas keluar Daerah dalam {{ Str::lcfirst($nota->kegiatan) }}. mulai tanggal
-            <b>{{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}@if ($nota->tanggal_selesai)
-            s.d {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}@endif</b>, dengan
-            pembebanan biaya pada Sub Kegiatan <b>{{ $nota->subKegiatan->nomor_rekening }} -
-                {{ $nota->subKegiatan->nama_kegiatan ?? '-' }}</b> pada DPA Badan Pengelolaan Keuangan dan Aset Daerah
-            Provinsi Kalimantan Selatan Tahun Anggaran {{ \Carbon\Carbon::parse($nota->tanggal)->format('Y') }}.
+            <table class="pegawai-table">
+                <thead>
+                    <tr>
+                        <th width="55%">Nama</th>
+                        <th width="45%">Jabatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($nota->pegawais as $pegawai)
+                        <tr>
+                            <td>{{ $pegawai->nama }}</td>
+                            <td>{{ $pegawai->jabatan }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+
+        <p>
+            Perjalanan dinas dimaksud dibebankan pada
+            @if ($nota->subKegiatan)
+                Sub Kegiatan <b>{{ $nota->subKegiatan->nomor_rekening }} -
+                    {{ $nota->subKegiatan->nama_kegiatan }}</b> pada
+            @endif
+            DPA Badan Pengelolaan Keuangan dan Aset Daerah Provinsi Kalimantan Selatan Tahun Anggaran
+            {{ $tahunAnggaran }}.
         </p>
 
         <p>
@@ -270,7 +305,7 @@
 
                 {{ $nota->dari->jabatan ?? '' }}
 
-                <br><br><br><br>
+                <div style="height: 42px;"></div>
 
                 <b style="white-space: nowrap;">
                     {{ $nota->dari->nama ?? '' }}
@@ -290,185 +325,20 @@
 
     </table>
 
-    <div class="page-break"></div>
-    
-
-
-    <br>
+    <div class="disposisi-title">LEMBAR DISPOSISI</div>
 
     <table class="disposisi-table">
-
         <tr>
-            <td>
-                <b>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</b>
-            </td>
+            <td class="disposisi-header" width="33.33%"><b>KEPALA BIDANG PAD.</b></td>
+            <td class="disposisi-header" width="33.33%"><b>SEKRETARIS BPKAD.</b></td>
+            <td class="disposisi-header" width="33.34%"><b>KEPALA BPKAD.</b></td>
         </tr>
-
-        <tr class="space-half">
-            <td style="border:none"></td>
-        </tr>
-
         <tr>
-            <td style="height:120px; vertical-align:top; padding:6px;">
-
-                @if ($nota->status == \App\Models\NotaDinas::DISETUJUI_KABAN)
-
-                            @if ($nota->disposisi_kaban)
-                                <b style="text-decoration: underline;">Disposisi / Petunjuk Kepala Badan:</b>
-                                <p style="margin: 4px 0 8px 0;">
-                                    {!! nl2br(e($nota->disposisi_kaban)) !!}
-                                </p>
-                            @endif
-
-                            <b>Setuju {{ $nota->pegawais->count() }} Orang</b>
-
-                            <br>
-
-                            Dengan Nama / NIP:
-
-                            <br>
-
-                            @foreach ($nota->pegawais as $i => $pegawai)
-                                {{ $i + 1 }}. {{ $pegawai->nama }} / {{ $pegawai->nip }}<br>
-                            @endforeach
-
-                            <br>
-
-                            Tanggal Berangkat :
-                            {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
-
-                            <br>
-
-                            Tanggal Kembali :
-                            {{ \Carbon\Carbon::parse($nota->tanggal_selesai ?: $nota->tanggal_mulai)->translatedFormat('d F Y') }}
-
-                            <br>
-
-                            Lamanya :
-                            {{ $nota->tanggal_selesai
-                    ? \Carbon\Carbon::parse($nota->tanggal_mulai)->diffInDays(
-                        \Carbon\Carbon::parse($nota->tanggal_selesai)
-                    ) + 1
-                    : 1 }}
-                            Hari
-
-                @endif
-
-            </td>
+            <td class="disposisi-box"></td>
+            <td class="disposisi-box"></td>
+            <td class="disposisi-box"></td>
         </tr>
-
-        <tr>
-            <td style="padding:6px;">
-                Tanggal dan Jam Disposisi :
-                {{ \Carbon\Carbon::parse($nota->tanggal_disposisi_kaban ?: $nota->updated_at)->format('Y-m-d H:i:s') }}
-            </td>
-        </tr>
-
     </table>
-
-
-    <br>
-
-
-    {{-- =========================================================
-    DISPOSISI SEKRETARIS BADAN SETELAH PERSETUJUAN KABAN
-    ========================================================= --}}
-    @if ($nota->status == \App\Models\NotaDinas::DISETUJUI_KABAN)
-
-        <table class="disposisi-table">
-
-            <tr>
-                <td>
-                    <b>SEKRETARIS BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</b>
-                </td>
-            </tr>
-
-            <tr class="space-half">
-                <td style="border:none"></td>
-            </tr>
-
-            <tr>
-                <td style="height:120px; vertical-align:top; padding:6px;">
-
-                    <b>Disposisi Sekretaris Badan</b>
-
-                    <br><br>
-
-                    @if ($nota->disposisi_sekban)
-                        {!! nl2br(e($nota->disposisi_sekban)) !!}
-                    @else
-                        Berdasarkan persetujuan Kepala Badan, agar proses
-                        perjalanan dinas dapat ditindaklanjuti sesuai dengan
-                        ketentuan yang berlaku.
-                    @endif
-
-                </td>
-            </tr>
-
-            <tr>
-                <td style="padding:6px;">
-                    Tanggal dan Jam Disposisi :
-                    {{ \Carbon\Carbon::parse($nota->tanggal_disposisi_sekban ?: $nota->updated_at)->format('Y-m-d H:i:s') }}
-                </td>
-            </tr>
-
-        </table>
-
-    @endif
-
-    <br>
-    
-    <table class="disposisi-table">
-
-        <tr>
-            <td>
-                <b>{{ $nota->melalui->jabatan ?? 'SEKRETARIS BADAN' }}</b>
-            </td>
-        </tr>
-
-        <tr class="space-half">
-            <td style="border:none"></td>
-        </tr>
-
-        <tr>
-            <td style="height:120px; vertical-align:top; padding:6px;">
-
-                @if ($nota->disposisi_kabid)
-                    <b>Disposisi / Arahan:</b><br>
-                    {!! nl2br(e($nota->disposisi_kabid)) !!}
-                    <br><br>
-                @else
-                    <b>Mohon persetujuan Kaban</b>
-                @endif
-
-                @if ($nota->pegawais->count())
-
-                    <p style="margin:10px 0 5px 0;">
-                        Adapun pegawai yang diusulkan adalah sebagai berikut:
-                    </p>
-
-                    <ol style="margin-top:5px; padding-left:25px;">
-                        @foreach ($nota->pegawais as $pegawai)
-                            <li>
-                                {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
-                            </li>
-                        @endforeach
-                    </ol>
-
-                @endif
-
-            </td>
-        </tr>
-
-        <tr>
-            <td style="padding:6px;">
-                Tanggal dan Jam Disposisi :
-                {{ \Carbon\Carbon::parse($nota->tanggal_disposisi_kabid ?: $nota->updated_at)->format('Y-m-d H:i:s') }}
-            </td>
-        </tr>
-
-    </table>
-
 
 </body>
 

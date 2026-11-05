@@ -22,7 +22,6 @@
                                 <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nomor</th>
                                 <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Perihal</th>
                                 <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tujuan</th>
-                                <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                                 <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                             </tr>
                         </thead>
@@ -47,68 +46,6 @@
                                     <td class="px-5 py-4 sm:px-6">
                                         {{ $nota->lokasi }}
                                     </td>
-                                    <td class="px-5 py-4 sm:px-6">
-                                        @php
-                                            $statusConfig = match ($nota->status) {
-                                                'draft' => [
-                                                    'label' => 'Konsep',
-                                                    'class' => 'bg-slate-50 text-slate-600 border-slate-200',
-                                                ],
-                                                'diajukan_kabid' => [
-                                                    'label' => 'Menunggu Kabid',
-                                                    'class' => 'bg-blue-50 text-blue-600 border-blue-200',
-                                                ],
-                                                \App\Models\NotaDinas::DIAJUKAN_SEKBAN => [
-                                                    'label' => 'Menunggu Sekban',
-                                                    'class' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                                ],
-                                                \App\Models\NotaDinas::DIAJUKAN_KABAN => [
-                                                    'label' => 'Menunggu ACC Kaban',
-                                                    'class' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                                ],
-                                                \App\Models\NotaDinas::DISETUJUI_KABAN => [
-                                                    'label' => 'ACC Kaban',
-                                                    'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                                ],
-                                                \App\Models\NotaDinas::DISETUJUI_KABID => [
-                                                    'label' => 'Disetujui Kabid',
-                                                    'class' => 'bg-teal-50 text-teal-700 border-teal-200',
-                                                ],
-                                                \App\Models\NotaDinas::REVISI_KABID => [
-                                                    'label' => 'Revisi Kabid',
-                                                    'class' => 'bg-orange-50 text-orange-600 border-orange-200',
-                                                ],
-                                                \App\Models\NotaDinas::REVISI_SEKBAN => [
-                                                    'label' => 'Revisi Sekban',
-                                                    'class' => 'bg-orange-50 text-orange-600 border-orange-200',
-                                                ],
-                                                \App\Models\NotaDinas::REVISI_KABAN => [
-                                                    'label' => 'Revisi Kaban',
-                                                    'class' => 'bg-orange-50 text-orange-600 border-orange-200',
-                                                ],
-                                                'ditolak', 'ditolak_kabid', \App\Models\NotaDinas::DITOLAK_SEKBAN, \App\Models\NotaDinas::DITOLAK_KABAN => [
-                                                    'label' => 'Ditolak',
-                                                    'class' => 'bg-rose-50 text-rose-600 border-rose-200',
-                                                ],
-                                                default => [
-                                                    'label' => $nota->status,
-                                                    'class' => 'bg-gray-50 text-gray-600 border-gray-200',
-                                                ],
-                                            };
-                                         @endphp
-
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider {{ $statusConfig['class'] }}">
-                                            {{ $statusConfig['label'] }}
-                                        </span>
-
-                                        @if ($nota->disposisi_kaban || $nota->disposisi_sekban || $nota->disposisi_kabid)
-                                            <div class="mt-1 text-[11px] text-gray-500 italic max-w-[180px] truncate"
-                                                title="Catatan Disposisi: {{ $nota->disposisi_kaban ?: ($nota->disposisi_sekban ?: $nota->disposisi_kabid) }}">
-                                                💬 "{{ Str::limit($nota->disposisi_kaban ?: ($nota->disposisi_sekban ?: $nota->disposisi_kabid), 26) }}"
-                                            </div>
-                                        @endif
-                                    </td>
                                     <td class="px-5 py-4 sm:px-6 text-center">
                                         <div x-data="{ open: false }" class="relative inline-block text-left">
                                             <button @click="open = !open" @click.away="open = false"
@@ -128,86 +65,46 @@
                                                 <div class="py-1 flex flex-col text-left">
                                                     @php
                                                         $role = auth()->user()->role->name;
-                                                        $status = $nota->status;
-                                                        $hasAction = false;
                                                     @endphp
 
-                                                    {{-- Aksi Verifikasi Kabid --}}
-                                                    @if (in_array($role, ['kepala_bidang', 'super_admin']) && $status === 'diajukan_kabid')
-                                                        @php $hasAction = true; @endphp
-                                                        <a href="{{ route('nota-dinas.preview', $nota->id) }}"
-                                                            class="flex items-center px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                            Verifikasi Kabid
+                                                    <a href="{{ route('nota-dinas.preview', $nota->id) }}"
+                                                        class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                                        Lihat Dokumen
+                                                    </a>
+
+                                                    <a href="{{ route('nota.cetakNotaDinas', $nota->id) }}" target="_blank"
+                                                        class="flex items-center px-4 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                                        Cetak PDF
+                                                    </a>
+
+                                                    @if (!$nota->spt)
+                                                        <a href="{{ route('spt.create', ['nota_id' => $nota->id]) }}"
+                                                            class="flex items-center px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                            Buat SPT
+                                                        </a>
+                                                    @elseif (!$nota->sppd)
+                                                        <a href="{{ route('sppd.create', ['spt_id' => $nota->spt->id]) }}"
+                                                            class="flex items-center px-4 py-2 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                                            Buat SPPD
                                                         </a>
                                                     @endif
 
-                                                    {{-- Aksi Verifikasi Sekretaris Badan --}}
-                                                    @if (in_array($role, ['sekretaris_badan', 'super_admin']) && $status === \App\Models\NotaDinas::DIAJUKAN_SEKBAN)
-                                                        @php $hasAction = true; @endphp
-                                                        <a href="{{ route('nota-dinas.preview', $nota->id) }}"
-                                                            class="flex items-center px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                            Verifikasi Sekban
-                                                        </a>
-                                                    @endif
-
-                                                    {{-- Aksi Persetujuan Kaban --}}
-                                                    @if (in_array($role, ['kepala_badan', 'super_admin']) && $status === \App\Models\NotaDinas::DIAJUKAN_KABAN)
-                                                        @php $hasAction = true; @endphp
-                                                        <a href="{{ route('nota-dinas.preview', $nota->id) }}"
-                                                            class="flex items-center px-4 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
-                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                            ACC Kaban
-                                                        </a>
-                                                    @endif
-                                                    {{-- Jika sudah di-ACC Kaban, dokumen resmi terarsip dan dapat dicetak melalui menu Arsip --}}
-                                                    @if ($status === \App\Models\NotaDinas::DISETUJUI_KABAN)
-                                                        @php $hasAction = true; @endphp
-                                                        <a href="{{ route('arsip') }}"
-                                                            class="flex items-center px-4 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
-                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                                                            Buka di Arsip (Cetak)
+                                                    @if (in_array($role, ['kepala_sub_bidang', 'super_admin', 'admin', 'kepala_bidang']))
+                                                        <a href="{{ route('nota-dinas.edit', $nota->id) }}"
+                                                            class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                            Edit Data
                                                         </a>
 
-                                                        @if (!$nota->spt)
-                                                            <a href="{{ route('spt.create', ['nota_id' => $nota->id]) }}"
-                                                                class="flex items-center px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                                                Buat SPT
-                                                            </a>
-                                                        @elseif (!$nota->sppd)
-                                                            <a href="{{ route('sppd.create', ['spt_id' => $nota->spt->id]) }}"
-                                                                class="flex items-center px-4 py-2 text-sm text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20">
-                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                                                Buat SPPD
-                                                            </a>
-                                                        @endif
-                                                    @endif
-
-                                                    {{-- Edit & Hapus jika belum final --}}
-                                                    @if (in_array($role, ['kepala_sub_bidang', 'super_admin']))
-                                                        @if (in_array($status, ['draft', 'diajukan_kabid', 'revisi_kabid', \App\Models\NotaDinas::REVISI_SEKBAN, 'revisi_kaban', \App\Models\NotaDinas::DIAJUKAN_SEKBAN, \App\Models\NotaDinas::DIAJUKAN_KABAN]))
-                                                            @php $hasAction = true; @endphp
-                                                            <a href="{{ route('nota-dinas.edit', $nota->id) }}"
-                                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                                Edit Data
-                                                            </a>
-
-                                                            <form action="{{ route('nota-dinas.destroy', $nota->id) }}"
-                                                                method="POST" onsubmit="return confirm('Hapus data ini?')">
-                                                                @csrf @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">Hapus</button>
-                                                            </form>
-                                                        @endif
-                                                    @endif
-
-                                                    @if (!$hasAction)
-                                                        <div
-                                                            class="px-4 py-3 text-xs text-gray-500 italic text-center bg-gray-50 dark:bg-gray-900/50">
-                                                            Tidak ada aksi
-                                                        </div>
+                                                        <form action="{{ route('nota-dinas.destroy', $nota->id) }}"
+                                                            method="POST" onsubmit="return confirm('Hapus data ini?')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit"
+                                                                class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">Hapus</button>
+                                                        </form>
                                                     @endif
                                                 </div>
                                             </div>
@@ -215,7 +112,7 @@
                                     </td>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                                    <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
                                         Belum ada data nota dinas.
                                     </td>
                                 </tr>

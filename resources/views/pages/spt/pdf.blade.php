@@ -235,69 +235,21 @@
 
         <div class="paraf-container">
             <div class="paraf-box">
-                @php
-                    $spt = $nota->spt ?? null;
-                @endphp
                 <table class="paraf-table">
                     <tr>
                         <td colspan="2" class="text-center font-bold">Paraf Hirarki</td>
                     </tr>
                     <tr>
                         <td>Sekretaris</td>
-                        <td style="text-align: center; vertical-align: middle;">
-                            @if ($spt)
-                                @php
-                                    $sekbanImg = $spt->sekban_paraf;
-                                    if ((!$sekbanImg || !file_exists(public_path($sekbanImg))) && ($spt->isApprovedBySekban() || in_array($spt->status, ['diajukan_kaban', 'disetujui_kaban']))) {
-                                        // Ambil dari user spesifik yang terhubung ke SPT ini via sekban_id
-                                        $sekbanImg = ($spt->sekban?->signature_path && file_exists(public_path($spt->sekban->signature_path)))
-                                            ? $spt->sekban->signature_path
-                                            : (file_exists(public_path('images/signatures/sekban.jpeg')) ? 'images/signatures/sekban.jpeg' : null);
-                                    }
-                                @endphp
-                                @if (($spt->isApprovedBySekban() || in_array($spt->status, ['diajukan_kaban', 'disetujui_kaban'])) && $sekbanImg && file_exists(public_path($sekbanImg)))
-                                    <img src="{{ 'file://' . str_replace('\\', '/', public_path($sekbanImg)) }}" style="max-height: 20px; max-width: 50px; display: block; margin: 0 auto;">
-                                @endif
-                            @endif
-                        </td>
+                        <td style="text-align: center; vertical-align: middle; height: 28px;">&nbsp;</td>
                     </tr>
                     <tr>
                         <td>Kabid</td>
-                        <td style="text-align: center; vertical-align: middle;">
-                            @if ($spt)
-                                @php
-                                    $kabidImg = $spt->kabid_paraf;
-                                    if ((!$kabidImg || !file_exists(public_path($kabidImg))) && ($spt->isApprovedByKabid() || in_array($spt->status, ['diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban']))) {
-                                        // Ambil dari user spesifik yang terhubung ke SPT ini via kabid_id
-                                        $kabidImg = ($spt->kabid?->signature_path && file_exists(public_path($spt->kabid->signature_path)))
-                                            ? $spt->kabid->signature_path
-                                            : (file_exists(public_path('images/signatures/kabid-pad.jpeg')) ? 'images/signatures/kabid-pad.jpeg' : null);
-                                    }
-                                @endphp
-                                @if (($spt->isApprovedByKabid() || in_array($spt->status, ['diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban'])) && $kabidImg && file_exists(public_path($kabidImg)))
-                                    <img src="{{ 'file://' . str_replace('\\', '/', public_path($kabidImg)) }}" style="max-height: 20px; max-width: 50px; display: block; margin: 0 auto;">
-                                @endif
-                            @endif
-                        </td>
+                        <td style="text-align: center; vertical-align: middle; height: 28px;">&nbsp;</td>
                     </tr>
                     <tr>
                         <td>Kasubid</td>
-                        <td style="text-align: center; vertical-align: middle;">
-                            @if ($spt)
-                                @php
-                                    $kasubidImg = $spt->kasubid_paraf;
-                                    if ((!$kasubidImg || !file_exists(public_path($kasubidImg))) && ($spt->isApprovedByKasubid() || in_array($spt->status, ['diajukan_kabid', 'diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban']))) {
-                                        // Ambil dari user spesifik yang terhubung ke SPT ini via kasubid_id
-                                        $kasubidImg = ($spt->kasubid?->signature_path && file_exists(public_path($spt->kasubid->signature_path)))
-                                            ? $spt->kasubid->signature_path
-                                            : (file_exists(public_path('images/signatures/kasubid-I-pad.jpeg')) ? 'images/signatures/kasubid-I-pad.jpeg' : null);
-                                    }
-                                @endphp
-                                @if (($spt->isApprovedByKasubid() || in_array($spt->status, ['diajukan_kabid', 'diajukan_sekban', 'diajukan_kaban', 'disetujui_kaban'])) && $kasubidImg && file_exists(public_path($kasubidImg)))
-                                    <img src="{{ 'file://' . str_replace('\\', '/', public_path($kasubidImg)) }}" style="max-height: 20px; max-width: 50px; display: block; margin: 0 auto;">
-                                @endif
-                            @endif
-                        </td>
+                        <td style="text-align: center; vertical-align: middle; height: 28px;">&nbsp;</td>
                     </tr>
                 </table>
             </div>

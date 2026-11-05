@@ -23,35 +23,28 @@
                 <div class="space-y-6">
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        {{-- Yth --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Kepada (kepala badan)</label>
+                            <label class="block mb-2 text-sm font-medium">Yth (Kepala Badan)</label>
                             <select name="kepada_id" class="w-full border rounded-lg p-2">
                                 @foreach ($kepalaBadan as $pegawai)
-                                    <option value="{{ $pegawai->id }}" {{ $nota->kepada_id == $pegawai->id ? 'selected' : '' }}>
+                                    <option value="{{ $pegawai->id }}" {{ old('kepada_id', $nota->kepada_id) == $pegawai->id ? 'selected' : '' }}>
                                         {{ $pegawai->nama }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
+                        {{-- Dari --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Melalui (kepala bidang)</label>
-                            <select name="melalui_id" class="w-full border rounded-lg p-2">
-                                <option value="">-- Tidak Ada --</option>
-                                @foreach ($kepalaBidang as $pegawai)
-                                    <option value="{{ $pegawai->id }}" {{ $nota->melalui_id == $pegawai->id ? 'selected' : '' }}>
-                                        {{ $pegawai->nama }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-medium">Dari (kepala sub bidang)</label>
-                            @if ($userLogin->pegawai_id)
-                                <input type="hidden" name="dari_id" value="{{ $userLogin->pegawai_id }}">
+                            <label class="block mb-2 text-sm font-medium">Dari</label>
+                            @php
+                                $dariPegawai = $nota->dari ?? $userLogin->pegawai;
+                            @endphp
+                            @if ($dariPegawai)
+                                <input type="hidden" name="dari_id" value="{{ $dariPegawai->id }}">
                                 <input type="text" readonly
-                                    value="{{ $userLogin->name }} ({{ $userLogin->pegawai->nama ?? '-' }})"
+                                    value="{{ $dariPegawai->nama }} ({{ $dariPegawai->jabatan }})"
                                     class="w-full border rounded-lg p-2 bg-gray-100 text-gray-700 cursor-not-allowed">
                             @else
                                 <div class="w-full border border-yellow-400 rounded-lg p-2 bg-yellow-50">
@@ -65,20 +58,33 @@
                             @endif
                         </div>
 
+                        {{-- Tembusan --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Sub Kegiatan</label>
-                            <select name="sub_kegiatan_id" class="w-full border rounded-lg p-2">
-                                <option value="">-- Pilih --</option>
-                                @foreach ($subKegiatans as $sub)
-                                    <option value="{{ $sub->id }}" {{ $nota->sub_kegiatan_id == $sub->id ? 'selected' : '' }}>
-                                        {{ $sub->nomor_rekening }} - {{ $sub->nama_kegiatan }}
+                            <label class="block mb-2 text-sm font-medium">Tembusan (Kepala Bidang)</label>
+                            <select name="melalui_id" class="w-full border rounded-lg p-2">
+                                @forelse ($kepalaBidang as $pegawai)
+                                    <option value="{{ $pegawai->id }}"
+                                        {{ old('melalui_id', $nota->melalui_id) == $pegawai->id ? 'selected' : '' }}>
+                                        {{ $pegawai->jabatan }} - {{ $pegawai->nama }}
                                     </option>
-                                @endforeach
+                                @empty
+                                    <option value="">-- Belum ada data kepala bidang --</option>
+                                @endforelse
                             </select>
                         </div>
 
+                        {{-- Tanggal --}}
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Tanggal</label>
+                            <input type="date" name="tanggal"
+                                value="{{ old('tanggal', $nota->tanggal ? \Carbon\Carbon::parse($nota->tanggal)->format('Y-m-d') : '') }}"
+                                onclick="this.showPicker()"
+                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+
+                        {{-- Nomor --}}
                         <div class="lg:col-span-2">
-                            <label class="block mb-2 text-sm font-medium">Nomor Nota Dinas</label>
+                            <label class="block mb-2 text-sm font-medium">Nomor</label>
                             <div class="flex items-center border rounded-lg overflow-hidden bg-gray-50">
                                 <span class="px-3 py-2 bg-gray-100 text-gray-700 font-medium">900.1 /</span>
                                 <input type="text" disabled
@@ -90,47 +96,56 @@
                             <p class="text-xs text-gray-500 mt-1">Nomor urut tidak dapat diubah.</p>
                         </div>
 
+                        {{-- Sifat --}}
                         <div>
-                            <label class="block mb-2 text-sm font-medium">Tanggal Nota</label>
-                            <input type="date" name="tanggal" onclick="this.showPicker()"
-                                value="{{ $nota->tanggal ? \Carbon\Carbon::parse($nota->tanggal)->format('Y-m-d') : '' }}"
-                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                            <label class="block mb-2 text-sm font-medium">Sifat</label>
+                            <select name="sifat" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                @foreach (['Biasa', 'Penting', 'Segera', 'Sangat Segera'] as $sifat)
+                                    <option value="{{ $sifat }}" {{ old('sifat', $nota->sifat) == $sifat ? 'selected' : '' }}>
+                                        {{ $sifat }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:col-span-2">
-                            <div>
-                                <label class="block mb-2 text-sm font-medium">Sifat</label>
-                                <select name="sifat" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
-                                    @foreach (['Biasa', 'Penting', 'Segera', 'Sangat Segera'] as $sifat)
-                                        <option value="{{ $sifat }}" {{ $nota->sifat == $sifat ? 'selected' : '' }}>
-                                            {{ $sifat }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block mb-2 text-sm font-medium">Lampiran</label>
-                                <input type="text" name="lampiran" value="{{ old('lampiran', $nota->lampiran) }}"
-                                    class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="Contoh: 1 (satu) Berkas">
-                            </div>
+                        {{-- Lampiran --}}
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Lampiran</label>
+                            <input type="text" name="lampiran" value="{{ old('lampiran', $nota->lampiran) }}"
+                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Contoh: 1 (satu) Berkas">
                         </div>
 
+                        {{-- Hal --}}
                         <div class="lg:col-span-2">
-                            <label class="block mb-2 text-sm font-medium">Perihal</label>
+                            <label class="block mb-2 text-sm font-medium">Hal</label>
                             <input type="text" name="perihal" value="{{ old('perihal', $nota->perihal) }}"
                                 class="w-full border rounded-lg p-2">
                         </div>
 
-                        <div class="lg:col-span-2">
+                        {{-- Sub Kegiatan --}}
+                        <div>
+                            <label class="block mb-2 text-sm font-medium">Sub Kegiatan</label>
+                            <select name="sub_kegiatan_id" class="w-full border rounded-lg p-2">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($subKegiatans as $sub)
+                                    <option value="{{ $sub->id }}" {{ old('sub_kegiatan_id', $nota->sub_kegiatan_id) == $sub->id ? 'selected' : '' }}>
+                                        {{ $sub->nomor_rekening }} - {{ $sub->nama_kegiatan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Kegiatan --}}
+                        <div>
                             <label class="block mb-2 text-sm font-medium">Kegiatan</label>
                             <input type="text" name="kegiatan" value="{{ old('kegiatan', $nota->kegiatan) }}"
                                 class="w-full border rounded-lg p-2">
                         </div>
 
+                        {{-- Undangan --}}
                         <div class="lg:col-span-2" x-data="undanganEdit()">
-                            <label class="block mb-2 text-sm font-medium">Undangan</label>
+                            <label class="block mb-2 text-sm font-medium">Konteks / Undangan</label>
 
                             {{-- Toggle dengan/tanpa undangan --}}
                             <div class="flex items-center gap-4 mb-3">
@@ -156,19 +171,21 @@
                             <input x-show="pakaiUndangan == '0'" type="hidden" name="asal_undangan" value="">
                         </div>
 
+                        {{-- Lokasi --}}
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tujuan / Lokasi</label>
                             <input type="text" name="lokasi" value="{{ old('lokasi', $nota->lokasi) }}"
                                 class="w-full border rounded-lg p-2" placeholder="D.K.I Jakarta">
                         </div>
 
+                        {{-- Jenis Perjalanan --}}
                         <div>
                             <label class="block mb-2 text-sm font-medium">Jenis Perjalanan</label>
                             <select name="jenis_perjalanan" class="w-full border rounded-lg p-2">
-                                <option value="dalam_daerah" {{ $nota->jenis_perjalanan == 'dalam_daerah' ? 'selected' : '' }}>
+                                <option value="dalam_daerah" {{ old('jenis_perjalanan', $nota->jenis_perjalanan) == 'dalam_daerah' ? 'selected' : '' }}>
                                     Dalam Daerah / Dalam Provinsi
                                 </option>
-                                <option value="luar_daerah" {{ $nota->jenis_perjalanan == 'luar_daerah' ? 'selected' : '' }}>
+                                <option value="luar_daerah" {{ old('jenis_perjalanan', $nota->jenis_perjalanan) == 'luar_daerah' ? 'selected' : '' }}>
                                     Luar Daerah / Luar Provinsi
                                 </option>
                             </select>
@@ -210,17 +227,18 @@
                             </div>
                         </div>
 
+                        {{-- Tanggal Mulai / Selesai --}}
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Mulai</label>
                             <input type="date" name="tanggal_mulai" onclick="this.showPicker()"
-                                value="{{ $nota->tanggal_mulai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->format('Y-m-d') : '' }}"
+                                value="{{ old('tanggal_mulai', $nota->tanggal_mulai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->format('Y-m-d') : '') }}"
                                 class="w-full border rounded-lg p-2">
                         </div>
 
                         <div>
                             <label class="block mb-2 text-sm font-medium">Tanggal Selesai</label>
                             <input type="date" name="tanggal_selesai" onclick="this.showPicker()"
-                                value="{{ $nota->tanggal_selesai ? \Carbon\Carbon::parse($nota->tanggal_selesai)->format('Y-m-d') : '' }}"
+                                value="{{ old('tanggal_selesai', $nota->tanggal_selesai ? \Carbon\Carbon::parse($nota->tanggal_selesai)->format('Y-m-d') : '') }}"
                                 class="w-full border rounded-lg p-2">
                         </div>
                     </div>

@@ -104,12 +104,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('nota-dinas', NotaDinasController::class)
             ->parameters(['nota-dinas' => 'nota']);
 
-        Route::patch(
-            '/nota-dinas/{nota}/approve-kasubid',
-            [NotaDinasController::class, 'approveKasubid']
-        )->name('nota-dinas.approve-kasubid');
-        Route::patch('/nota-dinas/{id}/revisi-kabid', [NotaDinasController::class, 'revisiKabid'])->name('nota-dinas.revisi-kabid');
-        Route::patch('/nota-dinas/{id}/reject-kabid', [NotaDinasController::class, 'rejectKabid'])->name('nota-dinas.reject-kabid');
         Route::get(
             '/nota-dinas/{nota}/preview',
             [NotaDinasController::class, 'preview']
@@ -141,51 +135,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/spt/{id}/update-nomor', [SPTController::class, 'updateNomor'])->name('spt.updateNomor');
     });
 
-    Route::middleware('role:super_admin,kepala_bidang')->group(function () {
-
-        Route::patch(
-            '/nota-dinas/{nota}/approve-kabid',
-            [NotaDinasController::class, 'approveKabid']
-        )
-            ->name('nota-dinas.approve-kabid');
-    });
-
-    Route::middleware('role:super_admin,sekretaris_badan')->group(function () {
-
-        Route::patch(
-            '/nota-dinas/{nota}/approve-sekban',
-            [NotaDinasController::class, 'approveSekban']
-        )->name('nota-dinas.approve-sekban');
-
-        Route::patch(
-            '/nota-dinas/{id}/revisi-sekban',
-            [NotaDinasController::class, 'revisiSekban']
-        )->name('nota-dinas.revisi-sekban');
-
-        Route::patch(
-            '/nota-dinas/{id}/reject-sekban',
-            [NotaDinasController::class, 'rejectSekban']
-        )->name('nota-dinas.reject-sekban');
-    });
-
-    Route::middleware('role:super_admin,kepala_badan')->group(function () {
-
-        Route::patch(
-            '/nota-dinas/{nota}/approve-kaban',
-            [NotaDinasController::class, 'approveKaban']
-        )->name('nota-dinas.approve-kaban');
-
-        Route::patch(
-            '/nota-dinas/{id}/revisi-kaban',
-            [NotaDinasController::class, 'revisiKaban']
-        )->name('nota-dinas.revisi-kaban');
-
-        Route::patch(
-            '/nota-dinas/{id}/reject-kaban',
-            [NotaDinasController::class, 'rejectKaban']
-        )->name('nota-dinas.reject-kaban');
-    });
-
     // ======================
     // SPT & SPPD
     // ======================
@@ -203,10 +152,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/spt', [SPTController::class, 'storeMandiri'])->name('spt.storeMandiri');
         Route::get('/spt/{id}/cetak-mandiri', [SPTController::class, 'cetakSptMandiri'])->name('spt.cetakMandiri');
         Route::delete('/spt/{id}/hapus-mandiri', [SPTController::class, 'destroyMandiri'])->name('spt.destroyMandiri');
-        Route::post('/spt/{id}/approve-kasubid', [SPTController::class, 'approveKasubid'])->name('spt.approveKasubid');
-        Route::post('/spt/{id}/approve-kabid', [SPTController::class, 'approveKabid'])->name('spt.approveKabid');
-        Route::post('/spt/{id}/approve-sekban', [SPTController::class, 'approveSekban'])->name('spt.approveSekban');
-        Route::post('/spt/{id}/approve-kaban', [SPTController::class, 'approveKaban'])->name('spt.approveKaban');
 
         // SPPD Mandiri (standalone)
         Route::get('/sppd', [SPPDController::class, 'index'])->name('sppd.index');

@@ -15,6 +15,7 @@ class NotaDinas extends Model
         'kepada_id',
         'dari_id',
         'melalui_id',
+        'tembusan',
         'asal_undangan',
         'perihal',
         'lokasi',
@@ -43,6 +44,17 @@ class NotaDinas extends Model
         'tanggal_disposisi_kaban' => 'datetime',
     ];
 
+    /**
+     * Status netral untuk nota dinas yang sudah disimpan.
+     * Tidak ada lagi proses persetujuan digital pada modul Nota Dinas.
+     */
+    const STATUS_TERSIMPAN = 'tersimpan';
+
+    /*
+     * Konstanta status lama tetap dipertahankan agar data historis
+     * (nota yang dibuat sebelum penghapusan alur approval) tetap terbaca.
+     * Nilai-nilai ini tidak dipakai lagi pada alur baru.
+     */
     const DRAFT = 'draft';
     const DIAJUKAN_KASUBID = 'diajukan_kasubid';
     const DISETUJUI_KASUBID = 'disetujui_kasubid';
@@ -56,11 +68,6 @@ class NotaDinas extends Model
     const DISETUJUI_KABAN = 'disetujui_kaban';
     const REVISI_KABAN = 'revisi_kaban';
     const DITOLAK_KABAN = 'ditolak_kaban';
-
-    public function scopeApprovedByKaban($query)
-    {
-        return $query->whereIn('status', [self::DISETUJUI_KABAN, self::DISETUJUI_KABID]);
-    }
 
     public function subKegiatan()
     {

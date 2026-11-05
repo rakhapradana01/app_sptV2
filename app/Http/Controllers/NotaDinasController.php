@@ -9,7 +9,6 @@ use App\Models\Spt;
 use App\Models\SubKegiatan;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
@@ -17,10 +16,6 @@ class NotaDinasController extends Controller
 {
     public function cetakNotaDinas(NotaDinas $nota)
     {
-        if (!in_array($nota->status, [NotaDinas::DISETUJUI_KABAN, NotaDinas::DISETUJUI_KABID])) {
-            return redirect()->route('arsip')->with('error', 'Nota Dinas belum disetujui oleh Kepala Badan (Kaban) sehingga belum dapat dicetak.');
-        }
-
         $pdf = Pdf::loadView('pages.nota_dinas.pdf', compact('nota'))
             ->setPaper('A4', 'portrait');
 
@@ -30,7 +25,7 @@ class NotaDinasController extends Controller
     public function arsip(Request $request)
     {
         $user = auth()->user();
-        $query = NotaDinas::with(['spt', 'sppd'])->approvedByKaban();
+        $query = NotaDinas::with(['spt', 'sppd']);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -80,7 +75,7 @@ class NotaDinasController extends Controller
             'subKegiatan',
             'kepada',
             'melalui'
-        ])->whereNotIn('status', [NotaDinas::DISETUJUI_KABAN, NotaDinas::DISETUJUI_KABID]);
+        ]);
 
         if ($user) {
             if ($user->role->name === 'kepala_sub_bidang') {
@@ -226,12 +221,6 @@ class NotaDinasController extends Controller
             abort(403);
         }
 
-        // Hanya boleh edit jika belum disetujui kabid
-        if ($nota->status === NotaDinas::DISETUJUI_KABID) {
-            return redirect()->route('nota-dinas.index')
-                ->with('error', 'Nota dinas yang sudah disetujui tidak dapat diedit.');
-        }
-
         $querySub = SubKegiatan::query();
         if ($user->role->name === 'kepala_sub_bidang') {
             if ($user->sub_bidang_id) {
@@ -289,17 +278,13 @@ class NotaDinasController extends Controller
             abort(403);
         }
 
-        if ($nota->status === NotaDinas::DISETUJUI_KABID) {
-            return redirect()->route('nota-dinas.index')
-                ->with('error', 'Nota dinas yang sudah disetujui tidak dapat diedit.');
-        }
-
         $validated = $request->validate([
             'sub_kegiatan_id'  => 'required|exists:sub_kegiatans,id',
             'tanggal'          => 'required|date',
             'kepada_id'        => 'required|exists:pegawais,id',
             'dari_id'          => 'required|exists:pegawais,id',
             'melalui_id'       => 'nullable|exists:pegawais,id',
+            'tembusan'         => 'nullable|string',
             'perihal'          => 'required|string',
             'lokasi'           => 'required|string',
             'jenis_perjalanan' => 'required|in:dalam_daerah,luar_daerah',
@@ -319,6 +304,7 @@ class NotaDinasController extends Controller
             'kepada_id'        => $validated['kepada_id'],
             'dari_id'          => $validated['dari_id'],
             'melalui_id'       => $validated['melalui_id'] ?? null,
+            'tembusan'         => $validated['tembusan'] ?? null,
             'perihal'          => $validated['perihal'],
             'lokasi'           => $validated['lokasi'],
             'jenis_perjalanan' => $validated['jenis_perjalanan'],
@@ -328,10 +314,7 @@ class NotaDinasController extends Controller
             'asal_undangan'    => $validated['asal_undangan'],
             'sifat'            => $validated['sifat'] ?? null,
             'lampiran'         => $validated['lampiran'] ?? null,
-            // Reset ke diajukan_kabid jika sebelumnya revisi/ditolak
-            'status'           => in_array($nota->status, [NotaDinas::REVISI_KABID, 'ditolak'])
-                ? NotaDinas::DIAJUKAN_KABID
-                : $nota->status,
+            'status'           => NotaDinas::STATUS_TERSIMPAN,
             'revisi'           => null,
         ]);
 
@@ -355,11 +338,6 @@ class NotaDinasController extends Controller
             abort(403);
         }
 
-        if ($nota->status === NotaDinas::DISETUJUI_KABID) {
-            return redirect()->route('nota-dinas.index')
-                ->with('error', 'Nota dinas yang sudah disetujui tidak dapat dihapus.');
-        }
-
         $nota->pegawais()->detach();
         $nota->delete();
 
@@ -376,6 +354,7 @@ class NotaDinasController extends Controller
             'kepada_id' => 'required|exists:pegawais,id',
             'dari_id' => 'required|exists:pegawais,id',
             'melalui_id' => 'nullable|exists:pegawais,id',
+            'tembusan' => 'nullable|string',
             'perihal' => 'required|string',
             'lokasi' => 'required|string',
             'jenis_perjalanan' => 'required|in:dalam_daerah,luar_daerah',
@@ -398,13 +377,14 @@ class NotaDinasController extends Controller
             'kepada_id' => $validated['kepada_id'],
             'dari_id' => $validated['dari_id'],
             'melalui_id' => $validated['melalui_id'] ?? null,
+            'tembusan' => $validated['tembusan'] ?? null,
             'perihal' => $validated['perihal'],
             'lokasi' => $validated['lokasi'],
             'jenis_perjalanan' => $validated['jenis_perjalanan'],
             'tanggal_mulai' => $validated['tanggal_mulai'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
             'kegiatan' => $validated['kegiatan'],
-            'status' => NotaDinas::DIAJUKAN_KABID,
+            'status' => NotaDinas::STATUS_TERSIMPAN,
             'sifat' => $validated['sifat'],
             'lampiran' => $validated['lampiran'],
             'dinas_id' => $user->dinas_id ?? null,
@@ -418,204 +398,6 @@ class NotaDinasController extends Controller
 
         return redirect()->route('nota-dinas.index')
             ->with('success', 'Nota dinas berhasil disimpan.');
-    }
-
-    public function approveKasubid(NotaDinas $nota)
-    {
-        if (
-            Auth::user()->role->name != 'kepala_sub_bidang'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        if ($nota->status != NotaDinas::DRAFT) {
-            return back()->with('error', 'Status tidak valid');
-        }
-
-        $nota->update([
-            'status' => NotaDinas::DIAJUKAN_KABID
-        ]);
-
-        return back()->with('success', 'Berhasil diajukan ke Kabid');
-    }
-
-    public function revisiKabid(Request $request, $id)
-    {
-        $request->validate([
-            'revisi' => 'required|string|min:5',
-        ]);
-
-        $nota = NotaDinas::findOrFail($id);
-
-        $nota->update([
-            'status' => NotaDinas::REVISI_KABID, // Status berubah jadi revisi
-            'revisi' => $request->revisi,        // Simpan pesan revisinya
-        ]);
-
-        return redirect()->route('nota-dinas.index')->with('warning', 'Nota dikembalikan ke Kasubid untuk diperbaiki.');
-    }
-
-    public function rejectKabid($id)
-    {
-        $nota = NotaDinas::findOrFail($id);
-        $nota->update(['status' => 'ditolak']);
-
-        return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak.');
-    }
-    public function approveKabid(Request $request, NotaDinas $nota)
-    {
-        if (
-            Auth::user()->role->name != 'kepala_bidang'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        if ($nota->status != NotaDinas::DIAJUKAN_KABID) {
-            return back()->with('error', 'Status tidak valid');
-        }
-
-        $request->validate([
-            'disposisi_kabid' => 'nullable|string',
-        ]);
-
-        $nota->update([
-            'status' => NotaDinas::DIAJUKAN_SEKBAN,
-            'disposisi_kabid' => $request->input('disposisi_kabid'),
-            'tanggal_disposisi_kabid' => now(),
-        ]);
-
-        return redirect()->route('nota-dinas.index')
-            ->with('success', 'Nota dinas disetujui Kabid dan diteruskan ke Sekretaris Badan dengan catatan disposisi.');
-    }
-
-    public function approveSekban(Request $request, NotaDinas $nota)
-    {
-        if (
-            Auth::user()->role->name != 'sekretaris_badan'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        if ($nota->status != NotaDinas::DIAJUKAN_SEKBAN) {
-            return back()->with('error', 'Status tidak valid untuk disetujui Sekretaris Badan');
-        }
-
-        $request->validate([
-            'disposisi_sekban' => 'nullable|string',
-        ]);
-
-        $nota->update([
-            'status' => NotaDinas::DIAJUKAN_KABAN,
-            'disposisi_sekban' => $request->input('disposisi_sekban'),
-            'tanggal_disposisi_sekban' => now(),
-        ]);
-
-        return redirect()->route('nota-dinas.index')
-            ->with('success', 'Nota dinas disetujui Sekretaris Badan dan diteruskan ke Kepala Badan dengan catatan disposisi.');
-    }
-
-    public function revisiSekban(Request $request, $id)
-    {
-        if (
-            Auth::user()->role->name != 'sekretaris_badan'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        $request->validate([
-            'revisi' => 'required|string|min:5',
-        ]);
-
-        $nota = NotaDinas::findOrFail($id);
-        $nota->update([
-            'status' => NotaDinas::REVISI_SEKBAN,
-            'revisi' => $request->revisi,
-        ]);
-
-        return redirect()->route('nota-dinas.index')->with('warning', 'Nota dinas dikembalikan untuk revisi oleh Sekretaris Badan.');
-    }
-
-    public function rejectSekban($id)
-    {
-        if (
-            Auth::user()->role->name != 'sekretaris_badan'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        $nota = NotaDinas::findOrFail($id);
-        $nota->update(['status' => NotaDinas::DITOLAK_SEKBAN]);
-
-        return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak oleh Sekretaris Badan.');
-    }
-
-    public function approveKaban(Request $request, NotaDinas $nota)
-    {
-        if (
-            Auth::user()->role->name != 'kepala_badan'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        if ($nota->status != NotaDinas::DIAJUKAN_KABAN) {
-            return back()->with('error', 'Status tidak valid untuk disetujui Kepala Badan');
-        }
-
-        $request->validate([
-            'disposisi_kaban' => 'nullable|string',
-        ]);
-
-        $nota->update([
-            'status' => NotaDinas::DISETUJUI_KABAN,
-            'disposisi_kaban' => $request->input('disposisi_kaban'),
-            'tanggal_disposisi_kaban' => now(),
-        ]);
-
-        return redirect()->route('nota-dinas.index')
-            ->with('success', 'Nota dinas berhasil di-ACC Kepala Badan dengan catatan disposisi.');
-    }
-
-    public function revisiKaban(Request $request, $id)
-    {
-        if (
-            Auth::user()->role->name != 'kepala_badan'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        $request->validate([
-            'revisi' => 'required|string|min:5',
-        ]);
-
-        $nota = NotaDinas::findOrFail($id);
-        $nota->update([
-            'status' => NotaDinas::REVISI_KABAN,
-            'revisi' => $request->revisi,
-        ]);
-
-        return redirect()->route('nota-dinas.index')->with('warning', 'Nota dinas dikembalikan untuk revisi oleh Kepala Badan.');
-    }
-
-    public function rejectKaban($id)
-    {
-        if (
-            Auth::user()->role->name != 'kepala_badan'
-            && Auth::user()->role->name != 'super_admin'
-        ) {
-            abort(403);
-        }
-
-        $nota = NotaDinas::findOrFail($id);
-        $nota->update(['status' => NotaDinas::DITOLAK_KABAN]);
-
-        return redirect()->route('nota-dinas.index')->with('error', 'Nota dinas telah ditolak oleh Kepala Badan.');
     }
 
     public function preview(NotaDinas $nota)

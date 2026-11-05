@@ -129,7 +129,7 @@
                                 @empty
                                 <tr>
                                     <td colspan="4" class="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
-                                        Belum ada dokumen Nota Dinas yang disetujui Kepala Badan (ACC Kaban).
+                                        Belum ada dokumen Nota Dinas yang tersimpan.
                                     </td>
                                 </tr>
                             @endforelse
@@ -143,7 +143,7 @@
         </x-common.component-card>
 
         {{-- ===== SECTION SPT MANDIRI ===== --}}
-        <x-common.component-card title="Persetujuan Paraf SPT Mandiri">
+        <x-common.component-card title="Arsip SPT Mandiri">
             <div class="flex flex-col">
 
                 @if (session('success'))
@@ -167,16 +167,11 @@
                                     <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Nomor SPT</th>
                                     <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kegiatan</th>
                                     <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pegawai</th>
-                                    <th class="px-5 py-3.5 sm:px-6 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status Paraf</th>
                                     <th class="px-5 py-3.5 sm:px-6 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-36">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($spts as $spt)
-                                    @php
-                                        $uRole = auth()->user()->role->name ?? '';
-                                        $st = $spt->status ?? 'draft';
-                                    @endphp
                                     <tr
                                         class="border-b border-gray-100 dark:border-gray-800 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.02] transition">
                                         <td class="px-5 py-4 text-sm text-gray-500">
@@ -209,34 +204,6 @@
                                                 @endif
                                             </div>
                                         </td>
-                                        <td class="px-5 py-4 text-xs">
-                                            @if ($st === 'draft' || empty($st))
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                                    Draft
-                                                </span>
-                                            @elseif ($st === 'diajukan_kabid')
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                                                    Paraf Kasubid ✓ (Menunggu Kabid)
-                                                </span>
-                                            @elseif ($st === 'diajukan_sekban')
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
-                                                    Paraf Kabid ✓ (Menunggu Sekban)
-                                                </span>
-                                            @elseif ($st === 'diajukan_kaban')
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
-                                                    Paraf Sekban ✓ (Menunggu Kaban)
-                                                </span>
-                                            @elseif ($st === 'disetujui_kaban')
-                                                <span
-                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-                                                    Lengkap ✓ Disetujui Kaban
-                                                </span>
-                                            @endif
-                                        </td>
                                         <td class="px-5 py-4 text-center">
                                             <div x-data="{ open: false }" class="relative inline-block text-left">
                                                 <button @click="open = !open" @click.away="open = false"
@@ -252,82 +219,6 @@
                                                 <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100"
                                                     class="absolute right-0 mt-2 w-52 origin-top-right bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[60] overflow-hidden">
                                                     <div class="py-1 flex flex-col text-left">
-
-                                                        <div
-                                                            class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase border-b border-gray-100 dark:border-gray-700">
-                                                            Persetujuan Paraf
-                                                        </div>
-
-                                                        {{-- Paraf Kasubid --}}
-                                                        @if (($st === 'draft' || empty($st)) && in_array($uRole, ['super_admin', 'kepala_sub_bidang']))
-                                                            <form action="{{ route('spt.approveKasubid', $spt->id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <button type="submit"
-                                                                    class="flex items-center w-full px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    Paraf Kasubid
-                                                                </button>
-                                                            </form>
-                                                        @endif
-
-                                                        {{-- Paraf Kabid --}}
-                                                        @if ($st === 'diajukan_kabid' && in_array($uRole, ['super_admin', 'kepala_bidang']))
-                                                            <form action="{{ route('spt.approveKabid', $spt->id) }}" method="POST">
-                                                                @csrf
-                                                                <button type="submit"
-                                                                    class="flex items-center w-full px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
-                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    Paraf Kabid
-                                                                </button>
-                                                            </form>
-                                                        @endif
-
-                                                        {{-- Paraf Sekban --}}
-                                                        @if ($st === 'diajukan_sekban' && in_array($uRole, ['super_admin', 'sekretaris_badan']))
-                                                            <form action="{{ route('spt.approveSekban', $spt->id) }}" method="POST">
-                                                                @csrf
-                                                                <button type="submit"
-                                                                    class="flex items-center w-full px-4 py-2 text-sm text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20">
-                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    Paraf Sekban
-                                                                </button>
-                                                            </form>
-                                                        @endif
-
-                                                        {{-- ACC Kaban --}}
-                                                        @if ($st === 'diajukan_kaban' && in_array($uRole, ['super_admin', 'kepala_badan']))
-                                                            <form action="{{ route('spt.approveKaban', $spt->id) }}" method="POST">
-                                                                @csrf
-                                                                <button type="submit"
-                                                                    class="flex items-center w-full px-4 py-2 text-sm text-emerald-600 font-medium hover:bg-emerald-50 dark:hover:bg-emerald-900/20">
-                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
-                                                                        viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    ACC Kaban
-                                                                </button>
-                                                            </form>
-                                                        @endif
-
-                                                        <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 
                                                         {{-- Cetak SPT --}}
                                                         <a href="{{ route('spt.cetakMandiri', $spt->id) }}" target="_blank"
@@ -348,7 +239,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-400">
+                                        <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-400">
                                             Belum ada SPT mandiri.
                                         </td>
                                     </tr>
