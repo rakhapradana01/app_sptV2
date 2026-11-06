@@ -54,27 +54,17 @@
 
         {{-- BAGIAN TENGAH: Nama Aplikasi & Deskripsi Platform --}}
         <div class="relative z-10 my-auto py-12 max-w-xl">
-            {{-- Micro Badge Resmi --}}
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300 font-medium mb-6">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#C8A45D]"></span>
-                <span class="tracking-wide">Portal Administrasi Resmi</span>
-            </div>
-
             <h1 class="text-3xl sm:text-4xl xl:text-5xl font-bold text-white tracking-tight leading-[1.18]">
                 SISTEM INFORMASI<br>
                 <span class="text-white/90 font-light">PERJALANAN DINAS</span>
             </h1>
-
-            <p class="mt-6 text-sm xl:text-base text-gray-300/90 leading-relaxed max-w-lg font-normal">
-                Platform terintegrasi untuk pengelolaan administrasi perjalanan dinas yang tertib, efektif, dan akuntabel.
-            </p>
         </div>
 
         {{-- BAGIAN BAWAH: Footer Identitas --}}
         <div class="relative z-10 pt-6 border-t border-white/10">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-400 gap-2">
                 <span class="font-medium text-gray-300">BPKAD Provinsi Kalimantan Selatan</span>
-                <span class="text-gray-400">&copy; {{ date('Y') }} Hak Cipta Dilindungi</span>
+                <span class="text-gray-400">&copy; {{ date('Y') }} Belum Ada Hak Cipta</span>
             </div>
         </div>
     </div>
