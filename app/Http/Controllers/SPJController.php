@@ -57,12 +57,94 @@ class SPJController extends Controller
             return redirect()->route('spj.index')->with('error', 'Harap isi nomor SPT terlebih dahulu sebelum mengakses/membuat SPJ.');
         }
 
-        return view('pages.spj.show', compact('spt'));
+        // --- TAMBAHAN LUAS: Ambil data lengkap master_shs untuk referensi ---
+        $lokasiEfektif = $spt->lokasi_efektif;
+        $tahunAnggaran = $spt->tahun_anggaran;
+
+        // Daftar opsi uang harian dari master_shs
+        $uangHarianOptions = [];
+        $shsByLokasi = [];
+        // Referensi maksimum biaya dari master_shs
+        $maxTiketPesawat = 0;
+        $maxPenginapan = 0;
+        $maxTransport = 0;
+
+        if ($lokasiEfektif && $tahunAnggaran) {
+            $masterShsRecords = \App\Models\MasterShs::where('tahun_anggaran', $tahunAnggaran)
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($masterShsRecords as $ms) {
+                $lokasi = $ms->lokasi_tujuan;
+                // Opsi uang harian
+                if (!isset($uangHarianOptions[$lokasi])) {
+                    $uangHarianOptions[$lokasi] = $ms->uang_harian ?? 0;
+                }
+                $totalTrans = (float) ($ms->transport_bjb_rumah_bandara + $ms->transport_bjb_bandara_rumah + $ms->transport_tujuan_bandara_hotel + $ms->transport_tujuan_hotel_bandara);
+                $shsByLokasi[$lokasi] = [
+                    'uang_harian' => (float) ($ms->uang_harian ?? 0),
+                    'tiket_pesawat' => (float) ($ms->tiket_pesawat ?? 0),
+                    'penginapan' => (float) ($ms->penginapan ?? 0),
+                    'transport' => $totalTrans,
+                    'bjb_pergi' => (float) ($ms->transport_bjb_rumah_bandara ?? 0),
+                    'bjb_pulang' => (float) ($ms->transport_bjb_bandara_rumah ?? 0),
+                    'tuj_pergi' => (float) ($ms->transport_tujuan_bandara_hotel ?? 0),
+                    'tuj_pulang' => (float) ($ms->transport_tujuan_hotel_bandara ?? 0),
+                ];
+                // Referensi maksimum biaya (ambil record pertama yang cocok)
+                if ($maxTiketPesawat == 0) {
+                    $maxTiketPesawat = $ms->tiket_pesawat ?? 0;
+                }
+                if ($maxPenginapan == 0) {
+                    $maxPenginapan = $ms->penginapan ?? 0;
+                }
+                // Total transport dari master_shs
+                if ($maxTransport == 0) {
+                    $maxTransport = $totalTrans;
+                }
+            }
+        }
+        // Default jika tidak ada data
+        if (empty($uangHarianOptions)) {
+            $uangHarianOptions = ['' => '-- Pilih Lokasi Terlebih Dahulu --'];
+            $maxTiketPesawat = 0;
+            $maxPenginapan = 0;
+            $maxTransport = 0;
+        }
+        // ------------------------------------------
+
+        return view('pages.spj.show', compact('spt', 'uangHarianOptions', 'maxTiketPesawat', 'maxPenginapan', 'maxTransport', 'lokasiEfektif', 'tahunAnggaran', 'shsByLokasi'));
     }
 
     public function storeRincian(Request $request, $id)
     {
         $spt = Spt::findOrFail($id);
+
+        // --- TAMBAHAN: Cari standar uang harian dan referensi maksimum dari master_shs ---
+        $lokasiEfektif = $spt->lokasi_efektif; // ambil dari SPT atau NotaDinas
+        $tahunAnggaran = $spt->tahun_anggaran;
+
+        $standardUangHarian = 0;
+        $maxTiketPesawat = 0;
+        $maxPenginapan = 0;
+        $maxTransport = 0;
+
+        if ($lokasiEfektif && $tahunAnggaran) {
+            $masterShs = \App\Models\MasterShs::where('lokasi_tujuan', $lokasiEfektif)
+                ->where('tahun_anggaran', $tahunAnggaran)
+                ->where('is_active', true)
+                ->first();
+
+            if ($masterShs) {
+                $standardUangHarian = $masterShs->uang_harian ?? 0;
+                $maxTiketPesawat = $masterShs->tiket_pesawat ?? 0;
+                $maxPenginapan = $masterShs->penginapan ?? 0;
+                // Total transport dari master_shs
+                $maxTransport = $masterShs->transport_bjb_rumah_bandara + $masterShs->transport_bjb_bandara_rumah
+                    + $masterShs->transport_tujuan_bandara_hotel + $masterShs->transport_tujuan_hotel_bandara;
+            }
+        }
+        // --------------------------------------------------------------
 
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
@@ -70,13 +152,19 @@ class SPJController extends Controller
             'kode_rekening' => 'nullable|string',
             'jumlah_hari' => 'required|integer',
             'uang_harian' => 'required|numeric',
-            'tiket_pesawat_pergi' => 'nullable|numeric',
-            'tiket_pesawat_pulang' => 'nullable|numeric',
-            'transport' => 'nullable|numeric',
-            'penginapan' => 'nullable|numeric',
+            'tiket_pesawat_pergi' => ['nullable', 'numeric', 'max:' . $maxTiketPesawat],
+            'tiket_pesawat_pulang' => ['nullable', 'numeric', 'max:' . $maxTiketPesawat],
+            'transport' => ['nullable', 'numeric', 'max:' . $maxTransport],
+            'penginapan' => ['nullable', 'numeric', 'max:' . $maxPenginapan],
         ]);
 
-        $total = ($request->jumlah_hari * $request->uang_harian) +
+        $uangHarian = $request->uang_harian;
+        // Gunakan standar dari master_shs jika belum diisi atau sesuai kebutuhan
+        // Jika user menginput nilai, gunakan nilai user; jika tidak, gunakan standar
+        // Di sini kita tetapkan nilai awal, dan user bisa mengubahnya di form
+        $effectiveUangHarian = $uangHarian ?: $standardUangHarian;
+
+        $total = ($request->jumlah_hari * $effectiveUangHarian) +
             ($request->tiket_pesawat_pergi ?? 0) +
             ($request->tiket_pesawat_pulang ?? 0) +
             ($request->transport ?? 0) +
@@ -92,7 +180,7 @@ class SPJController extends Controller
                 'kode_rekening' => $request->kode_rekening,
                 'uraian_id' => $request->uraian_id,
                 'jumlah_hari' => $request->jumlah_hari,
-                'uang_harian' => $request->uang_harian,
+                'uang_harian' => $effectiveUangHarian,
                 'tiket_pesawat_pergi' => $request->tiket_pesawat_pergi ?? 0,
                 'tiket_pesawat_pulang' => $request->tiket_pesawat_pulang ?? 0,
                 'transport' => $request->transport ?? 0,

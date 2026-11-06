@@ -262,13 +262,15 @@
             <table class="pegawai-table">
                 <thead>
                     <tr>
-                        <th width="55%">Nama</th>
-                        <th width="45%">Jabatan</th>
+                        <th width="5%" style="text-align: center;">No</th>
+                        <th width="45%">Nama</th>
+                        <th width="50%">Jabatan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($nota->pegawais as $pegawai)
                         <tr>
+                            <td style="text-align: center;">{{ $loop->iteration }}</td>
                             <td>{{ $pegawai->nama }}</td>
                             <td>{{ $pegawai->jabatan }}</td>
                         </tr>
