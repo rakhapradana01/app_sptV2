@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
             // ======================
             Route::get('/master-shs', [MasterShsController::class, 'index'])->name('master-shs.index');
             Route::post('/master-shs', [MasterShsController::class, 'store'])->name('master-shs.store');
+            Route::get('/master-shs/create', [MasterShsController::class, 'create'])->name('master-shs.create');
             Route::get('/master-shs/{id}', [MasterShsController::class, 'show'])->name('master-shs.show');
             Route::put('/master-shs/{id}', [MasterShsController::class, 'update'])->name('master-shs.update');
             Route::delete('/master-shs/{id}', [MasterShsController::class, 'destroy'])->name('master-shs.destroy');

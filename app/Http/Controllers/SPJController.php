@@ -120,55 +120,27 @@ class SPJController extends Controller
     {
         $spt = Spt::findOrFail($id);
 
-        // --- TAMBAHAN: Cari standar uang harian dan referensi maksimum dari master_shs ---
-        $lokasiEfektif = $spt->lokasi_efektif; // ambil dari SPT atau NotaDinas
-        $tahunAnggaran = $spt->tahun_anggaran;
-
-        $standardUangHarian = 0;
-        $maxTiketPesawat = 0;
-        $maxPenginapan = 0;
-        $maxTransport = 0;
-
-        if ($lokasiEfektif && $tahunAnggaran) {
-            $masterShs = \App\Models\MasterShs::where('lokasi_tujuan', $lokasiEfektif)
-                ->where('tahun_anggaran', $tahunAnggaran)
-                ->where('is_active', true)
-                ->first();
-
-            if ($masterShs) {
-                $standardUangHarian = $masterShs->uang_harian ?? 0;
-                $maxTiketPesawat = $masterShs->tiket_pesawat ?? 0;
-                $maxPenginapan = $masterShs->penginapan ?? 0;
-                // Total transport dari master_shs
-                $maxTransport = $masterShs->transport_bjb_rumah_bandara + $masterShs->transport_bjb_bandara_rumah
-                    + $masterShs->transport_tujuan_bandara_hotel + $masterShs->transport_tujuan_hotel_bandara;
-            }
-        }
-        // --------------------------------------------------------------
-
         $request->validate([
-            'pegawai_id' => 'required|exists:pegawais,id',
-            'uraian_id' => 'nullable|exists:uraians,id',
-            'kode_rekening' => 'nullable|string',
-            'jumlah_hari' => 'required|integer',
-            'uang_harian' => 'required|numeric',
-            'tiket_pesawat_pergi' => ['nullable', 'numeric', 'max:' . $maxTiketPesawat],
-            'tiket_pesawat_pulang' => ['nullable', 'numeric', 'max:' . $maxTiketPesawat],
-            'transport' => ['nullable', 'numeric', 'max:' . $maxTransport],
-            'penginapan' => ['nullable', 'numeric', 'max:' . $maxPenginapan],
+            'pegawai_id'           => 'required|exists:pegawais,id',
+            'uraian_id'            => 'nullable',
+            'kode_rekening'        => 'nullable|string',
+            'jumlah_hari'          => 'required|integer|min:1',
+            'uang_harian'          => 'required|numeric|min:0',
+            'tiket_pesawat_pergi'  => 'nullable|numeric|min:0',
+            'tiket_pesawat_pulang' => 'nullable|numeric|min:0',
+            'transport'            => 'nullable|numeric|min:0',
+            'penginapan'           => 'nullable|numeric|min:0',
         ]);
 
-        $uangHarian = $request->uang_harian;
-        // Gunakan standar dari master_shs jika belum diisi atau sesuai kebutuhan
-        // Jika user menginput nilai, gunakan nilai user; jika tidak, gunakan standar
-        // Di sini kita tetapkan nilai awal, dan user bisa mengubahnya di form
-        $effectiveUangHarian = $uangHarian ?: $standardUangHarian;
+        $uangHarian = (float) $request->uang_harian;
+        $jumlahHari = (int) $request->jumlah_hari;
+        $tiketPergi = (float) ($request->tiket_pesawat_pergi ?? 0);
+        $tiketPulang = (float) ($request->tiket_pesawat_pulang ?? 0);
+        $transport = (float) ($request->transport ?? 0);
+        $penginapan = (float) ($request->penginapan ?? 0);
+        $uraianId = !empty($request->uraian_id) ? $request->uraian_id : null;
 
-        $total = ($request->jumlah_hari * $effectiveUangHarian) +
-            ($request->tiket_pesawat_pergi ?? 0) +
-            ($request->tiket_pesawat_pulang ?? 0) +
-            ($request->transport ?? 0) +
-            ($request->penginapan ?? 0);
+        $total = ($jumlahHari * $uangHarian) + $tiketPergi + $tiketPulang + $transport + $penginapan;
 
         SpjRincian::updateOrCreate(
             [
@@ -177,19 +149,19 @@ class SPJController extends Controller
                 'pegawai_id'    => $request->pegawai_id
             ],
             [
-                'kode_rekening' => $request->kode_rekening,
-                'uraian_id' => $request->uraian_id,
-                'jumlah_hari' => $request->jumlah_hari,
-                'uang_harian' => $effectiveUangHarian,
-                'tiket_pesawat_pergi' => $request->tiket_pesawat_pergi ?? 0,
-                'tiket_pesawat_pulang' => $request->tiket_pesawat_pulang ?? 0,
-                'transport' => $request->transport ?? 0,
-                'penginapan' => $request->penginapan ?? 0,
-                'total' => $total,
+                'kode_rekening'        => $request->kode_rekening,
+                'uraian_id'            => $uraianId,
+                'jumlah_hari'          => $jumlahHari,
+                'uang_harian'          => $uangHarian,
+                'tiket_pesawat_pergi'  => $tiketPergi,
+                'tiket_pesawat_pulang' => $tiketPulang,
+                'transport'            => $transport,
+                'penginapan'           => $penginapan,
+                'total'                => $total,
             ]
         );
 
-        return redirect()->back()->with('success', 'Rincian berhasil disimpan');
+        return redirect()->back()->with('success', 'Rincian biaya berhasil disimpan.');
     }
 
     public function exportExcel($id)

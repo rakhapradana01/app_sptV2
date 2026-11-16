@@ -11,11 +11,11 @@ use Illuminate\Validation\Rule;
 class MasterShsController extends Controller
 {
     /**
-     * Tampilkan daftar Master SHS dengan form inline di atas tabel.
+     * Tampilkan daftar Master SHS.
      */
     public function index(Request $request)
     {
-        $query = MasterShs::withCount(['penginapan', 'transportasi']);
+        $query = MasterShs::withCount(['detailPenginapan as penginapan_count', 'transportasi']);
 
         // Filter pencarian
         if ($search = $request->input('search')) {
@@ -88,11 +88,19 @@ class MasterShsController extends Controller
     }
 
     /**
+     * Tampilkan halaman tambah Master SHS baru.
+     */
+    public function create()
+    {
+        return view('pages.master.tujuan_biaya.create');
+    }
+
+    /**
      * Tampilkan halaman detail/edit satu Master SHS beserta tabel penginapan & transportasi.
      */
     public function show($id)
     {
-        $shs = MasterShs::with(['penginapan', 'transportasi'])->findOrFail($id);
+        $shs = MasterShs::with(['detailPenginapan', 'transportasi'])->findOrFail($id);
         return view('pages.master.tujuan_biaya.show', compact('shs'));
     }
 

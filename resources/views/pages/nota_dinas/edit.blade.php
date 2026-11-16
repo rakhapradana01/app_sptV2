@@ -20,7 +20,7 @@
                 @csrf
                 @method('PUT')
 
-                <div class="space-y-6">
+                <div x-data="notaDinasEditForm()" class="space-y-6">
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         {{-- Yth --}}
@@ -65,7 +65,7 @@
                                 @forelse ($kepalaBidang as $pegawai)
                                     <option value="{{ $pegawai->id }}"
                                         {{ old('melalui_id', $nota->melalui_id) == $pegawai->id ? 'selected' : '' }}>
-                                        {{ $pegawai->jabatan }} - {{ $pegawai->nama }}
+                                        {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
                                     </option>
                                 @empty
                                     <option value="">-- Belum ada data kepala bidang --</option>
@@ -144,7 +144,7 @@
                         </div>
 
                         {{-- Undangan --}}
-                        <div class="lg:col-span-2" x-data="undanganEdit()">
+                        <div class="lg:col-span-2">
                             <label class="block mb-2 text-sm font-medium">Konteks / Undangan</label>
 
                             {{-- Toggle dengan/tanpa undangan --}}
@@ -163,12 +163,13 @@
                                 </label>
                             </div>
 
-                            <div x-show="pakaiUndangan == '1'" x-transition>
-                                <input type="text" name="asal_undangan"
-                                    value="{{ old('asal_undangan', $nota->asal_undangan) }}"
-                                    class="w-full border rounded-lg p-2">
-                            </div>
-                            <input x-show="pakaiUndangan == '0'" type="hidden" name="asal_undangan" value="">
+                            <input type="text" name="asal_undangan" x-model="asalUndangan" :disabled="pakaiUndangan != '1'"
+                                placeholder="Sehubungan dengan undangan dari ..."
+                                class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+
+                            <p class="text-xs text-gray-500 mt-1" x-show="pakaiUndangan == '1'">
+                                Awali dengan kalimat "Sehubungan dengan".
+                            </p>
                         </div>
 
                         {{-- Lokasi --}}
@@ -192,7 +193,7 @@
                         </div>
 
                         {{-- Pegawai yang Dilibatkan --}}
-                        <div class="lg:col-span-2" x-data="pegawaiEdit()">
+                        <div class="lg:col-span-2">
                             <label class="block mb-3 text-sm font-medium">Pegawai yang Dilibatkan</label>
 
                             <div class="flex gap-3">
@@ -258,8 +259,10 @@
     </div>
 
     <script>
-        function pegawaiEdit() {
+        function notaDinasEditForm() {
             return {
+                pakaiUndangan: '{{ old('asal_undangan', $nota->asal_undangan) ? '1' : '0' }}',
+                asalUndangan: @json(old('asal_undangan', $nota->asal_undangan ?? 'Sehubungan dengan ')),
                 pegawais: @json($nota->pegawais->map(fn($p) => ['id' => (string)$p->id, 'nama' => $p->nama . ' - ' . $p->jabatan])),
                 addPegawai(select) {
                     let id = select.value;
@@ -269,12 +272,6 @@
                         select.value = '';
                     }
                 }
-            }
-        }
-
-        function undanganEdit() {
-            return {
-                pakaiUndangan: '{{ $nota->asal_undangan ? "1" : "0" }}',
             }
         }
     </script>

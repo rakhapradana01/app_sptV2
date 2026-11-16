@@ -56,8 +56,8 @@
     <x-common.page-breadcrumb pageTitle="Detail SPJ" />
 
     <div class="space-y-6" x-data="{ 
-        activeTab: 'kuitansi',
-        showRincianModal: false,
+        activeTab: '{{ $errors->any() ? 'rincian' : 'kuitansi' }}',
+        showRincianModal: {{ $errors->any() ? 'true' : 'false' }},
         isEditRincian: false,
         showSptModal: false,
         penerimaId: '{{ $firstPegawai->id ?? '' }}',
@@ -119,11 +119,19 @@
             tuj_pergi: 0,
             tuj_pulang: 0,
         },
+        jumlahMalam: {{ $spt->durasi_hari }},
         syncTransportFromBreakdown() {
             this.rincianForm.transport = (parseFloat(this.transportBreakdown.bjb_pergi) || 0) +
                                          (parseFloat(this.transportBreakdown.bjb_pulang) || 0) +
                                          (parseFloat(this.transportBreakdown.tuj_pergi) || 0) +
                                          (parseFloat(this.transportBreakdown.tuj_pulang) || 0);
+        },
+        syncPenginapanFromMalam() {
+            const malam = parseInt(this.jumlahMalam) || 0;
+            const tarif = parseFloat(this.paguPanduan.penginapan) || 0;
+            if (malam > 0 && tarif > 0) {
+                this.rincianForm.penginapan = malam * tarif;
+            }
         },
         onUangHarianChange(event) {
             const sel = event.target;
@@ -143,6 +151,20 @@
             }
             if (opt.dataset.penginapan !== undefined) {
                 this.paguPanduan.penginapan = parseFloat(opt.dataset.penginapan) || 0;
+            }
+
+            // Otomatis isi tiket pergi & pulang dari SHS (hanya saat tambah baru atau nilai masih 0)
+            if (opt.dataset.tiket !== undefined && !this.isEditRincian) {
+                const tiketTotal = parseFloat(opt.dataset.tiket) || 0;
+                if (tiketTotal > 0) {
+                    this.rincianForm.tiket_pesawat_pergi  = Math.round(tiketTotal / 2);
+                    this.rincianForm.tiket_pesawat_pulang = Math.round(tiketTotal / 2);
+                }
+            }
+
+            // Otomatis isi penginapan dari SHS (hanya saat tambah baru)
+            if (opt.dataset.penginapan !== undefined && !this.isEditRincian) {
+                this.syncPenginapanFromMalam();
             }
 
             // Otomatis isi breakdown rute & jumlahkan transport jika tersedia
@@ -177,6 +199,7 @@
         openAddRincian(item = null) {
             this.isEditRincian = false;
             this.showTransportBreakdown = false;
+            this.jumlahMalam = {{ $spt->durasi_hari }};
             this.transportBreakdown = { bjb_pergi: 0, bjb_pulang: 0, tuj_pergi: 0, tuj_pulang: 0 };
             const defaultUang = '{{ $defaultUangHarian }}';
             const initialUang = (item && item.uang_harian && item.uang_harian !== '0') ? item.uang_harian : defaultUang;
@@ -201,6 +224,7 @@
         openEditRincian(item) {
             this.isEditRincian = true;
             this.showTransportBreakdown = false;
+            this.jumlahMalam = 0;
             this.transportBreakdown = { bjb_pergi: 0, bjb_pulang: 0, tuj_pergi: 0, tuj_pulang: 0 };
             this.rincianForm = { ...item };
             this.selectedUangHarian = item.uang_harian || '';
@@ -208,6 +232,47 @@
         }
     }">
         @include('pages.spj.partials.alert-nomor-spt')
+
+        {{-- Flash Messages & Validation Errors --}}
+        @if(session('success'))
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
+                <div class="flex items-center gap-3">
+                    <svg class="h-5 w-5 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="font-medium text-emerald-800 dark:text-emerald-300">{{ session('success') }}</p>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+                <div class="flex items-center gap-3">
+                    <svg class="h-5 w-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="font-medium text-red-800 dark:text-red-300">{{ session('error') }}</p>
+                </div>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
+                <div class="flex items-start gap-3">
+                    <svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="font-medium text-red-800 dark:text-red-300">Gagal menyimpan rincian:</p>
+                        <ul class="mt-1 space-y-1 text-sm text-red-600 dark:text-red-400">
+                            @foreach($errors->all() as $error)
+                                <li>&bull; {{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <x-common.component-card>
             <x-slot name="title">

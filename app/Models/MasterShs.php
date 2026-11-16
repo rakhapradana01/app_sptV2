@@ -67,6 +67,14 @@ class MasterShs extends Model
     }
 
     /**
+     * Alias untuk relasi penginapan agar tidak collision dengan kolom/atribut penginapan
+     */
+    public function detailPenginapan(): HasMany
+    {
+        return $this->hasMany(MasterShsPenginapan::class, 'master_shs_id');
+    }
+
+    /**
      * Detail tarif transportasi per rute
      */
     public function transportasi(): HasMany

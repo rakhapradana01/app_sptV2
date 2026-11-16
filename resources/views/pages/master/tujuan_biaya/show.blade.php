@@ -284,7 +284,7 @@
                             </tr>
                         </thead>
                         <tbody x-data="{ editingPenginapan: null }">
-                            @forelse($shs->penginapan as $index => $p)
+                            @forelse($shs->detailPenginapan as $index => $p)
                                 {{-- Baris tampilan --}}
                                 <tr x-show="editingPenginapan !== {{ $p->id }}" class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/80 dark:hover:bg-white/[0.02] transition">
                                     <td class="px-5 py-3 text-sm text-gray-500">{{ $index + 1 }}</td>

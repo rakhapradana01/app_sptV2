@@ -118,6 +118,15 @@
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tiket Pergi</label>
+                            <span x-show="!isEditRincian && rincianForm.tiket_pesawat_pergi > 0 && selectedUangHarian"
+                                class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-full px-2 py-0.5">
+                                ✦ dari SHS
+                                <button type="button"
+                                    @click="rincianForm.tiket_pesawat_pergi = 0"
+                                    class="ml-0.5 text-blue-400 hover:text-red-500 dark:hover:text-red-400 leading-none" title="Reset ke 0">
+                                    &times;
+                                </button>
+                            </span>
                         </div>
                         <input type="number" name="tiket_pesawat_pergi" x-model.number="rincianForm.tiket_pesawat_pergi" 
                             class="form-control w-full text-sm py-2 px-3" placeholder="0">
@@ -127,7 +136,15 @@
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tiket Pulang</label>
-    
+                            <span x-show="!isEditRincian && rincianForm.tiket_pesawat_pulang > 0 && selectedUangHarian"
+                                class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-full px-2 py-0.5">
+                                ✦ dari SHS
+                                <button type="button"
+                                    @click="rincianForm.tiket_pesawat_pulang = 0"
+                                    class="ml-0.5 text-blue-400 hover:text-red-500 dark:hover:text-red-400 leading-none" title="Reset ke 0">
+                                    &times;
+                                </button>
+                            </span>
                         </div>
                         <input type="number" name="tiket_pesawat_pulang" x-model.number="rincianForm.tiket_pesawat_pulang" 
                             class="form-control w-full text-sm py-2 px-3" placeholder="0">
@@ -179,13 +196,57 @@
                     </div>
 
                     <!-- Penginapan -->
-                    <div class="sm:col-span-2">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Penginapan (Pagu Maksimal)</label>
-                        
+                    <div class="sm:col-span-2 space-y-3">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Penginapan</label>
+
+                        <!-- Baris 1: Jumlah Malam + Tarif/Malam -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Jumlah Malam</label>
+                                <input type="number" min="0" x-model.number="jumlahMalam"
+                                    @input="syncPenginapanFromMalam()"
+                                    class="form-control w-full text-sm py-2 px-3"
+                                    placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                    Tarif/Malam (Pagu SHS)
+                                </label>
+                                <div class="form-control w-full text-sm py-2 px-3 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 select-none cursor-default">
+                                    Rp <span x-text="formatRupiah(paguPanduan.penginapan)"></span>
+                                </div>
+                            </div>
                         </div>
-                        <input type="number" name="penginapan" x-model.number="rincianForm.penginapan"
-                            class="form-control w-full font-semibold text-sm py-2 px-3" placeholder="0">
+
+                        <!-- Baris 2: Total Penginapan (editable) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="text-xs text-gray-500 dark:text-gray-400">
+                                    Total Penginapan
+                                    <span x-show="jumlahMalam > 0 && paguPanduan.penginapan > 0"
+                                        class="ml-1 text-indigo-500 dark:text-indigo-400">
+                                        (<span x-text="jumlahMalam"></span> malam × Rp <span x-text="formatRupiah(paguPanduan.penginapan)"></span>)
+                                    </span>
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <span x-show="paguPanduan.penginapan > 0 && selectedUangHarian"
+                                        class="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                                        Maks: <b>Rp <span x-text="formatRupiah(jumlahMalam * paguPanduan.penginapan)"></span></b>
+                                    </span>
+                                    <span x-show="!isEditRincian && rincianForm.penginapan > 0 && selectedUangHarian"
+                                        class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-full px-2 py-0.5">
+                                        ✦ dari SHS
+                                        <button type="button" @click="rincianForm.penginapan = 0"
+                                            class="ml-0.5 text-blue-400 hover:text-red-500 dark:hover:text-red-400 leading-none"
+                                            title="Reset ke 0">
+                                            &times;
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <input type="number" name="penginapan" x-model.number="rincianForm.penginapan"
+                                class="form-control w-full font-semibold text-sm py-2 px-3" placeholder="0">
+                        </div>
                     </div>
                 </div>
             </div>
