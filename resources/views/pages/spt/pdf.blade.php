@@ -1,19 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
+    <meta charset="UTF-8">
     <title>SPT</title>
+
     <style>
         @page {
-            size: a4 portrait;
-            margin: 0.5cm 1.5cm 1.0cm 1.5cm;
+            size: A4 portrait;
+            /* margin: 0.8cm 3.0cm 1.0cm 3.0cm; */
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
-            font-family: 'Arial', sans-serif;
-            font-size: 11.5pt;
+            background-color: #fff !important;
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
             line-height: 1.35;
             margin: 0;
+            padding: 0;
+            color: #000;
         }
 
         .text-center {
@@ -32,45 +42,63 @@
         .header-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            background-color: #fff !important;
+        }
+
+        .header-table tr,
+        .header-table td,
+        .header-table th {
+            background-color: #fff !important;
         }
 
         .logo {
             width: 80px;
         }
 
-        .header-text h2 {
-            margin: 0;
-            font-size: 13pt;
+        /* JUDUL SPT */
+        .document-title {
+            text-align: center;
+            margin-bottom: 8px;
+            background-color: #fff;
         }
 
-        .header-text h1 {
-            margin: 0;
-            font-size: 15pt;
+        .document-title .title {
+            font-size: 12pt;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
-        .header-text p {
-            margin: 0;
-            font-size: 9pt;
-        }
-
-        .content-table {
+        /* TABEL DASAR & STRUKTUR LUAR */
+        .main-table {
             width: 100%;
-            margin-top: 8px;
             border-collapse: collapse;
         }
 
-        .content-table td {
+        .main-table > tbody > tr > td {
+            vertical-align: top;
+            padding: 2px 0;
+        }
+
+        /* TABEL PETUGAS DI DALAM KOLOM KANAN */
+        .list-petugas {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+            page-break-inside: avoid;
+        }
+
+        .list-petugas td {
             vertical-align: top;
             padding: 1px 0;
         }
 
-        .list-petugas {
+        /* BAGIAN PENUTUP & TANDA TANGAN */
+        .footer-section {
             width: 100%;
-            margin-bottom: 3px;
-            border-collapse: collapse;
-            font-size: 11pt;
-            line-height: 1.15;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin-top: 8px;
         }
 
         .ttd-container {
@@ -78,52 +106,46 @@
             width: 100%;
             position: relative;
             page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .ttd-box {
             float: right;
-            width: 40%;
+            width: 48%;
             text-align: left;
         }
 
         .paraf-container {
             clear: both;
-            margin-top: 5px;
-            width: 20%;
-            position: relative;
-            left: 150px;
+            margin-top: 8px;
+            width: 28%;
+            margin-left: 18%;
             page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .paraf-box {
             width: 100%;
         }
 
-        .page-break {
-            page-break-before: always;
-        }
-
-        .footer-section {
-            width: 100%;
-            page-break-inside: avoid;
-        }
-
         .paraf-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9.5pt;
+            font-size: 9pt;
+            background-color: #fff;
         }
 
         .paraf-table td {
             border: 1px solid #000;
             padding: 3px 4px;
-            height: 14px;
+            height: 26px;
         }
 
-        .paraf-table tr:not(:first-child) td:first-child {
-            width: 50%;
+        .paraf-table tr:first-child td {
+            height: auto;
         }
 
+        .paraf-table tr:not(:first-child) td:first-child,
         .paraf-table tr:not(:first-child) td:last-child {
             width: 50%;
         }
@@ -131,98 +153,124 @@
 </head>
 
 <body>
+
+    {{-- KOP SURAT --}}
     <table class="header-table">
         @include('components.kop-surat')
     </table>
 
-    <div class="text-center">
-        <div class="font-bold underline" style="font-size: 12pt;">SURAT PERINTAH TUGAS</div>
-        <div style="line-height: 1.4;">
-            @php
-                $parts = explode('/', $nota->spt->nomor_spt);
-            @endphp
+    {{-- JUDUL DAN NOMOR SPT --}}
+    <div class="document-title">
+        <div class="title">
+            SURAT PERINTAH TUGAS
+        </div>
 
-            NOMOR : {{ $parts[0] ?? '' }}/
-            <span
-                style="display: inline-block; min-width: 1.5cm; text-align: center; border-bottom: 1px solid transparent; vertical-align: bottom;">
+        @php
+            $parts = explode('/', $nota->spt->nomor_spt);
+        @endphp
+
+        <div style="line-height: 1.4;">
+            NOMOR :
+            {{ $parts[0] ?? '' }}/
+            <span style="display: inline-block; min-width: 1.5cm; text-align: center; border-bottom: 1px solid transparent; vertical-align: bottom;">
                 {{ $parts[1] ?? '' }}
             </span>
             /{{ $parts[2] ?? '' }}/{{ $parts[3] ?? '' }}
         </div>
     </div>
 
-    <table class="content-table">
+    {{-- TABEL UTAMA SPT --}}
+    <table class="main-table">
+        {{-- DASAR --}}
         <tr>
-            <td style="width: 15%;">Dasar</td>
-            <td style="width: 2%;">:</td>
-            <td style="text-align: justify;">{{ $nota->spt->jenis_anggaran }} SKPD Badan Pengelolaan Keuangan dan Aset
-                Daerah Provinsi Kalimantan Selatan Tahun Anggaran {{ $nota->spt->tahun_anggaran ?? date('Y') }}.</td>
+            <td style="width: 100px;">Dasar</td>
+            <td style="width: 15px;" class="text-center">:</td>
+            <td style="text-align: justify;">
+                {{ $nota->spt->jenis_anggaran }}
+                Badan Pengelolaan Keuangan dan Aset Daerah Provinsi Kalimantan Selatan
+                Tahun Anggaran {{ $nota->spt->tahun_anggaran ?? date('Y') }}.
+            </td>
         </tr>
+
+        {{-- MEMERINTAHKAN --}}
         <tr>
-            <td colspan="3" class="text-center font-bold" style="padding: 8px 0;">MEMERINTAHKAN :</td>
+            <td colspan="3" class="text-center font-bold" style="padding: 10px 0 6px 0;">
+                MEMERINTAHKAN :
+            </td>
         </tr>
+
+        {{-- KEPADA --}}
         <tr>
-            <td>Kepada</td>
-            <td>:</td>
+            <td style="width: 100px;">Kepada</td>
+            <td style="width: 15px;" class="text-center">:</td>
             <td>
-                @foreach ($nota->pegawais as $index => $pegawai)
+                @php
+                    $listPegawai = $nota->pegawais->values();
+                @endphp
+
+                @foreach ($listPegawai as $index => $pegawai)
                     <table class="list-petugas">
                         <tr>
                             <td style="width: 25px;">{{ $index + 1 }}.</td>
-                            <td style="width: 80px;">Nama</td>
-                            <td style="width: 10px;">:</td>
-                            <td>{{ $pegawai->nama }}</td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>NIP</td>
-                            <td>:</td>
-                            <td>{{ $pegawai->nip }}</td>
+                            <td style="width: 95px;">Nama</td>
+                            <td style="width: 15px;" class="text-center">:</td>
+                            <td class="font-bold">{{ $pegawai->nama }}</td>
                         </tr>
                         <tr>
                             <td></td>
                             <td>Pangkat/Gol</td>
-                            <td>:</td>
-                            <td>{{ $pegawai->pangkat }}</td>
+                            <td class="text-center">:</td>
+                            <td>{{ $pegawai->pangkat ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>NIP</td>
+                            <td class="text-center">:</td>
+                            <td>{{ $pegawai->nip ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td></td>
                             <td>Jabatan</td>
-                            <td>:</td>
-                            <td>{{ $pegawai->jabatan }}</td>
+                            <td class="text-center">:</td>
+                            <td>{{ $pegawai->jabatan ?? '-' }}</td>
                         </tr>
                     </table>
                 @endforeach
             </td>
         </tr>
+
+        {{-- UNTUK --}}
+        <tr>
+            <td style="width: 100px; padding-top: 8px;">Untuk</td>
+            <td style="width: 15px; padding-top: 8px;" class="text-center">:</td>
+            <td style="padding-top: 8px; text-align: justify;">
+                1. {{ $nota->perihal }} di {{ $nota->lokasi }}.<br>
+
+                2. Waktu Pelaksanaan
+                @if (is_null($nota->tanggal_selesai) || $nota->tanggal_mulai == $nota->tanggal_selesai)
+                    tanggal {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
+                @else
+                    tanggal {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
+                    s/d
+                    {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
+                @endif
+                .<br>
+
+                3. Melaporkan hasil pelaksanaan tugas kepada yang memberikan tugas.
+            </td>
+        </tr>
     </table>
 
+    {{-- BAGIAN PENUTUP & TANDA TANGAN --}}
     <div class="footer-section">
-        <table class="content-table" style="margin-top: 0;">
-            <tr>
-                <td style="width: 15%; padding-top: 6px;">Untuk</td>
-                <td style="width: 2%; padding-top: 6px;">:</td>
-                <td style="padding-top: 6px; text-align: justify;">
-                    1. {{ $nota->perihal }} di {{ $nota->lokasi }}.<br>
-
-                    2. Waktu Pelaksanaan
-                    @if (is_null($nota->tanggal_selesai) || $nota->tanggal_mulai == $nota->tanggal_selesai)
-                        {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }}
-                    @else
-                        {{ \Carbon\Carbon::parse($nota->tanggal_mulai)->translatedFormat('d F Y') }} s/d
-                        {{ \Carbon\Carbon::parse($nota->tanggal_selesai)->translatedFormat('d F Y') }}
-                    @endif
-                    .<br>
-
-                    3. Melaporkan hasil pelaksanaan tugas kepada yang memberikan tugas.
-                </td>
-            </tr>
-        </table>
-
+        {{-- TANDA TANGAN KEPALA BADAN --}}
         <div class="ttd-container">
             <div class="ttd-box">
-                <div style="margin-bottom: 5px;">Banjarbaru,
-                    {{ $nota->tanggal_mulai ? \Carbon\Carbon::parse($nota->tanggal_mulai)->subDay()->translatedFormat('d F Y') : \Carbon\Carbon::now()->translatedFormat('d F Y') }}
+                <div style="margin-bottom: 5px;">
+                    Banjarbaru,&nbsp;&nbsp;&nbsp;&nbsp;
+                    {{ $nota->tanggal_mulai
+                        ? \Carbon\Carbon::parse($nota->tanggal_mulai)->subDay()->translatedFormat('F Y')
+                        : \Carbon\Carbon::now()->translatedFormat('F Y') }}
                 </div>
                 <div>KEPALA BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH</div>
                 <div>PROVINSI KALIMANTAN SELATAN,</div>
@@ -233,6 +281,7 @@
             </div>
         </div>
 
+        {{-- PARAF HIRARKI --}}
         <div class="paraf-container">
             <div class="paraf-box">
                 <table class="paraf-table">
@@ -241,20 +290,21 @@
                     </tr>
                     <tr>
                         <td>Sekretaris</td>
-                        <td style="text-align: center; vertical-align: middle; height: 28px;">&nbsp;</td>
+                        <td style="text-align: center; vertical-align: middle; height: 26px;">&nbsp;</td>
                     </tr>
                     <tr>
                         <td>Kabid</td>
-                        <td style="text-align: center; vertical-align: middle; height: 28px;">&nbsp;</td>
+                        <td style="text-align: center; vertical-align: middle; height: 26px;">&nbsp;</td>
                     </tr>
                     <tr>
                         <td>Kasubid</td>
-                        <td style="text-align: center; vertical-align: middle; height: 28px;">&nbsp;</td>
+                        <td style="text-align: center; vertical-align: middle; height: 26px;">&nbsp;</td>
                     </tr>
                 </table>
             </div>
         </div>
     </div>
+
 </body>
 
 </html>

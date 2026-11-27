@@ -449,10 +449,6 @@
                     </form>
                 </div>
             </x-ui.modal>
-
-            <div class="mt-4">
-                <x-ui.pagination :paginator="$subKegiatan" />
-            </div>
         </x-common.component-card>
     </div>
     <script>
